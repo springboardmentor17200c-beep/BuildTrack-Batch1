@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import secrets
+import os
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -69,6 +70,29 @@ def store_otp_for_phone(phone_number: str, otp_code: str) -> None:
 
 
 def send_otp_to_phone(phone_number: str, otp_code: str) -> None:
+    # Attempt to send via Twilio if credentials are provided; otherwise fall back to console.
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    from_number = os.getenv("TWILIO_FROM_NUMBER")
+
+    if account_sid and auth_token and from_number:
+        try:
+            from twilio.rest import Client
+
+            client = Client(account_sid, auth_token)
+            message = client.messages.create(
+                body=f"[BuildTrack] Your OTP is {otp_code}",
+                from_=from_number,
+                to=phone_number,
+            )
+            print(f"[Twilio] Sent message SID {message.sid} to {phone_number}")
+            return
+        except Exception as exc:
+            print(
+                f"[Twilio] Failed to send SMS: {exc}. Falling back to console output."
+            )
+
+    # Fallback / simulation
     print(f"[SMS simulation via Twilio to {phone_number}]: Your OTP is {otp_code}")
 
 
