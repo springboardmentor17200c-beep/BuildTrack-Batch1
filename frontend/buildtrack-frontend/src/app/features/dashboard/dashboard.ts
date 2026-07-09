@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { Router, RouterLink } from '@angular/router';
 /* ============================================================
    Type shapes for the dummy data used across the template.
    These are presentational only — swap the dummy arrays below
@@ -58,11 +58,12 @@ interface MonthlyPoint {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
 export class DashboardComponent implements OnInit {
+    constructor(private router: Router) {}
 
   /* ---------------- Sidebar / navigation state ---------------- */
   sidebarCollapsed = false;
@@ -259,11 +260,16 @@ export class DashboardComponent implements OnInit {
   }
 
   setActive(item: NavItem): void {
-    this.activeNav = item.key;
-    // Routing intentionally left untouched — wire this into the
-    // existing router navigation used elsewhere in the app.
+  this.activeNav = item.key;
+
+  if (item.key === 'projects') {
+    this.router.navigate(['/projects']);
   }
 
+  if (item.key === 'dashboard') {
+    this.router.navigate(['/dashboard']);
+  }
+}
   addProject(): void {
     // Hook into existing "add project" flow / route.
   }
