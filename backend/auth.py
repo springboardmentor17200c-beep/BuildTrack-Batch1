@@ -1,16 +1,17 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import secrets
-import os
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-SECRET_KEY = "super-secret-key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-OTP_EXPIRATION_MINUTES = 5
+from config import settings
+
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+OTP_EXPIRATION_MINUTES = settings.otp_expiration_minutes
 
 FAKE_USER_DB = {
     "demo": {
@@ -39,9 +40,9 @@ def get_user(username: str) -> dict | None:
     return FAKE_USER_DB.get(username)
 
 
-def get_user_by_phone(phone_number: str) -> dict | None:
+def get_user_by_email(email: str) -> dict | None:
     for user in FAKE_USER_DB.values():
-        if user.get("phone_number") == phone_number:
+        if user.get("email") == email:
             return user
     return None
 
@@ -59,8 +60,8 @@ def generate_otp_code() -> str:
     return "".join(secrets.choice("0123456789") for _ in range(6))
 
 
-def store_otp_for_phone(phone_number: str, otp_code: str) -> None:
-    FAKE_OTP_STORE[phone_number] = {
+def store_otp_for_email(email: str, otp_code: str) -> None:
+    FAKE_OTP_STORE[email] = {
         "otp_code": otp_code,
         "expires_at": datetime.now(timezone.utc)
         + timedelta(minutes=OTP_EXPIRATION_MINUTES),
@@ -69,43 +70,49 @@ def store_otp_for_phone(phone_number: str, otp_code: str) -> None:
     }
 
 
-def send_otp_to_phone(phone_number: str, otp_code: str) -> None:
-    # Attempt to send via Twilio if credentials are provided; otherwise fall back to console.
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_number = os.getenv("TWILIO_FROM_NUMBER")
+def send_otp_via_email(email: str, otp_code: str) -> None:
+    # Attempt to send an email via SendGrid if configured; otherwise fall back to console.
+    api_key = settings.sendgrid_api_key
+    from_email = settings.mail_from_email
 
-    if account_sid and auth_token and from_number:
+    if api_key and from_email:
         try:
-            from twilio.rest import Client
+            from sendgrid import SendGridAPIClient
+            from sendgrid.helpers.mail import Mail
 
-            client = Client(account_sid, auth_token)
-            message = client.messages.create(
-                body=f"[BuildTrack] Your OTP is {otp_code}",
-                from_=from_number,
-                to=phone_number,
+            message = Mail(
+                from_email=from_email,
+                to_emails=email,
+                subject="[BuildTrack] Your OTP",
+                plain_text_content=f"Your OTP is {otp_code}",
             )
-            print(f"[Twilio] Sent message SID {message.sid} to {phone_number}")
+            sg = SendGridAPIClient(api_key)
+            resp = sg.send(message)
+            print(f"[SendGrid] Sent OTP to {email}: status={resp.status_code}")
             return
         except Exception as exc:
-            print(
-                f"[Twilio] Failed to send SMS: {exc}. Falling back to console output."
-            )
+            print("[SendGrid] Email send failed.")
+            print(f"[SendGrid] Error type: {type(exc).__name__}")
+            print(f"[SendGrid] Error details: {exc}")
+            print("[SendGrid] Falling back to console output.")
+    else:
+        print("[SendGrid] Missing SendGrid configuration in environment variables.")
+        print("Expected: SENDGRID_API_KEY and MAIL_FROM_EMAIL")
 
     # Fallback / simulation
-    print(f"[SMS simulation via Twilio to {phone_number}]: Your OTP is {otp_code}")
+    print(f"[Email simulation] To {email}: Your OTP is {otp_code}")
 
 
-def verify_phone_otp(phone_number: str, otp_code: str) -> str:
-    record = FAKE_OTP_STORE.get(phone_number)
+def verify_email_otp(email: str, otp_code: str) -> str:
+    record = FAKE_OTP_STORE.get(email)
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="OTP not found for this phone number",
+            detail="OTP not found for this email",
         )
 
     if datetime.now(timezone.utc) > record["expires_at"]:
-        clear_otp_data(phone_number)
+        clear_otp_data(email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="OTP has expired",
@@ -125,8 +132,8 @@ def verify_phone_otp(phone_number: str, otp_code: str) -> str:
     return verification_token
 
 
-def verify_password_reset_token(phone_number: str, verification_token: str) -> None:
-    record = FAKE_OTP_STORE.get(phone_number)
+def verify_password_reset_token(email: str, verification_token: str) -> None:
+    record = FAKE_OTP_STORE.get(email)
     if not record or record.get("verification_token") != verification_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -144,8 +151,8 @@ def verify_password_reset_token(phone_number: str, verification_token: str) -> N
         )
 
 
-def clear_otp_data(phone_number: str) -> None:
-    FAKE_OTP_STORE.pop(phone_number, None)
+def clear_otp_data(key: str) -> None:
+    FAKE_OTP_STORE.pop(key, None)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> dict:

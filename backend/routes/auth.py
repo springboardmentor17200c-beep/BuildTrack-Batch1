@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from auth import (
     FAKE_USER_DB,
@@ -11,11 +11,11 @@ from auth import (
     create_access_token,
     generate_otp_code,
     get_current_user,
-    get_user_by_phone,
-    send_otp_to_phone,
-    store_otp_for_phone,
+    get_user_by_email,
+    send_otp_via_email,
+    store_otp_for_email,
     verify_password_reset_token,
-    verify_phone_otp,
+    verify_email_otp,
 )
 from models import RegistrationRequest, UserProfile
 
@@ -23,16 +23,16 @@ router = APIRouter()
 
 
 class ForgotPasswordRequest(BaseModel):
-    phone_number: str = Field(..., min_length=7)
+    email: EmailStr
 
 
 class VerifyOtpRequest(BaseModel):
-    phone_number: str
+    email: EmailStr
     otp_code: str
 
 
 class ResetPasswordRequest(BaseModel):
-    phone_number: str
+    email: EmailStr
     verification_token: str
     new_password: str = Field(..., min_length=6)
 
@@ -67,18 +67,18 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> dict[st
     "/forgot-password", response_model=SuccessResponse, status_code=status.HTTP_200_OK
 )
 def forgot_password(payload: ForgotPasswordRequest):
-    user = get_user_by_phone(payload.phone_number)
+    user = get_user_by_email(payload.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with that phone number not found",
+            detail="User with that email not found",
         )
 
     otp_code = generate_otp_code()
-    store_otp_for_phone(payload.phone_number, otp_code)
-    send_otp_to_phone(payload.phone_number, otp_code)
+    store_otp_for_email(payload.email, otp_code)
+    send_otp_via_email(payload.email, otp_code)
 
-    return {"message": "OTP sent to the provided phone number."}
+    return {"message": "OTP sent to the provided email address."}
 
 
 @router.post(
@@ -87,7 +87,7 @@ def forgot_password(payload: ForgotPasswordRequest):
     status_code=status.HTTP_200_OK,
 )
 def verify_otp(payload: VerifyOtpRequest):
-    verification_token = verify_phone_otp(payload.phone_number, payload.otp_code)
+    verification_token = verify_email_otp(payload.email, payload.otp_code)
     return {"verification_token": verification_token}
 
 
@@ -97,17 +97,17 @@ def verify_otp(payload: VerifyOtpRequest):
     status_code=status.HTTP_200_OK,
 )
 def reset_password(payload: ResetPasswordRequest):
-    verify_password_reset_token(payload.phone_number, payload.verification_token)
+    verify_password_reset_token(payload.email, payload.verification_token)
 
-    user = get_user_by_phone(payload.phone_number)
+    user = get_user_by_email(payload.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with that phone number not found",
+            detail="User with that email not found",
         )
 
     user["password"] = payload.new_password
-    clear_otp_data(payload.phone_number)
+    clear_otp_data(payload.email)
 
     return {"message": "Password has been reset successfully."}
 
