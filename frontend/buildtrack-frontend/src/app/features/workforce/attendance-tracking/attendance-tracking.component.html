@@ -1,0 +1,113 @@
+<div class="bt-page">
+  <a class="bt-back-btn" [routerLink]="['/workforce']">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Workforce Management
+  </a>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Attendance Tracking</h1>
+      <p class="bt-subtitle">Mark and review attendance for any date.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="markAllPresent()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        Mark All Present
+      </button>
+    </div>
+  </div>
+
+  <div class="bt-actions" style="margin-bottom:20px;">
+    <button class="bt-filter-btn" (click)="shiftDate(-1)" title="Previous day" style="padding:9px 12px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </button>
+    <input type="date" [(ngModel)]="selectedDate" (ngModelChange)="onDateChange()" class="bt-filter-select" />
+    <button class="bt-filter-btn" (click)="shiftDate(1)" title="Next day" style="padding:9px 12px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+    </button>
+    <div class="bt-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <input type="text" placeholder="Search worker..." [(ngModel)]="search" />
+    </div>
+  </div>
+
+  <div class="bt-stats-row">
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ presentCount }}</span>
+        <span class="bt-stat-label">Present</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6"></path><path d="M9 9l6 6"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ absentCount }}</span>
+        <span class="bt-stat-label">Absent</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ halfDayCount }}</span>
+        <span class="bt-stat-label">Half Day</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M8.5 14.5l2 2 4-4.5"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ onLeaveCount }}</span>
+        <span class="bt-stat-label">On Leave</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">{{ selectedDate }}</h3>
+        <span class="bt-panel-sub">{{ workers.length }} workers</span>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr><th>Worker</th><th>Role</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Mark Attendance</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of workers">
+            <td class="bt-strong">{{ w.name }}</td>
+            <td>{{ w.category }}</td>
+            <td class="bt-muted">{{ recordFor(w.id)?.checkIn || '—' }}</td>
+            <td class="bt-muted">{{ recordFor(w.id)?.checkOut || '—' }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(recordFor(w.id)?.status)">{{ recordFor(w.id)?.status || 'Not marked' }}</span></td>
+            <td>
+              <select
+                class="bt-filter-select"
+                style="padding:6px 10px;font-size:13px;"
+                [ngModel]="recordFor(w.id)?.status"
+                (ngModelChange)="setStatus(w.id, $event)">
+                <option [ngValue]="undefined" disabled>Mark as...</option>
+                <option *ngFor="let s of statusOptions" [ngValue]="s">{{ s }}</option>
+              </select>
+            </td>
+          </tr>
+          <tr *ngIf="workers.length === 0">
+            <td colspan="6" class="bt-empty">No workers match your search.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

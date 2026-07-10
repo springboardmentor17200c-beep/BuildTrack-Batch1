@@ -1,0 +1,103 @@
+<div class="bt-page">
+  <a class="bt-back-btn" [routerLink]="['/resources']">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Resource Management
+  </a>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Resource Allocation</h1>
+      <p class="bt-subtitle">Assign equipment and machinery to projects, and see who's responsible.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="toggleForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        <span *ngIf="!showForm">New Allocation</span>
+        <span *ngIf="showForm">Cancel</span>
+      </button>
+    </div>
+  </div>
+
+  <form class="bt-form-card" *ngIf="showForm" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="bt-form-grid">
+      <label>
+        <span>Resource</span>
+        <select formControlName="resourceId">
+          <option value="" disabled selected>Select available resource</option>
+          <option *ngFor="let r of availableResources" [value]="r.id">{{ r.name }} ({{ r.category }})</option>
+        </select>
+      </label>
+      <label>
+        <span>Project</span>
+        <select formControlName="project">
+          <option value="" disabled selected>Select project</option>
+          <option *ngFor="let p of projectNames" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Allocated To</span>
+        <input type="text" formControlName="allocatedTo" placeholder="e.g. Priya Menon" />
+      </label>
+      <label>
+        <span>Start Date</span>
+        <input type="date" formControlName="startDate" />
+      </label>
+      <label>
+        <span>End Date</span>
+        <input type="date" formControlName="endDate" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Save Allocation</button>
+    </div>
+  </form>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">All Allocations</h3>
+        <span class="bt-panel-sub">{{ allocations.length }} allocation{{ allocations.length === 1 ? '' : 's' }}</span>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th>Resource</th>
+            <th>Category</th>
+            <th>Project</th>
+            <th>Allocated To</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of allocations">
+            <td class="bt-strong">{{ a.resourceName }}</td>
+            <td>{{ a.category }}</td>
+            <td>{{ a.project }}</td>
+            <td>{{ a.allocatedTo }}</td>
+            <td class="bt-muted">{{ a.startDate }}</td>
+            <td class="bt-muted">{{ a.endDate }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(a.status)">{{ a.status }}</span></td>
+            <td>
+              <div class="bt-row-actions">
+                <button class="bt-icon-btn danger" (click)="remove(a.id)" title="Remove allocation">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="allocations.length === 0">
+            <td colspan="8" class="bt-empty">No allocations yet. Click "New Allocation" to assign a resource.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<div class="bt-page">
+  <a class="bt-back-btn" [routerLink]="['/workforce']">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Workforce Management
+  </a>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Shift Scheduling</h1>
+      <p class="bt-subtitle">Plan and assign morning, evening and night shifts across projects.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="toggleForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        <span *ngIf="!showForm">New Shift</span>
+        <span *ngIf="showForm">Cancel</span>
+      </button>
+    </div>
+  </div>
+
+  <form class="bt-form-card" *ngIf="showForm" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="bt-form-grid">
+      <label>
+        <span>Worker</span>
+        <select formControlName="workerId">
+          <option value="" disabled selected>Select worker</option>
+          <option *ngFor="let w of workers" [value]="w.id">{{ w.name }} ({{ w.category }})</option>
+        </select>
+      </label>
+      <label>
+        <span>Project</span>
+        <select formControlName="project">
+          <option value="" disabled selected>Select project</option>
+          <option *ngFor="let p of projectNames" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Shift Type</span>
+        <select formControlName="shiftType">
+          <option value="" disabled selected>Select shift</option>
+          <option *ngFor="let s of shiftTypes" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Date</span>
+        <input type="date" formControlName="date" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Save Shift</button>
+    </div>
+  </form>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">All Shifts</h3>
+        <span class="bt-panel-sub">{{ filtered.length }} of {{ allShifts.length }} shifts</span>
+      </div>
+      <div class="bt-actions">
+        <select class="bt-filter-select" [(ngModel)]="projectFilter">
+          <option value="All">All Projects</option>
+          <option *ngFor="let p of projectNames" [value]="p">{{ p }}</option>
+        </select>
+        <select class="bt-filter-select" [(ngModel)]="shiftTypeFilter">
+          <option value="All">All Shift Types</option>
+          <option *ngFor="let s of shiftTypes" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr><th>Worker</th><th>Project</th><th>Shift</th><th>Date</th><th>Timing</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of filtered">
+            <td class="bt-strong">{{ s.workerName }}</td>
+            <td>{{ s.project }}</td>
+            <td><span class="bt-badge" [ngClass]="shiftClass(s.shiftType)">{{ s.shiftType }}</span></td>
+            <td class="bt-muted">{{ s.date }}</td>
+            <td class="bt-muted">{{ s.startTime }} – {{ s.endTime }}</td>
+            <td>
+              <div class="bt-row-actions">
+                <button class="bt-icon-btn danger" (click)="removeShift(s.id)" title="Remove shift">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="6" class="bt-empty">No shifts match your filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
