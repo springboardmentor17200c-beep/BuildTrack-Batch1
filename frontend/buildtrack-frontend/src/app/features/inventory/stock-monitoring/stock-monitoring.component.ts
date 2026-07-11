@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { MaterialCategory, MaterialItem, StockStatus } from '../models/inventory.model';
+import { InventoryRecord, MaterialCategory, StockStatus } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { InventoryDataService } from '../inventory-data.service';
   styleUrls: ['./stock-monitoring.component.css'],
 })
 export class StockMonitoringComponent implements OnInit {
-  allMaterials: MaterialItem[] = [];
+  allRecords: InventoryRecord[] = [];
   search = '';
   categoryFilter: MaterialCategory | 'All' = 'All';
   statusFilter: StockStatus | 'All' = 'All';
@@ -26,31 +26,27 @@ export class StockMonitoringComponent implements OnInit {
   constructor(private data: InventoryDataService) {}
 
   ngOnInit(): void {
-    this.data.materials$.subscribe(m => (this.allMaterials = m));
+    this.data.inventory$.subscribe(r => (this.allRecords = r));
   }
 
-  get filtered(): MaterialItem[] {
-    return this.allMaterials.filter(m => {
+  statusOf(record: InventoryRecord) {
+    return this.data.getStockStatus(record);
+  }
+
+  get filtered(): InventoryRecord[] {
+    return this.allRecords.filter(r => {
       const matchesSearch =
         !this.search ||
-        m.name.toLowerCase().includes(this.search.toLowerCase()) ||
-        m.id.toLowerCase().includes(this.search.toLowerCase());
-      const matchesCategory = this.categoryFilter === 'All' || m.category === this.categoryFilter;
-      const matchesStatus = this.statusFilter === 'All' || m.status === this.statusFilter;
+        r.materialName.toLowerCase().includes(this.search.toLowerCase()) ||
+        r.materialId.toLowerCase().includes(this.search.toLowerCase());
+      const matchesCategory = this.categoryFilter === 'All' || r.category === this.categoryFilter;
+      const matchesStatus = this.statusFilter === 'All' || this.statusOf(r) === this.statusFilter;
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }
 
-  stockPercent(m: MaterialItem): number {
-    const pct = (m.currentStock / (m.reorderLevel * 2)) * 100;
+  stockPercent(m: InventoryRecord): number {
+    const pct = (m.availableQuantity / (m.minimumStockLevel * 2)) * 100;
     return Math.max(2, Math.min(100, Math.round(pct)));
-  }
-
-  statusClass(status: StockStatus) {
-    return {
-      'In Stock': 'badge green',
-      'Low Stock': 'badge orange',
-      'Out of Stock': 'badge red',
-    }[status];
   }
 }

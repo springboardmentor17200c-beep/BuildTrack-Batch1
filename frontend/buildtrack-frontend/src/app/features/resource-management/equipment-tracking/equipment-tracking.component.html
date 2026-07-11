@@ -9,12 +9,12 @@
   <div class="bt-topbar">
     <div>
       <h1 class="bt-title">Equipment Tracking</h1>
-      <p class="bt-subtitle">Real-time status, location and maintenance info for every asset.</p>
+      <p class="bt-subtitle">Ownership, status and maintenance info for every asset.</p>
     </div>
     <div class="bt-actions">
       <div class="bt-search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
-        <input type="text" placeholder="Search by name or ID..." [(ngModel)]="search" />
+        <input type="text" placeholder="Search name, ID or serial no..." [(ngModel)]="search" />
       </div>
       <select class="bt-filter-select" [(ngModel)]="categoryFilter">
         <option *ngFor="let c of categories" [value]="c">{{ c === 'All' ? 'All Categories' : c }}</option>
@@ -37,32 +37,30 @@
       <table class="bt-table">
         <thead>
           <tr>
-            <th>Asset ID</th>
-            <th>Name</th>
+            <th>Asset</th>
             <th>Category</th>
+            <th>Manufacturer / Model</th>
+            <th>Serial No.</th>
             <th>Status</th>
-            <th>Project / Site</th>
-            <th>Utilization</th>
-            <th>Last Serviced</th>
+            <th>Assigned Project</th>
+            <th>Last / Next Service</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let r of filtered">
-            <td class="bt-muted">{{ r.id }}</td>
-            <td class="bt-strong">{{ r.name }}</td>
+            <td class="bt-strong">{{ r.resourceName }}<div class="bt-muted">{{ r.resourceId }}</div></td>
             <td>{{ r.category }}</td>
-            <td><span class="bt-badge" [ngClass]="statusClass(r.status)">{{ r.status }}</span></td>
             <td>
-              <div class="bt-strong" style="font-size:13px;">{{ r.assignedProject || '—' }}</div>
-              <div class="bt-muted">{{ r.site }}</div>
+              <div>{{ r.manufacturer }}</div>
+              <div class="bt-muted">{{ r.modelNumber }}</div>
             </td>
+            <td class="bt-muted">{{ r.serialNumber }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(r.currentStatus)">{{ r.currentStatus }}</span></td>
+            <td>{{ assignedProject(r.resourceId) || '—' }}</td>
             <td>
-              <div class="bt-progress">
-                <div class="bt-progress-bar"><div class="bt-progress-fill blue" [style.width.%]="r.utilization"></div></div>
-                <span class="bt-progress-value">{{ r.utilization }}%</span>
-              </div>
+              <div class="bt-muted">Last: {{ lastMaintenance(r.resourceId) || '—' }}</div>
+              <div class="bt-muted">Next: {{ nextMaintenance(r.resourceId) || '—' }}</div>
             </td>
-            <td class="bt-muted">{{ r.lastServiced }}</td>
           </tr>
           <tr *ngIf="filtered.length === 0">
             <td colspan="7" class="bt-empty">No equipment matches your filters.</td>

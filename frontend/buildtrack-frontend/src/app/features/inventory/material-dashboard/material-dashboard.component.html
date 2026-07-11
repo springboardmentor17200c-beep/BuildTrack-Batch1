@@ -9,7 +9,7 @@
   <div class="bt-topbar">
     <div>
       <h1 class="bt-title">Material Inventory Dashboard</h1>
-      <p class="bt-subtitle">Overview of every material category and its stock health.</p>
+      <p class="bt-subtitle">Overview of every material category and its stock health, company-wide.</p>
     </div>
   </div>
 
@@ -76,23 +76,24 @@
     <div class="bt-panel-header">
       <div>
         <h3 class="bt-panel-title">All Materials</h3>
-        <span class="bt-panel-sub">{{ materials.length }} tracked</span>
+        <span class="bt-panel-sub">{{ records.length }} tracked</span>
       </div>
     </div>
     <div class="bt-table-wrap">
       <table class="bt-table">
         <thead>
-          <tr><th>Material</th><th>Category</th><th>Stock</th><th>Reorder Level</th><th>Status</th><th>Last Updated</th></tr>
+          <tr><th>Material</th><th>Category</th><th>Stock</th><th>Reorder Level</th><th>Location</th><th>Status</th><th>Last Updated</th></tr>
         </thead>
         <tbody>
-          <tr *ngFor="let m of materials">
-            <td class="bt-strong">{{ m.name }}</td>
+          <tr *ngFor="let m of records">
+            <td class="bt-strong">{{ m.materialName }}</td>
             <td>{{ m.category }}</td>
-            <td>{{ m.currentStock | number }} {{ m.unit }}</td>
-            <td class="bt-muted">{{ m.reorderLevel | number }} {{ m.unit }}</td>
+            <td>{{ m.availableQuantity | number }} {{ m.unitOfMeasure }}</td>
+            <td class="bt-muted">{{ m.minimumStockLevel | number }} {{ m.unitOfMeasure }}</td>
+            <td class="bt-muted">{{ m.storageLocation }}</td>
             <td>
-              <span class="bt-badge" [ngClass]="{ green: m.status === 'In Stock', orange: m.status === 'Low Stock', red: m.status === 'Out of Stock' }">
-                {{ m.status }}
+              <span class="bt-badge" [ngClass]="{ green: statusOf(m) === 'In Stock', orange: statusOf(m) === 'Low Stock', red: statusOf(m) === 'Out of Stock' }">
+                {{ statusOf(m) }}
               </span>
             </td>
             <td class="bt-muted">{{ m.lastUpdated }}</td>

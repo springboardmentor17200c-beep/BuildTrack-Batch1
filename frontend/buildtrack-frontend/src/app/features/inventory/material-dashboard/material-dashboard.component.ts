@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MaterialCategory, MaterialItem } from '../models/inventory.model';
+import { InventoryRecord, MaterialCategory } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
 
 interface CategorySummary {
@@ -18,7 +18,7 @@ interface CategorySummary {
   styleUrls: ['./material-dashboard.component.css'],
 })
 export class MaterialDashboardComponent implements OnInit {
-  materials: MaterialItem[] = [];
+  records: InventoryRecord[] = [];
   categorySummaries: CategorySummary[] = [];
 
   totalMaterials = 0;
@@ -29,25 +29,30 @@ export class MaterialDashboardComponent implements OnInit {
   constructor(private data: InventoryDataService) {}
 
   ngOnInit(): void {
-    this.data.materials$.subscribe(m => {
-      this.materials = m;
+    this.data.inventory$.subscribe(records => {
+      this.records = records;
       this.computeStats();
     });
   }
 
-  private computeStats() {
-    this.totalMaterials = this.materials.length;
-    this.inStockCount = this.materials.filter(m => m.status === 'In Stock').length;
-    this.lowStockCount = this.materials.filter(m => m.status === 'Low Stock').length;
-    this.outOfStockCount = this.materials.filter(m => m.status === 'Out of Stock').length;
+  statusOf(record: InventoryRecord) {
+    return this.data.getStockStatus(record);
+  }
 
-    const categories = Array.from(new Set(this.materials.map(m => m.category)));
+  private computeStats() {
+    const statuses = this.records.map(r => this.data.getStockStatus(r));
+    this.totalMaterials = this.records.length;
+    this.inStockCount = statuses.filter(s => s === 'In Stock').length;
+    this.lowStockCount = statuses.filter(s => s === 'Low Stock').length;
+    this.outOfStockCount = statuses.filter(s => s === 'Out of Stock').length;
+
+    const categories = Array.from(new Set(this.records.map(r => r.category)));
     this.categorySummaries = categories.map(category => {
-      const items = this.materials.filter(m => m.category === category);
+      const items = this.records.filter(r => r.category === category);
       return {
         category,
         itemCount: items.length,
-        lowOrOutCount: items.filter(m => m.status !== 'In Stock').length,
+        lowOrOutCount: items.filter(r => this.data.getStockStatus(r) !== 'In Stock').length,
       };
     });
   }

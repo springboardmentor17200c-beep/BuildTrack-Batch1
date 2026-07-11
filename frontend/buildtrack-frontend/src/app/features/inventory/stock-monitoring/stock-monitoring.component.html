@@ -9,7 +9,7 @@
   <div class="bt-topbar">
     <div>
       <h1 class="bt-title">Stock Monitoring</h1>
-      <p class="bt-subtitle">Track stock levels per site and spot shortages before they cause delays.</p>
+      <p class="bt-subtitle">Company-wide stock levels — spot low or out-of-stock materials before they cause delays.</p>
     </div>
     <div class="bt-actions">
       <div class="bt-search">
@@ -29,35 +29,35 @@
     <div class="bt-panel-header">
       <div>
         <h3 class="bt-panel-title">Stock Levels</h3>
-        <span class="bt-panel-sub">{{ filtered.length }} of {{ allMaterials.length }} materials</span>
+        <span class="bt-panel-sub">{{ filtered.length }} of {{ allRecords.length }} materials</span>
       </div>
     </div>
 
     <div class="bt-table-wrap">
       <table class="bt-table">
         <thead>
-          <tr><th>Material ID</th><th>Name</th><th>Site</th><th>Stock Level</th><th>Status</th></tr>
+          <tr><th>Material ID</th><th>Name</th><th>Storage Location</th><th>Stock Level</th><th>Status</th></tr>
         </thead>
         <tbody>
           <tr *ngFor="let m of filtered">
-            <td class="bt-muted">{{ m.id }}</td>
-            <td class="bt-strong">{{ m.name }}</td>
-            <td>{{ m.site }}</td>
+            <td class="bt-muted">{{ m.materialId }}</td>
+            <td class="bt-strong">{{ m.materialName }}</td>
+            <td>{{ m.storageLocation }}</td>
             <td>
               <div class="bt-progress">
                 <div class="bt-progress-bar">
                   <div
                     class="bt-progress-fill"
                     [style.width.%]="stockPercent(m)"
-                    [ngClass]="{ green: m.status === 'In Stock', orange: m.status === 'Low Stock', red: m.status === 'Out of Stock' }">
+                    [ngClass]="{ green: statusOf(m) === 'In Stock', orange: statusOf(m) === 'Low Stock', red: statusOf(m) === 'Out of Stock' }">
                   </div>
                 </div>
-                <span class="bt-progress-value" style="min-width:80px;">{{ m.currentStock | number }} {{ m.unit }}</span>
+                <span class="bt-progress-value" style="min-width:80px;">{{ m.availableQuantity | number }} {{ m.unitOfMeasure }}</span>
               </div>
             </td>
             <td>
-              <span class="bt-badge" [ngClass]="{ green: m.status === 'In Stock', orange: m.status === 'Low Stock', red: m.status === 'Out of Stock' }">
-                {{ m.status }}
+              <span class="bt-badge" [ngClass]="{ green: statusOf(m) === 'In Stock', orange: statusOf(m) === 'Low Stock', red: statusOf(m) === 'Out of Stock' }">
+                {{ statusOf(m) }}
               </span>
             </td>
           </tr>

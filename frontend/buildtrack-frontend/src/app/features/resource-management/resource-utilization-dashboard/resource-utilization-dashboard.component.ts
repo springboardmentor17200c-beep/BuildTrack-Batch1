@@ -35,26 +35,33 @@ export class ResourceUtilizationDashboardComponent implements OnInit {
       this.resources = r;
       this.computeStats();
     });
+    // recompute if allocation history changes too (utilization depends on it)
+    this.data.allocations$.subscribe(() => this.computeStats());
   }
 
   private computeStats() {
     this.totalAssets = this.resources.length;
-    this.inUseCount = this.resources.filter(r => r.status === 'In Use').length;
-    this.availableCount = this.resources.filter(r => r.status === 'Available').length;
-    this.maintenanceCount = this.resources.filter(r => r.status === 'Under Maintenance').length;
-    this.avgUtilization = this.totalAssets
-      ? Math.round(this.resources.reduce((sum, r) => sum + r.utilization, 0) / this.totalAssets)
+    this.inUseCount = this.resources.filter(r => r.currentStatus === 'Allocated').length;
+    this.availableCount = this.resources.filter(r => r.currentStatus === 'Available').length;
+    this.maintenanceCount = this.resources.filter(r => r.currentStatus === 'Under Maintenance').length;
+
+    const utilizations = this.resources.map(r => this.data.getUtilization(r.resourceId));
+    this.avgUtilization = utilizations.length
+      ? Math.round(utilizations.reduce((s, v) => s + v, 0) / utilizations.length)
       : 0;
 
     const categories = Array.from(new Set(this.resources.map(r => r.category)));
     this.categorySummaries = categories.map(category => {
       const items = this.resources.filter(r => r.category === category);
-      const avgUtilization = Math.round(items.reduce((s, r) => s + r.utilization, 0) / items.length);
+      const itemUtilizations = items.map(r => this.data.getUtilization(r.resourceId));
+      const avgUtilization = itemUtilizations.length
+        ? Math.round(itemUtilizations.reduce((s, v) => s + v, 0) / itemUtilizations.length)
+        : 0;
       return {
         category,
         avgUtilization,
         total: items.length,
-        inUse: items.filter(r => r.status === 'In Use').length,
+        inUse: items.filter(r => r.currentStatus === 'Allocated').length,
       };
     }).sort((a, b) => b.avgUtilization - a.avgUtilization);
   }

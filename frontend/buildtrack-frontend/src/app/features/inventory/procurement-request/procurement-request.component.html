@@ -8,8 +8,8 @@
 
   <div class="bt-topbar">
     <div>
-      <h1 class="bt-title">Procurement Requests</h1>
-      <p class="bt-subtitle">Raise, approve and track material requests from sites to procurement.</p>
+      <h1 class="bt-title">Material Requests</h1>
+      <p class="bt-subtitle">Projects request material from stock — approving issues it out and reduces inventory.</p>
     </div>
     <div class="bt-actions">
       <button class="bt-add-btn" (click)="toggleForm()">
@@ -26,7 +26,7 @@
         <span>Material</span>
         <select formControlName="materialId">
           <option value="" disabled selected>Select material</option>
-          <option *ngFor="let m of materials" [value]="m.id">{{ m.name }} ({{ m.category }})</option>
+          <option *ngFor="let m of materials" [value]="m.materialId">{{ m.materialName }} ({{ m.category }})</option>
         </select>
       </label>
       <label>
@@ -65,30 +65,29 @@
         </thead>
         <tbody>
           <tr *ngFor="let r of requests">
-            <td class="bt-muted">{{ r.id }}</td>
+            <td class="bt-muted">{{ r.requestId }}</td>
             <td class="bt-strong">{{ r.materialName }}</td>
-            <td>{{ r.quantity | number }} {{ r.unit }}</td>
+            <td>{{ r.requestedQuantity | number }} {{ r.unitOfMeasure }}</td>
             <td>{{ r.project }}</td>
             <td>{{ r.requestedBy }}</td>
             <td class="bt-muted">{{ r.requestDate }}</td>
-            <td><span class="bt-badge" [ngClass]="statusClass(r.status)">{{ r.status }}</span></td>
             <td>
-              <div class="bt-row-actions">
-                <button
-                  *ngIf="r.status === 'Pending' || r.status === 'Approved'"
-                  class="bt-icon-btn"
-                  (click)="advance(r)"
-                  [title]="r.status === 'Pending' ? 'Approve' : 'Mark Delivered'">
+              <span class="bt-badge" [ngClass]="statusClass(r.requestStatus)">{{ r.requestStatus }}</span>
+              <div *ngIf="r.requestStatus === 'Pending' && !canApprove(r)" class="bt-muted" style="margin-top:4px;">Insufficient stock</div>
+            </td>
+            <td>
+              <div class="bt-row-actions" *ngIf="r.requestStatus === 'Pending'">
+                <button class="bt-icon-btn" (click)="approve(r)" [disabled]="!canApprove(r)" title="Approve — issues stock to project">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
                 </button>
-                <button *ngIf="r.status === 'Pending'" class="bt-icon-btn danger" (click)="reject(r)" title="Reject">
+                <button class="bt-icon-btn danger" (click)="reject(r)" title="Reject">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6"></path><path d="M9 9l6 6"></path></svg>
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="requests.length === 0">
-            <td colspan="8" class="bt-empty">No procurement requests yet. Click "New Request" to raise one.</td>
+            <td colspan="8" class="bt-empty">No material requests yet. Click "New Request" to raise one.</td>
           </tr>
         </tbody>
       </table>

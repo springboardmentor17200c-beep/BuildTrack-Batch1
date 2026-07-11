@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Allocation, Resource } from '../models/resource.model';
+import { Resource, ResourceAllocation } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { ResourceDataService } from '../resource-data.service';
   styleUrls: ['./resource-allocation.component.css'],
 })
 export class ResourceAllocationComponent implements OnInit {
-  allocations: Allocation[] = [];
+  allocations: ResourceAllocation[] = [];
   availableResources: Resource[] = [];
   projectNames: string[] = [];
   showForm = false;
@@ -23,15 +23,15 @@ export class ResourceAllocationComponent implements OnInit {
     this.form = this.fb.group({
       resourceId: ['', Validators.required],
       project: ['', Validators.required],
-      allocatedTo: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+      allocatedBy: ['', Validators.required],
+      allocationDate: ['', Validators.required],
+      expectedReturnDate: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
     this.data.allocations$.subscribe(a => (this.allocations = a));
-    this.data.resources$.subscribe(r => (this.availableResources = r.filter(x => x.status === 'Available')));
+    this.data.resources$.subscribe(r => (this.availableResources = r.filter(x => x.currentStatus === 'Available')));
     this.projectNames = this.data.projectNames;
   }
 
@@ -45,32 +45,33 @@ export class ResourceAllocationComponent implements OnInit {
       return;
     }
 
-    const { resourceId, project, allocatedTo, startDate, endDate } = this.form.value;
-    const resource = this.availableResources.find(r => r.id === resourceId);
+    const { resourceId, project, allocatedBy, allocationDate, expectedReturnDate } = this.form.value;
+    const resource = this.availableResources.find(r => r.resourceId === resourceId);
     if (!resource) return;
 
-    const allocation: Allocation = {
-      id: 'A-' + Math.floor(2000 + Math.random() * 8000),
+    const allocation: ResourceAllocation = {
+      allocationId: 'A-' + Math.floor(2000 + Math.random() * 8000),
       resourceId,
-      resourceName: resource.name,
+      resourceName: resource.resourceName,
       category: resource.category,
       project,
-      allocatedTo,
-      startDate,
-      endDate,
-      status: 'Scheduled',
+      allocatedBy,
+      allocationDate,
+      expectedReturnDate,
+      actualReturnDate: null,
+      allocationStatus: 'Allocated',
     };
 
-    this.data.addAllocation(allocation, resourceId);
+    this.data.addAllocation(allocation);
     this.form.reset();
     this.showForm = false;
   }
 
-  remove(id: string) {
-    this.data.deleteAllocation(id);
+  markReturned(allocationId: string) {
+    this.data.returnAllocation(allocationId);
   }
 
-  statusClass(status: Allocation['status']) {
-    return { Active: 'green', Scheduled: 'blue', Completed: 'gray' }[status];
+  statusClass(status: ResourceAllocation['allocationStatus']) {
+    return { Allocated: 'blue', Returned: 'gray', Overdue: 'red' }[status];
   }
 }

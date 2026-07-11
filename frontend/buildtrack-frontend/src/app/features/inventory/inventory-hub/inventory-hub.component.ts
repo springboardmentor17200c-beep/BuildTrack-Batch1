@@ -47,8 +47,8 @@ export class InventoryHubComponent implements OnInit {
       statLabel: 'Low / out of stock',
     },
     {
-      title: 'Procurement Requests',
-      description: 'Raise, approve and track material requests from sites to procurement.',
+      title: 'Material Requests',
+      description: 'Projects request material from stock — approving issues it out and reduces inventory.',
       icon: 'requests',
       route: 'requests',
       accent: 'purple',
@@ -60,14 +60,15 @@ export class InventoryHubComponent implements OnInit {
   constructor(private router: Router, private data: InventoryDataService) {}
 
   ngOnInit(): void {
-    this.data.materials$.subscribe(materials => {
-      this.totalMaterials = materials.length;
-      this.inStockCount = materials.filter(m => m.status === 'In Stock').length;
-      this.lowStockCount = materials.filter(m => m.status === 'Low Stock').length;
-      this.outOfStockCount = materials.filter(m => m.status === 'Out of Stock').length;
+    this.data.inventory$.subscribe(records => {
+      this.totalMaterials = records.length;
+      const statuses = records.map(r => this.data.getStockStatus(r));
+      this.inStockCount = statuses.filter(s => s === 'In Stock').length;
+      this.lowStockCount = statuses.filter(s => s === 'Low Stock').length;
+      this.outOfStockCount = statuses.filter(s => s === 'Out of Stock').length;
     });
     this.data.requests$.subscribe(requests => {
-      this.pendingRequests = requests.filter(r => r.status === 'Pending').length;
+      this.pendingRequests = requests.filter(r => r.requestStatus === 'Pending').length;
     });
   }
 

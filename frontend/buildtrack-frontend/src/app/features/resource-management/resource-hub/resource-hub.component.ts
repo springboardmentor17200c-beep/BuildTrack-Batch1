@@ -8,15 +8,9 @@ interface ResourceOption {
   description: string;
   icon: string;
   route: string;
-  accent: string; // css var name for the accent color
+  accent: string;
   stat: string;
   statLabel: string;
-}
-
-interface ActivityItem {
-  label: string;
-  detail: string;
-  tone: 'blue' | 'orange' | 'green';
 }
 
 @Component({
@@ -44,7 +38,7 @@ export class ResourceHubComponent implements OnInit {
     },
     {
       title: 'Equipment Tracking',
-      description: 'See real-time status, location and maintenance schedule for every piece of equipment.',
+      description: 'See real-time status, ownership details and maintenance schedule for every piece of equipment.',
       icon: 'tracking',
       route: 'tracking',
       accent: 'orange',
@@ -67,9 +61,9 @@ export class ResourceHubComponent implements OnInit {
   ngOnInit(): void {
     this.data.resources$.subscribe(resources => {
       this.totalAssets = resources.length;
-      this.inUseCount = resources.filter(r => r.status === 'In Use').length;
-      this.availableCount = resources.filter(r => r.status === 'Available').length;
-      this.maintenanceCount = resources.filter(r => r.status === 'Under Maintenance').length;
+      this.inUseCount = resources.filter(r => r.currentStatus === 'Allocated').length;
+      this.availableCount = resources.filter(r => r.currentStatus === 'Available').length;
+      this.maintenanceCount = resources.filter(r => r.currentStatus === 'Under Maintenance').length;
     });
   }
 

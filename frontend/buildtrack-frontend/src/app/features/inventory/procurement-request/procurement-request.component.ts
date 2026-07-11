@@ -2,8 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { MaterialItem, ProcurementRequest } from '../models/inventory.model';
+import { InventoryRecord, Material, MaterialRequest } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
+
+// NOTE: this page represents the DB's `material_requests` table — a project
+// asking to draw material from existing stock. It is NOT the vendor-facing
+// Procurement module (procurement_requests / purchase_orders / invoices),
+// which is a separate module not yet built.
 
 @Component({
   selector: 'app-procurement-request',
@@ -13,8 +18,9 @@ import { InventoryDataService } from '../inventory-data.service';
   styleUrls: ['./procurement-request.component.css'],
 })
 export class ProcurementRequestComponent implements OnInit {
-  requests: ProcurementRequest[] = [];
-  materials: MaterialItem[] = [];
+  requests: MaterialRequest[] = [];
+  materials: Material[] = [];
+  inventoryRecords: InventoryRecord[] = [];
   projectNames: string[] = [];
   showForm = false;
   form: FormGroup;
@@ -31,6 +37,7 @@ export class ProcurementRequestComponent implements OnInit {
   ngOnInit(): void {
     this.data.requests$.subscribe(r => (this.requests = r));
     this.data.materials$.subscribe(m => (this.materials = m));
+    this.data.inventory$.subscribe(inv => (this.inventoryRecords = inv));
     this.projectNames = this.data.projectNames;
   }
 
@@ -45,42 +52,41 @@ export class ProcurementRequestComponent implements OnInit {
     }
 
     const { materialId, quantity, project, requestedBy } = this.form.value;
-    const material = this.materials.find(m => m.id === materialId);
+    const material = this.materials.find(m => m.materialId === materialId);
     if (!material) return;
 
-    const request: ProcurementRequest = {
-      id: 'PR-' + Math.floor(3000 + Math.random() * 9000),
-      materialId,
-      materialName: material.name,
-      category: material.category,
-      quantity: Number(quantity),
-      unit: material.unit,
+    const request: MaterialRequest = {
+      requestId: 'MR-' + Math.floor(3000 + Math.random() * 9000),
       project,
       requestedBy,
-      requestDate: new Date().toISOString().slice(0, 10),
-      status: 'Pending',
+      materialId,
+      materialName: material.materialName,
+      category: material.category,
+      unitOfMeasure: material.unitOfMeasure,
+      requestedQuantity: Number(quantity),
+      requestDate: '2026-07-10',
+      requestStatus: 'Pending',
     };
 
-    this.data.addRequest(request);
+    this.data.addMaterialRequest(request);
     this.form.reset();
     this.showForm = false;
   }
 
-  advance(request: ProcurementRequest) {
-    const next: Record<ProcurementRequest['status'], ProcurementRequest['status']> = {
-      Pending: 'Approved',
-      Approved: 'Delivered',
-      Delivered: 'Delivered',
-      Rejected: 'Rejected',
-    };
-    this.data.updateRequestStatus(request.id, next[request.status]);
+  /** Whether there's enough stock to approve this request right now. */
+  canApprove(request: MaterialRequest): boolean {
+    return this.data.hasSufficientStock(request.materialId, request.requestedQuantity);
   }
 
-  reject(request: ProcurementRequest) {
-    this.data.updateRequestStatus(request.id, 'Rejected');
+  approve(request: MaterialRequest) {
+    this.data.approveRequest(request.requestId);
   }
 
-  statusClass(status: ProcurementRequest['status']) {
-    return { Pending: 'orange', Approved: 'blue', Delivered: 'green', Rejected: 'red' }[status];
+  reject(request: MaterialRequest) {
+    this.data.rejectRequest(request.requestId);
+  }
+
+  statusClass(status: MaterialRequest['requestStatus']) {
+    return { Pending: 'orange', Approved: 'green', Rejected: 'red' }[status];
   }
 }

@@ -21,7 +21,7 @@ export class EquipmentTrackingComponent implements OnInit {
   categories: (ResourceCategory | 'All')[] = [
     'All', 'Excavators', 'Concrete Mixers', 'Cranes', 'Dump Trucks', 'Generators', 'Safety Equipment',
   ];
-  statuses: (ResourceStatus | 'All')[] = ['All', 'Available', 'In Use', 'Under Maintenance', 'Idle'];
+  statuses: (ResourceStatus | 'All')[] = ['All', 'Available', 'Allocated', 'Under Maintenance'];
 
   constructor(private data: ResourceDataService) {}
 
@@ -33,20 +33,32 @@ export class EquipmentTrackingComponent implements OnInit {
     return this.allResources.filter(r => {
       const matchesSearch =
         !this.search ||
-        r.name.toLowerCase().includes(this.search.toLowerCase()) ||
-        r.id.toLowerCase().includes(this.search.toLowerCase());
+        r.resourceName.toLowerCase().includes(this.search.toLowerCase()) ||
+        r.resourceId.toLowerCase().includes(this.search.toLowerCase()) ||
+        r.serialNumber.toLowerCase().includes(this.search.toLowerCase());
       const matchesCategory = this.categoryFilter === 'All' || r.category === this.categoryFilter;
-      const matchesStatus = this.statusFilter === 'All' || r.status === this.statusFilter;
+      const matchesStatus = this.statusFilter === 'All' || r.currentStatus === this.statusFilter;
       return matchesSearch && matchesCategory && matchesStatus;
     });
+  }
+
+  assignedProject(resourceId: string): string | null {
+    return this.data.getAssignedProject(resourceId);
+  }
+
+  lastMaintenance(resourceId: string): string | null {
+    return this.data.getLastMaintenanceDate(resourceId);
+  }
+
+  nextMaintenance(resourceId: string): string | null {
+    return this.data.getNextMaintenanceDate(resourceId);
   }
 
   statusClass(status: ResourceStatus) {
     return {
       'Available': 'green',
-      'In Use': 'blue',
+      'Allocated': 'blue',
       'Under Maintenance': 'orange',
-      'Idle': 'gray',
     }[status];
   }
 }

@@ -26,7 +26,7 @@
         <span>Resource</span>
         <select formControlName="resourceId">
           <option value="" disabled selected>Select available resource</option>
-          <option *ngFor="let r of availableResources" [value]="r.id">{{ r.name }} ({{ r.category }})</option>
+          <option *ngFor="let r of availableResources" [value]="r.resourceId">{{ r.resourceName }} ({{ r.category }})</option>
         </select>
       </label>
       <label>
@@ -37,16 +37,16 @@
         </select>
       </label>
       <label>
-        <span>Allocated To</span>
-        <input type="text" formControlName="allocatedTo" placeholder="e.g. Priya Menon" />
+        <span>Allocated By</span>
+        <input type="text" formControlName="allocatedBy" placeholder="e.g. Priya Menon" />
       </label>
       <label>
-        <span>Start Date</span>
-        <input type="date" formControlName="startDate" />
+        <span>Allocation Date</span>
+        <input type="date" formControlName="allocationDate" />
       </label>
       <label>
-        <span>End Date</span>
-        <input type="date" formControlName="endDate" />
+        <span>Expected Return Date</span>
+        <input type="date" formControlName="expectedReturnDate" />
       </label>
     </div>
     <div class="bt-form-actions">
@@ -58,7 +58,7 @@
     <div class="bt-panel-header">
       <div>
         <h3 class="bt-panel-title">All Allocations</h3>
-        <span class="bt-panel-sub">{{ allocations.length }} allocation{{ allocations.length === 1 ? '' : 's' }}</span>
+        <span class="bt-panel-sub">{{ allocations.length }} allocation{{ allocations.length === 1 ? '' : 's' }} (full history, nothing is deleted)</span>
       </div>
     </div>
 
@@ -69,9 +69,10 @@
             <th>Resource</th>
             <th>Category</th>
             <th>Project</th>
-            <th>Allocated To</th>
-            <th>Start</th>
-            <th>End</th>
+            <th>Allocated By</th>
+            <th>Allocation Date</th>
+            <th>Expected Return</th>
+            <th>Actual Return</th>
             <th>Status</th>
             <th></th>
           </tr>
@@ -81,20 +82,25 @@
             <td class="bt-strong">{{ a.resourceName }}</td>
             <td>{{ a.category }}</td>
             <td>{{ a.project }}</td>
-            <td>{{ a.allocatedTo }}</td>
-            <td class="bt-muted">{{ a.startDate }}</td>
-            <td class="bt-muted">{{ a.endDate }}</td>
-            <td><span class="bt-badge" [ngClass]="statusClass(a.status)">{{ a.status }}</span></td>
+            <td>{{ a.allocatedBy }}</td>
+            <td class="bt-muted">{{ a.allocationDate }}</td>
+            <td class="bt-muted">{{ a.expectedReturnDate }}</td>
+            <td class="bt-muted">{{ a.actualReturnDate || '—' }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(a.allocationStatus)">{{ a.allocationStatus }}</span></td>
             <td>
               <div class="bt-row-actions">
-                <button class="bt-icon-btn danger" (click)="remove(a.id)" title="Remove allocation">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+                <button
+                  *ngIf="a.allocationStatus === 'Allocated' || a.allocationStatus === 'Overdue'"
+                  class="bt-icon-btn"
+                  (click)="markReturned(a.allocationId)"
+                  title="Mark returned">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="allocations.length === 0">
-            <td colspan="8" class="bt-empty">No allocations yet. Click "New Allocation" to assign a resource.</td>
+            <td colspan="9" class="bt-empty">No allocations yet. Click "New Allocation" to assign a resource.</td>
           </tr>
         </tbody>
       </table>
