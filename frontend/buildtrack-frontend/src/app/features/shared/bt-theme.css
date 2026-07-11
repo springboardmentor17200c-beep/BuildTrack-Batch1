@@ -1,17 +1,24 @@
 /* ==========================================================================
-   BuildTrack shared theme
-   Matches the "Project Management" page design (rounded stat cards with
-   solid icon squares, pill badges, top search/filter/add bar, clean tables).
+   BuildTrack shared theme — LIQUID GLASS EDITION
+   Same class names as the original bt-theme.css (bt-page, bt-stat-card,
+   bt-panel, bt-badge, bt-table, bt-option-card, etc.) so nothing that
+   already uses this theme needs markup changes — but every surface now
+   uses the same frosted-glass material recipe as the Project Management
+   "Liquid Glass" component: translucent fill + heavy blur + glossy top
+   sheen + top-left light pool + layered inset/outer shadow + glow accents.
 
-   HOW TO USE:
-   Add this file to your global styles so its classes are available
-   everywhere, e.g. in angular.json:
+   NOTE: because glass only reads as "glass" over something behind it,
+   pair this with a background (e.g. an app-shell .bg-mesh / gradient
+   backdrop) — over a plain white page it will look like a soft tinted
+   card, which is still fine, just less dramatic.
+
+   HOW TO USE: same as before —
      "styles": ["src/styles.css", "src/app/shared/bt-theme.css"]
-   or import it at the top of src/styles.css:
-     @import './app/shared/bt-theme.css';
    ========================================================================== */
+   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
+  /* Corporate palette — unchanged so charts/badges stay on-brand */
   --bt-blue: #3b82f6;
   --bt-blue-soft: #eff6ff;
   --bt-green: #10b981;
@@ -25,13 +32,96 @@
   --bt-text: #111827;
   --bt-muted: #6b7280;
   --bt-border: #f1f5f9;
-  --bt-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --bt-font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+
+  /* Liquid glass material — identical recipe to the Project Management page */
+  --bt-glass-fill: rgba(255, 255, 255, 0.14);
+  --bt-glass-fill-strong: rgba(255, 255, 255, 0.22);
+  --bt-glass-fill-soft: rgba(255, 255, 255, 0.09);
+  --bt-glass-border: rgba(255, 255, 255, 0.32);
+  --bt-glass-border-soft: rgba(255, 255, 255, 0.18);
+  --bt-glass-blur: blur(30px) saturate(190%);
+
+  --bt-glass-shadow:
+    0 8px 32px rgba(15, 30, 60, 0.16),
+    0 1.5px 1px rgba(255,255,255,0.5) inset,
+    0 -1px 1px rgba(15,30,60,0.06) inset;
+
+  --bt-glass-shadow-hover:
+    0 22px 48px rgba(15, 30, 60, 0.24),
+    0 0 0 1px rgba(255,255,255,0.4) inset,
+    0 1.5px 1px rgba(255,255,255,0.6) inset;
+
+  --bt-glow-blue: 0 0 24px rgba(59, 130, 246, 0.45);
+  --bt-glow-green: 0 0 24px rgba(16, 185, 129, 0.45);
+  --bt-glow-purple: 0 0 24px rgba(139, 92, 246, 0.45);
+  --bt-glow-orange: 0 0 24px rgba(249, 115, 22, 0.45);
+  --bt-glow-red: 0 0 24px rgba(239, 68, 68, 0.45);
+
+  --bt-ease: cubic-bezier(.22, 1, .36, 1);
+  --bt-ease-spring: cubic-bezier(.34, 1.56, .64, 1);
 }
+
+* { box-sizing: border-box; }
 
 .bt-page {
   padding: 28px 32px 48px;
   font-family: var(--bt-font);
   color: var(--bt-text);
+}
+
+/* ---------------------------------------------------------
+   GLASS PRIMITIVE — every card/panel below applies this
+--------------------------------------------------------- */
+.bt-stat-card,
+.bt-panel,
+.bt-form-card,
+.bt-option-card,
+.bt-search,
+.bt-filter-select,
+.bt-filter-btn {
+  position: relative;
+  background: var(--bt-glass-fill);
+  -webkit-backdrop-filter: var(--bt-glass-blur);
+  backdrop-filter: var(--bt-glass-blur);
+  border: 1px solid var(--bt-glass-border);
+  box-shadow: var(--bt-glass-shadow);
+  isolation: isolate;
+}
+
+.bt-stat-card::before,
+.bt-panel::before,
+.bt-form-card::before,
+.bt-option-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 26%, transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bt-stat-card::after,
+.bt-panel::after,
+.bt-form-card::after,
+.bt-option-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 90% at 8% 0%, rgba(255,255,255,0.30), transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bt-stat-card > *, .bt-panel > *, .bt-form-card > *, .bt-option-card > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* Back button */
@@ -49,11 +139,11 @@
   padding: 0;
   margin-bottom: 16px;
   font-family: inherit;
-  transition: color 0.15s ease;
+  transition: color 0.2s var(--bt-ease);
 }
 .bt-back-btn:hover { color: var(--bt-blue); }
 
-/* Top bar: title + subtitle on the left, search/filter/add on the right */
+/* Top bar */
 .bt-topbar {
   display: flex;
   justify-content: space-between;
@@ -62,19 +152,33 @@
   gap: 16px;
   margin-bottom: 24px;
 }
-.bt-title { font-size: 26px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.01em; }
+.bt-title {
+  font-size: 26px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.01em;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
 .bt-subtitle { color: var(--bt-muted); font-size: 14px; margin: 0; }
 
 .bt-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
+/* Search — glass pill */
 .bt-search {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f3f4f6;
   border-radius: 999px;
   padding: 9px 16px;
   min-width: 220px;
+  background: var(--bt-glass-fill-soft);
+  border-color: var(--bt-glass-border-soft);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: none;
+  transition: box-shadow .25s var(--bt-ease), border-color .25s var(--bt-ease), background .25s var(--bt-ease);
+}
+.bt-search:focus-within {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255,255,255,0.30);
+  box-shadow: var(--bt-glow-blue);
 }
 .bt-search svg { color: var(--bt-muted); flex-shrink: 0; }
 .bt-search input {
@@ -88,13 +192,12 @@
 }
 .bt-search input::placeholder { color: #9ca3af; }
 
+/* Filter — glass pill */
 .bt-filter-select,
 .bt-filter-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #fff;
-  border: 1px solid var(--bt-border);
   border-radius: 12px;
   padding: 9px 16px;
   font-size: 14px;
@@ -102,25 +205,110 @@
   color: var(--bt-text);
   cursor: pointer;
   font-family: inherit;
+  background: var(--bt-glass-fill-soft);
+  border-color: var(--bt-glass-border-soft);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: none;
+  transition: transform .3s var(--bt-ease-spring), box-shadow .3s var(--bt-ease), background .3s var(--bt-ease);
 }
 .bt-filter-select:focus { outline: none; border-color: var(--bt-blue); }
+.bt-filter-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 30px rgba(15,30,60,0.18); }
 
+/* Filter DROPDOWN MENU — use this instead of a native <select> whenever
+   you want the rounded/glass "All Projects" style. Native <select> option
+   lists are rendered by the OS/browser and can never be styled to match;
+   this button + list pattern is what the Project Management filter uses.
+
+   Markup pattern:
+     <div class="bt-filter-wrap">
+       <button class="bt-filter-btn" (click)="open = !open">Filter <svg.../></button>
+       <ul class="bt-filter-menu" *ngIf="open">
+         <li><button class="bt-filter-option active">All Projects</button></li>
+         <li><button class="bt-filter-option">Active</button></li>
+         ...
+       </ul>
+     </div>
+*/
+.bt-filter-wrap { position: relative; display: inline-block; }
+
+.bt-filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 180px;
+  padding: 8px;
+  margin: 0;
+  list-style: none;
+  border-radius: 18px;
+  background: var(--bt-glass-fill-strong);
+  -webkit-backdrop-filter: var(--bt-glass-blur);
+  backdrop-filter: var(--bt-glass-blur);
+  border: 1px solid var(--bt-glass-border);
+  box-shadow: var(--bt-glass-shadow-hover);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bt-filter-option {
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--bt-text);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s var(--bt-ease), color .2s var(--bt-ease);
+}
+.bt-filter-option:hover { background: rgba(255,255,255,0.35); color: var(--bt-blue); }
+.bt-filter-option.active {
+  background: linear-gradient(135deg, rgba(59,130,246,0.22), rgba(96,165,250,0.10));
+  color: var(--bt-blue);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.22) inset;
+}
+
+/* Add button — solid glass gradient with ripple */
 .bt-add-btn {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--bt-blue);
-  color: #fff;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.4);
   border-radius: 999px;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: filter 0.15s ease;
+  color: #fff;
+  background: linear-gradient(135deg, #60a5fa, var(--bt-blue));
+  box-shadow: 0 10px 26px rgba(59,130,246,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
+  transition: transform .3s var(--bt-ease-spring), box-shadow .3s var(--bt-ease);
 }
-.bt-add-btn:hover { filter: brightness(1.08); }
+.bt-add-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 60%);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity .5s var(--bt-ease), transform .5s var(--bt-ease);
+  pointer-events: none;
+}
+.bt-add-btn:active::after { opacity: 1; transform: scale(1.6); transition: 0s; }
+.bt-add-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 34px rgba(59,130,246,0.55), inset 0 1px 1px rgba(255,255,255,0.6);
+}
 
 /* Stat cards row */
 .bt-stats-row {
@@ -130,15 +318,15 @@
   margin-bottom: 24px;
 }
 .bt-stat-card {
-  background: #fff;
-  border: 1px solid var(--bt-border);
   border-radius: 20px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: transform .35s var(--bt-ease-spring), box-shadow .35s var(--bt-ease);
 }
+.bt-stat-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: var(--bt-glass-shadow-hover); }
+
 .bt-stat-icon {
   width: 48px;
   height: 48px;
@@ -148,26 +336,26 @@
   justify-content: center;
   color: #fff;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 6px 16px rgba(15,30,60,0.25);
 }
-.bt-stat-icon.blue { background: var(--bt-blue); }
-.bt-stat-icon.green { background: var(--bt-green); }
-.bt-stat-icon.purple { background: var(--bt-purple); }
-.bt-stat-icon.orange { background: var(--bt-orange); }
-.bt-stat-icon.red { background: var(--bt-red); }
+.bt-stat-icon.blue { background: linear-gradient(135deg, #60a5fa, var(--bt-blue)); }
+.bt-stat-icon.green { background: linear-gradient(135deg, #34d399, var(--bt-green)); }
+.bt-stat-icon.purple { background: linear-gradient(135deg, #a78bfa, var(--bt-purple)); }
+.bt-stat-icon.orange { background: linear-gradient(135deg, #fbbf24, var(--bt-orange)); }
+.bt-stat-icon.red { background: linear-gradient(135deg, #f87171, var(--bt-red)); }
 
 .bt-stat-text { display: flex; flex-direction: column; }
 .bt-stat-value { font-size: 22px; font-weight: 800; line-height: 1.15; }
 .bt-stat-label { font-size: 13px; font-weight: 700; margin-top: 2px; }
 .bt-stat-sub { font-size: 12px; color: var(--bt-muted); margin-top: 1px; }
 
-/* Panel wrapper (cards, tables, forms live inside these) */
+/* Panel wrapper */
 .bt-panel {
-  background: #fff;
-  border: 1px solid var(--bt-border);
   border-radius: 20px;
   padding: 22px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: box-shadow .35s var(--bt-ease), transform .35s var(--bt-ease-spring);
 }
+.bt-panel:hover { box-shadow: var(--bt-glass-shadow-hover); }
 .bt-panel + .bt-panel { margin-top: 20px; }
 .bt-panel-header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; }
 .bt-panel-title { font-size: 17px; font-weight: 800; margin: 0 0 2px; }
@@ -183,21 +371,22 @@
   letter-spacing: 0.04em;
   color: var(--bt-muted);
   padding: 12px 14px;
-  border-bottom: 1px solid var(--bt-border);
+  border-bottom: 1px solid var(--bt-glass-border-soft);
   white-space: nowrap;
 }
 .bt-table td {
   padding: 14px;
   font-size: 14px;
-  border-bottom: 1px solid var(--bt-border);
+  border-bottom: 1px solid var(--bt-glass-border-soft);
   vertical-align: middle;
 }
 .bt-table tr:last-child td { border-bottom: none; }
-.bt-table tbody tr:hover td { background: #fafbff; }
+.bt-table tbody tr { transition: background .25s var(--bt-ease); }
+.bt-table tbody tr:hover td { background: rgba(255,255,255,0.22); }
 .bt-strong { font-weight: 700; }
 .bt-muted { color: var(--bt-muted); font-size: 13px; }
 
-/* Badges */
+/* Badges — soft-tint + hairline border, glass-style */
 .bt-badge {
   display: inline-block;
   padding: 5px 12px;
@@ -205,75 +394,78 @@
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
-.bt-badge.blue { background: var(--bt-blue-soft); color: var(--bt-blue); }
-.bt-badge.green { background: var(--bt-green-soft); color: var(--bt-green); }
-.bt-badge.purple { background: var(--bt-purple-soft); color: var(--bt-purple); }
-.bt-badge.orange { background: var(--bt-orange-soft); color: var(--bt-orange); }
-.bt-badge.red { background: var(--bt-red-soft); color: var(--bt-red); }
-.bt-badge.gray { background: #f1f2f6; color: var(--bt-muted); }
+.bt-badge.blue { background: rgba(59, 130, 246, 0.16); color: #1D4ED8; border-color: rgba(59,130,246,0.25); }
+.bt-badge.green { background: rgba(16, 185, 129, 0.16); color: #0D9463; border-color: rgba(16,185,129,0.25); }
+.bt-badge.purple { background: rgba(139, 92, 246, 0.16); color: #6D28D9; border-color: rgba(139,92,246,0.25); }
+.bt-badge.orange { background: rgba(249, 115, 22, 0.16); color: #B45F06; border-color: rgba(249,115,22,0.25); }
+.bt-badge.red { background: rgba(239, 68, 68, 0.14); color: #DC2626; border-color: rgba(239,68,68,0.22); }
+.bt-badge.gray { background: rgba(107, 114, 128, 0.14); color: var(--bt-muted); border-color: rgba(107,114,128,0.2); }
 
-/* Progress bars */
+/* Progress bars — glowing fill */
 .bt-progress { display: flex; align-items: center; gap: 8px; }
-.bt-progress-bar { width: 90px; height: 6px; border-radius: 999px; background: #f1f2f6; overflow: hidden; flex-shrink: 0; }
-.bt-progress-fill { height: 100%; border-radius: 999px; }
-.bt-progress-fill.blue { background: var(--bt-blue); }
-.bt-progress-fill.green { background: var(--bt-green); }
-.bt-progress-fill.orange { background: var(--bt-orange); }
-.bt-progress-fill.red { background: var(--bt-red); }
+.bt-progress-bar {
+  width: 90px; height: 7px; border-radius: 999px;
+  background: rgba(255,255,255,0.30);
+  border: 1px solid var(--bt-glass-border-soft);
+  overflow: hidden; flex-shrink: 0;
+}
+.bt-progress-fill { height: 100%; border-radius: 999px; transition: width 1s var(--bt-ease); }
+.bt-progress-fill.blue { background: linear-gradient(90deg, var(--bt-blue), #60a5fa); box-shadow: var(--bt-glow-blue); }
+.bt-progress-fill.green { background: linear-gradient(90deg, var(--bt-green), #34d399); box-shadow: var(--bt-glow-green); }
+.bt-progress-fill.orange { background: linear-gradient(90deg, var(--bt-orange), #fbbf24); box-shadow: var(--bt-glow-orange); }
+.bt-progress-fill.red { background: linear-gradient(90deg, var(--bt-red), #f87171); box-shadow: var(--bt-glow-red); }
 .bt-progress-value { font-size: 12.5px; font-weight: 700; color: var(--bt-text); min-width: 34px; }
 
-/* Row actions (view / edit / delete icons) */
+/* Row actions */
 .bt-row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .bt-icon-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  background: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--bt-glass-border-soft);
+  background: var(--bt-glass-fill-soft);
   color: var(--bt-muted);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.25s var(--bt-ease), color 0.25s var(--bt-ease), transform 0.25s var(--bt-ease), box-shadow 0.25s var(--bt-ease);
 }
-.bt-icon-btn:hover { background: #f1f2f6; color: var(--bt-text); }
-.bt-icon-btn.danger:hover { background: var(--bt-red-soft); color: var(--bt-red); }
+.bt-icon-btn:hover { background: rgba(59,130,246,0.16); color: var(--bt-blue); transform: translateY(-2px); box-shadow: var(--bt-glow-blue); }
+.bt-icon-btn.danger:hover { background: rgba(239,68,68,0.16); color: var(--bt-red); box-shadow: 0 0 24px rgba(239,68,68,0.4); }
 
 /* Forms */
 .bt-form-card {
-  background: #fff;
-  border: 1px solid var(--bt-border);
   border-radius: 20px;
   padding: 22px;
   margin-bottom: 22px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 .bt-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 .bt-form-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted); }
 .bt-form-grid input,
 .bt-form-grid select {
-  border: 1px solid var(--bt-border);
+  border: 1px solid var(--bt-glass-border-soft);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 14px;
   font-family: inherit;
   color: var(--bt-text);
-  background: #fafbfe;
+  background: rgba(255,255,255,0.35);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 .bt-form-grid input:focus,
-.bt-form-grid select:focus { outline: none; border-color: var(--bt-blue); background: #fff; }
+.bt-form-grid select:focus { outline: none; border-color: var(--bt-blue); background: rgba(255,255,255,0.55); box-shadow: var(--bt-glow-blue); }
 .bt-form-actions { margin-top: 18px; display: flex; justify-content: flex-end; }
 
 .bt-empty { text-align: center; color: var(--bt-muted); padding: 32px; }
 
-/* Hub option cards (Resource/Inventory/Workforce landing screens) */
+/* Hub option cards */
 .bt-option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px; }
 .bt-option-card {
   text-align: left;
-  background: #fff;
-  border: 1px solid var(--bt-border);
   border-radius: 20px;
   padding: 22px;
   cursor: pointer;
@@ -281,10 +473,9 @@
   flex-direction: column;
   gap: 16px;
   font-family: inherit;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: transform 0.35s var(--bt-ease-spring), box-shadow 0.35s var(--bt-ease);
 }
-.bt-option-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(30, 40, 80, 0.1); }
+.bt-option-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: var(--bt-glass-shadow-hover); }
 .bt-option-card:focus-visible { outline: 2px solid var(--bt-blue); outline-offset: 2px; }
 .bt-option-body h3 { font-size: 17px; font-weight: 800; margin: 0 0 6px; }
 .bt-option-body p { font-size: 13.5px; line-height: 1.5; color: var(--bt-muted); margin: 0; }
@@ -294,23 +485,35 @@
   justify-content: space-between;
   margin-top: auto;
   padding-top: 14px;
-  border-top: 1px solid var(--bt-border);
+  border-top: 1px solid var(--bt-glass-border-soft);
 }
 .bt-option-arrow {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #f5f6fa;
+  background: rgba(255,255,255,0.30);
+  border: 1px solid var(--bt-glass-border-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bt-text);
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background 0.25s var(--bt-ease), color 0.25s var(--bt-ease), transform 0.25s var(--bt-ease), box-shadow .25s var(--bt-ease);
 }
-.bt-option-card:hover .bt-option-arrow { background: var(--bt-blue); color: #fff; transform: translateX(2px); }
+.bt-option-card:hover .bt-option-arrow {
+  background: linear-gradient(135deg, #60a5fa, var(--bt-blue));
+  color: #fff;
+  transform: translateX(2px);
+  box-shadow: var(--bt-glow-blue);
+}
 
 @media (max-width: 640px) {
   .bt-page { padding: 20px; }
   .bt-option-grid { grid-template-columns: 1fr; }
   .bt-search { min-width: 0; flex: 1; }
+}
+
+/* Performance — same containment strategy as the glass component */
+.bt-stat-card, .bt-panel, .bt-form-card, .bt-option-card {
+  will-change: transform;
+  contain: layout paint style;
 }
