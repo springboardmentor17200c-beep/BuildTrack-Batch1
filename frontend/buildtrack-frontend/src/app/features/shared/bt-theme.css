@@ -517,3 +517,180 @@
   will-change: transform;
   contain: layout paint style;
 }
+
+/* ==========================================================================
+   Auth screen additions — append this to the END of your existing
+   bt-theme.css (the one already installed at features/shared/bt-theme.css).
+   These classes are only used by Login, Register, and Reset Password,
+   which use a centered-card layout instead of the dashboard sidebar style.
+   ========================================================================== */
+
+   .bt-auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(180deg, #f7f9ff 0%, #eef1fb 100%);
+    font-family: var(--bt-font);
+  }
+  
+  .bt-auth-card {
+    background: #fff;
+    border: 1px solid var(--bt-border);
+    border-radius: 22px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 12px 32px rgba(30, 40, 80, 0.08);
+  }
+  
+  .bt-auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  
+  .bt-auth-logo-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--bt-blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  
+  .bt-auth-logo-text {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--bt-text);
+  }
+  
+  .bt-auth-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 6px;
+    color: var(--bt-text);
+  }
+  
+  .bt-auth-subtitle {
+    font-size: 13.5px;
+    color: var(--bt-muted);
+    margin: 0 0 26px;
+    line-height: 1.5;
+  }
+  
+  .bt-auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .bt-auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .bt-auth-field span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--bt-muted);
+  }
+  
+  .bt-auth-field input,
+  .bt-auth-field select {
+    border: 1px solid var(--bt-border);
+    border-radius: 11px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--bt-text);
+    background: #fafbfe;
+  }
+  
+  .bt-auth-field input:focus,
+  .bt-auth-field select:focus {
+    outline: none;
+    border-color: var(--bt-blue);
+    background: #fff;
+  }
+  
+  .bt-auth-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  
+  .bt-auth-link {
+    color: var(--bt-blue);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0;
+  }
+  .bt-auth-link:hover { text-decoration: underline; }
+  
+  .bt-auth-submit {
+    width: 100%;
+    background: var(--bt-blue);
+    color: #fff;
+    border: none;
+    border-radius: 11px;
+    padding: 13px;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 0.15s ease;
+    margin-top: 4px;
+  }
+  .bt-auth-submit:hover { filter: brightness(1.08); }
+  .bt-auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .bt-auth-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13.5px;
+    color: var(--bt-muted);
+  }
+  
+  .bt-auth-error {
+    background: var(--bt-red-soft);
+    color: var(--bt-red);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  
+  .bt-auth-success {
+    background: var(--bt-green-soft);
+    color: var(--bt-green);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  
+  .bt-auth-step {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--bt-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }

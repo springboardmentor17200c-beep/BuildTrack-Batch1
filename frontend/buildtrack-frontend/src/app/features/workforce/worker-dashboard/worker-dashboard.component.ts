@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -38,7 +39,7 @@ export class WorkerDashboardComponent implements OnInit {
   form: FormGroup;
   projectNames: string[] = [];
 
-  constructor(private data: WorkforceDataService, private fb: FormBuilder) {
+  constructor(private data: WorkforceDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       name: ['', Validators.required],
       category: ['', Validators.required],
@@ -108,5 +109,9 @@ export class WorkerDashboardComponent implements OnInit {
 
   statusClass(status: Worker['status']) {
     return { Active: 'green', 'On Leave': 'orange', Inactive: 'gray' }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

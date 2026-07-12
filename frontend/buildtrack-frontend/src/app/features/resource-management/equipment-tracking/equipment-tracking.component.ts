@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory, ResourceStatus } from '../models/resource.model';
@@ -23,7 +24,7 @@ export class EquipmentTrackingComponent implements OnInit {
   ];
   statuses: (ResourceStatus | 'All')[] = ['All', 'Available', 'Allocated', 'Under Maintenance'];
 
-  constructor(private data: ResourceDataService) {}
+  constructor(private data: ResourceDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.resources$.subscribe(r => (this.allResources = r));
@@ -60,5 +61,9 @@ export class EquipmentTrackingComponent implements OnInit {
       'Allocated': 'blue',
       'Under Maintenance': 'orange',
     }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

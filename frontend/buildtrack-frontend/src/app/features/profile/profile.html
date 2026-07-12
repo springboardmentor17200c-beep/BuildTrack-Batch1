@@ -1,0 +1,82 @@
+<div class="bt-page">
+  <button class="bt-back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back
+  </button>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Profile</h1>
+      <p class="bt-subtitle">Manage your account details and password.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-filter-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="bt-panel" style="margin-bottom:20px;" *ngIf="user">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Account Details</h3>
+        <span class="bt-panel-sub">{{ user.email }} · <span class="bt-badge blue">{{ user.role }}</span></span>
+      </div>
+    </div>
+
+    <div class="bt-auth-error" *ngIf="profileError">{{ profileError }}</div>
+    <div class="bt-auth-success" *ngIf="profileSuccess">Profile updated successfully.</div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+      <div class="bt-form-grid">
+        <label>
+          <span>Full Name</span>
+          <input type="text" formControlName="fullName" />
+        </label>
+        <label>
+          <span>Phone Number</span>
+          <input type="text" formControlName="phoneNumber" />
+        </label>
+        <label>
+          <span>Profile Image URL</span>
+          <input type="text" formControlName="profileImage" placeholder="https://..." />
+        </label>
+      </div>
+      <div class="bt-form-actions">
+        <button type="submit" class="bt-add-btn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Change Password</h3>
+        <span class="bt-panel-sub">Update your account password</span>
+      </div>
+    </div>
+
+    <div class="bt-auth-error" *ngIf="passwordError">{{ passwordError }}</div>
+    <div class="bt-auth-success" *ngIf="passwordSuccess">Password changed successfully.</div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <div class="bt-form-grid">
+        <label>
+          <span>Current Password</span>
+          <input type="password" formControlName="currentPassword" />
+        </label>
+        <label>
+          <span>New Password</span>
+          <input type="password" formControlName="newPassword" />
+        </label>
+        <label>
+          <span>Confirm New Password</span>
+          <input type="password" formControlName="confirmPassword" />
+        </label>
+      </div>
+      <div class="bt-form-actions">
+        <button type="submit" class="bt-add-btn">Change Password</button>
+      </div>
+    </form>
+  </div>
+</div>

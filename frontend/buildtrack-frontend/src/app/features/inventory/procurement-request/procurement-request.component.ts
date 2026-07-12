@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, Material, MaterialRequest } from '../models/inventory.model';
@@ -25,7 +26,7 @@ export class ProcurementRequestComponent implements OnInit {
   showForm = false;
   form: FormGroup;
 
-  constructor(private data: InventoryDataService, private fb: FormBuilder) {
+  constructor(private data: InventoryDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       materialId: ['', Validators.required],
       quantity: ['', [Validators.required, Validators.min(1)]],
@@ -88,5 +89,9 @@ export class ProcurementRequestComponent implements OnInit {
 
   statusClass(status: MaterialRequest['requestStatus']) {
     return { Pending: 'orange', Approved: 'green', Rejected: 'red' }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AttendanceRecord, AttendanceStatus, Worker } from '../models/workforce.model';
@@ -25,7 +26,7 @@ export class AttendanceTrackingComponent implements OnInit {
   halfDayCount = 0;
   onLeaveCount = 0;
 
-  constructor(private data: WorkforceDataService) {}
+  constructor(private data: WorkforceDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.workers$.subscribe(w => (this.allWorkers = w.filter(x => x.status !== 'Inactive')));
@@ -74,5 +75,9 @@ export class AttendanceTrackingComponent implements OnInit {
   statusClass(status: AttendanceStatus | undefined) {
     if (!status) return 'gray';
     return { Present: 'green', Absent: 'red', 'Half Day': 'orange', 'On Leave': 'blue' }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

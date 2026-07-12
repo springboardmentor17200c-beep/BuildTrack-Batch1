@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AnalyticsDataService } from '../analytics-data.service';
 
@@ -65,7 +66,7 @@ export class AnalyticsHubComponent implements OnInit {
     },
   ];
 
-  constructor(private router: Router, private data: AnalyticsDataService) {}
+  constructor(private router: Router, private data: AnalyticsDataService, private location: Location) {}
 
   ngOnInit(): void {
     const approved = this.data.totalApprovedBudget();
@@ -84,5 +85,9 @@ export class AnalyticsHubComponent implements OnInit {
 
   open(route: string) {
     this.router.navigate(['/analytics', route]);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

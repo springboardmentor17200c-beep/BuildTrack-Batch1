@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, MaterialCategory } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
@@ -26,7 +27,7 @@ export class MaterialDashboardComponent implements OnInit {
   lowStockCount = 0;
   outOfStockCount = 0;
 
-  constructor(private data: InventoryDataService) {}
+  constructor(private data: InventoryDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.inventory$.subscribe(records => {
@@ -55,5 +56,9 @@ export class MaterialDashboardComponent implements OnInit {
         lowOrOutCount: items.filter(r => this.data.getStockStatus(r) !== 'In Stock').length,
       };
     });
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

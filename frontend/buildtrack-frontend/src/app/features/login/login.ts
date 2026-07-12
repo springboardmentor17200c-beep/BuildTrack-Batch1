@@ -1,57 +1,44 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthDataService } from '../auth/auth-data.service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: ['./login.css'],
 })
 export class Login {
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+  form: FormGroup;
+  error = '';
+  submitting = false;
 
-  protected readonly isLoading = signal(false);
-  protected readonly showPassword = signal(false);
-
-  protected readonly loginForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    rememberMe: [false],
-  });
-
-  protected togglePasswordVisibility(): void {
-    this.showPassword.update((value) => !value);
+  constructor(private fb: FormBuilder, private auth: AuthDataService, private router: Router) {
+    this.form = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+    });
   }
 
-  protected onSubmit(): void {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
+  submit() {
+    this.error = '';
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
-    this.isLoading.set(true);
+    this.submitting = true;
+    const result = this.auth.login(this.form.value);
+    this.submitting = false;
 
-    // Backend not ready yet — simulate a brief auth delay, then
-    // navigate straight to the dashboard.
-    setTimeout(() => {
-      this.isLoading.set(false);
-      this.router.navigate(['/dashboard']);
-    }, 600);
-  }
+    if (!result.success) {
+      this.error = result.error || 'Login failed. Please try again.';
+      return;
+    }
 
-  protected get email() {
-    return this.loginForm.get('email');
-  }
-
-  protected get password() {
-    return this.loginForm.get('password');
+    this.router.navigate(['/dashboard']);
   }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { WorkforceDataService } from '../workforce-data.service';
 
@@ -56,7 +57,7 @@ export class WorkforceHubComponent implements OnInit {
     },
   ];
 
-  constructor(private router: Router, private data: WorkforceDataService) {}
+  constructor(private router: Router, private data: WorkforceDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.workers$.subscribe(workers => {
@@ -71,5 +72,9 @@ export class WorkforceHubComponent implements OnInit {
 
   open(route: string) {
     this.router.navigate(['/workforce', route]);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

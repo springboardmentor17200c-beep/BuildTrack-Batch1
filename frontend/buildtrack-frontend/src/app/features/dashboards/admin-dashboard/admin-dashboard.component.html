@@ -1,0 +1,132 @@
+<div class="bt-page">
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Welcome back, {{ currentUser?.fullName || 'Administrator' }}</h1>
+      <p class="bt-subtitle">Company-wide overview — users, projects, budgets, and system activity.</p>
+    </div>
+    <div class="bt-actions">
+      <span class="bt-badge purple">{{ currentUser?.role }}</span>
+      <a class="bt-filter-btn" [routerLink]="['/profile']">Profile</a>
+    </div>
+  </div>
+
+  <div class="bt-stats-row">
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon purple">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ totalUsers }}</span>
+        <span class="bt-stat-label">Total Users</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ activeProjects }}</span>
+        <span class="bt-stat-label">Active Projects</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ budgetUsedPercent }}%</span>
+        <span class="bt-stat-label">Budget Used</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ avgUtilization }}%</span>
+        <span class="bt-stat-label">Avg. Resource Utilization</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;margin-bottom:20px;">
+    <div class="bt-panel">
+      <div class="bt-panel-header">
+        <div>
+          <h3 class="bt-panel-title">Project Monitoring</h3>
+          <span class="bt-panel-sub">Live status across all projects</span>
+        </div>
+        <a class="bt-filter-btn" [routerLink]="['/analytics/progress']">View All</a>
+      </div>
+      <div class="bt-table-wrap">
+        <table class="bt-table">
+          <thead><tr><th>Project</th><th>Status</th><th>Progress</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of projects">
+              <td class="bt-strong">{{ p.project }}</td>
+              <td><span class="bt-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span></td>
+              <td>
+                <div class="bt-progress">
+                  <div class="bt-progress-bar" style="width:120px;"><div class="bt-progress-fill blue" [style.width.%]="p.completionPercentage"></div></div>
+                  <span class="bt-progress-value">{{ p.completionPercentage }}%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bt-panel">
+      <div class="bt-panel-header">
+        <div>
+          <h3 class="bt-panel-title">User Management</h3>
+          <span class="bt-panel-sub">{{ totalUsers }} accounts</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div *ngFor="let r of roleCounts" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bt-border);">
+          <span class="bt-badge" [ngClass]="roleClass(r.role)">{{ r.role }}</span>
+          <span class="bt-strong">{{ r.count }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start;">
+    <div class="bt-panel">
+      <div class="bt-panel-header">
+        <div>
+          <h3 class="bt-panel-title">Reports</h3>
+          <span class="bt-panel-sub">Jump to detailed analytics</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/budget']">Budget Analytics</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/progress']">Project Progress</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/resources']">Resource Analytics</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/procurement']">Procurement Analytics</a>
+      </div>
+    </div>
+
+    <div class="bt-panel">
+      <div class="bt-panel-header">
+        <div>
+          <h3 class="bt-panel-title">Activity Monitoring</h3>
+          <span class="bt-panel-sub">Recent system activity</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div *ngFor="let a of activity" style="display:flex;gap:12px;align-items:flex-start;">
+          <div class="bt-stat-icon" [ngClass]="a.icon === 'project' ? 'blue' : a.icon === 'budget' ? 'orange' : a.icon === 'user' ? 'purple' : 'green'" style="width:34px;height:34px;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>
+          </div>
+          <div>
+            <div class="bt-strong" style="font-size:13.5px;">{{ a.text }}</div>
+            <div class="bt-muted">{{ a.time }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

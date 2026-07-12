@@ -1,0 +1,20 @@
+<div class="bt-auth-page">
+  <div class="bt-auth-card" style="text-align:center;">
+    <div class="bt-auth-logo" style="justify-content:center;">
+      <div class="bt-auth-logo-badge">BT</div>
+      <span class="bt-auth-logo-text">BuildTrack</span>
+    </div>
+
+    <h1 class="bt-auth-title">Access restricted</h1>
+    <p class="bt-auth-subtitle" *ngIf="auth.currentUser">
+      Your role (<strong>{{ auth.currentUser.role }}</strong>) doesn't have permission to view this page.
+    </p>
+    <p class="bt-auth-subtitle" *ngIf="!auth.currentUser">
+      You need to sign in to view this page.
+    </p>
+
+    <a class="bt-auth-submit" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;" [routerLink]="['/dashboard']">
+      Back to Dashboard
+    </a>
+  </div>
+</div>

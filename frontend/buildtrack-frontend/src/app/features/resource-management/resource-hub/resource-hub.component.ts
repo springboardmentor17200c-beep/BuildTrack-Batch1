@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ResourceDataService } from '../resource-data.service';
 
@@ -56,7 +57,7 @@ export class ResourceHubComponent implements OnInit {
     },
   ];
 
-  constructor(private router: Router, private data: ResourceDataService) {}
+  constructor(private router: Router, private data: ResourceDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.resources$.subscribe(resources => {
@@ -69,5 +70,9 @@ export class ResourceHubComponent implements OnInit {
 
   open(route: string) {
     this.router.navigate(['/resources', route]);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Expense, ExpenseCategory, ProjectBudget } from '../models/analytics.model';
 import { AnalyticsDataService } from '../analytics-data.service';
@@ -20,7 +21,7 @@ export class BudgetAnalyticsComponent implements OnInit {
   totalRemaining = 0;
   usedPercent = 0;
 
-  constructor(private data: AnalyticsDataService) {}
+  constructor(private data: AnalyticsDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.budgets$.subscribe(b => (this.budgets = b));
@@ -50,5 +51,9 @@ export class BudgetAnalyticsComponent implements OnInit {
 
   statusClass(status: ProjectBudget['budgetStatus']) {
     return { Planned: 'orange', Approved: 'blue', Closed: 'green' }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

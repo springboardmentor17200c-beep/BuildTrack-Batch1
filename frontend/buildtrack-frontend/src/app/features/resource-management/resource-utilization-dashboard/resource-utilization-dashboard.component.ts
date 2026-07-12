@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
@@ -28,7 +29,7 @@ export class ResourceUtilizationDashboardComponent implements OnInit {
   maintenanceCount = 0;
   avgUtilization = 0;
 
-  constructor(private data: ResourceDataService) {}
+  constructor(private data: ResourceDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.resources$.subscribe(r => {
@@ -64,5 +65,9 @@ export class ResourceUtilizationDashboardComponent implements OnInit {
         inUse: items.filter(r => r.currentStatus === 'Allocated').length,
       };
     }).sort((a, b) => b.avgUtilization - a.avgUtilization);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

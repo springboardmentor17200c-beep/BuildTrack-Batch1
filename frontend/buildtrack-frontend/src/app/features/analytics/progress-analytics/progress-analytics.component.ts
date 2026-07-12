@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProjectProgressSummary } from '../models/analytics.model';
 import { AnalyticsDataService } from '../analytics-data.service';
@@ -27,7 +28,7 @@ export class ProgressAnalyticsComponent implements OnInit {
   completedCount = 0;
   avgProgress = 0;
 
-  constructor(private data: AnalyticsDataService) {}
+  constructor(private data: AnalyticsDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.progress$.subscribe(rows => {
@@ -62,5 +63,9 @@ export class ProgressAnalyticsComponent implements OnInit {
 
   progressColor(pct: number) {
     return pct >= 90 ? 'green' : pct >= 50 ? 'blue' : 'orange';
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

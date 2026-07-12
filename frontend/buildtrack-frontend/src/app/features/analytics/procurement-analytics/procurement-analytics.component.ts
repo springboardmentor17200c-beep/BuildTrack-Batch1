@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PurchaseOrderSummary, VendorSummary } from '../models/analytics.model';
 import { AnalyticsDataService } from '../analytics-data.service';
@@ -21,7 +22,7 @@ export class ProcurementAnalyticsComponent implements OnInit {
   pendingInvoices = 0;
   activeVendors = 0;
 
-  constructor(private data: AnalyticsDataService) {}
+  constructor(private data: AnalyticsDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.purchaseOrders$.subscribe(orders => {
@@ -43,5 +44,9 @@ export class ProcurementAnalyticsComponent implements OnInit {
 
   maxOrderCount(): number {
     return Math.max(1, ...this.statusBreakdown.map(s => s.count));
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

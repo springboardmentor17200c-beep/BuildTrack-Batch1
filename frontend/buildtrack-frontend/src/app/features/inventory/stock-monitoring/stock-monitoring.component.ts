@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, MaterialCategory, StockStatus } from '../models/inventory.model';
@@ -23,7 +24,7 @@ export class StockMonitoringComponent implements OnInit {
   ];
   statuses: (StockStatus | 'All')[] = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
 
-  constructor(private data: InventoryDataService) {}
+  constructor(private data: InventoryDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.inventory$.subscribe(r => (this.allRecords = r));
@@ -48,5 +49,9 @@ export class StockMonitoringComponent implements OnInit {
   stockPercent(m: InventoryRecord): number {
     const pct = (m.availableQuantity / (m.minimumStockLevel * 2)) * 100;
     return Math.max(2, Math.min(100, Math.round(pct)));
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -30,7 +31,7 @@ export class ShiftSchedulingComponent implements OnInit {
   projectFilter: string = 'All';
   shiftTypeFilter: ShiftType | 'All' = 'All';
 
-  constructor(private data: WorkforceDataService, private fb: FormBuilder) {
+  constructor(private data: WorkforceDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       workerId: ['', Validators.required],
       project: ['', Validators.required],
@@ -91,5 +92,9 @@ export class ShiftSchedulingComponent implements OnInit {
 
   shiftClass(type: ShiftType) {
     return { Morning: 'blue', Evening: 'orange', Night: 'purple' }[type];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

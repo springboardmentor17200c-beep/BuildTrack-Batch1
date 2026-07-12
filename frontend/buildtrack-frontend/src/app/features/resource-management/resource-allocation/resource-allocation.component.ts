@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceAllocation } from '../models/resource.model';
@@ -19,7 +20,7 @@ export class ResourceAllocationComponent implements OnInit {
   showForm = false;
   form: FormGroup;
 
-  constructor(private data: ResourceDataService, private fb: FormBuilder) {
+  constructor(private data: ResourceDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       resourceId: ['', Validators.required],
       project: ['', Validators.required],
@@ -73,5 +74,9 @@ export class ResourceAllocationComponent implements OnInit {
 
   statusClass(status: ResourceAllocation['allocationStatus']) {
     return { Allocated: 'blue', Returned: 'gray', Overdue: 'red' }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

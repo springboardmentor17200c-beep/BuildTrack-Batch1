@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { InventoryDataService } from '../inventory-data.service';
 
@@ -57,7 +58,7 @@ export class InventoryHubComponent implements OnInit {
     },
   ];
 
-  constructor(private router: Router, private data: InventoryDataService) {}
+  constructor(private router: Router, private data: InventoryDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.data.inventory$.subscribe(records => {
@@ -74,5 +75,9 @@ export class InventoryHubComponent implements OnInit {
 
   open(route: string) {
     this.router.navigate(['/inventory', route]);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory } from '../../resource-management/models/resource.model';
 import { ResourceDataService } from '../../resource-management/resource-data.service';
@@ -33,7 +34,7 @@ export class ResourceAnalyticsComponent implements OnInit {
   maintenanceCount = 0;
   avgUtilization = 0;
 
-  constructor(private resourceData: ResourceDataService) {}
+  constructor(private resourceData: ResourceDataService, private location: Location) {}
 
   ngOnInit(): void {
     this.resourceData.resources$.subscribe(r => {
@@ -73,5 +74,9 @@ export class ResourceAnalyticsComponent implements OnInit {
 
   statusClass(status: Resource['currentStatus']) {
     return { Available: 'green', Allocated: 'blue', 'Under Maintenance': 'orange' }[status];
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }
