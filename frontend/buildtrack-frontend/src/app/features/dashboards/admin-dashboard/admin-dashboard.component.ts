@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser, RoleName } from '../../auth/models/auth.model';
 import { AnalyticsDataService } from '../../analytics/analytics-data.service';
@@ -21,7 +22,7 @@ interface ActivityItem {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AppSidebarComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css'],
 })
@@ -85,7 +86,7 @@ export class AdminDashboardComponent implements OnInit {
       'Site Engineer': 'orange',
       Contractor: 'green',
       Worker: 'gray',
-      Client: 'blue',
+     'Client / Owner': 'blue',
     }[role];
   }
 }

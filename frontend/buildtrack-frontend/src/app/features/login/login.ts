@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthDataService } from '../auth/auth-data.service';
+import { DASHBOARD_ROUTE_BY_ROLE } from '../auth/models/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -16,9 +17,14 @@ export class Login {
   error = '';
   submitting = false;
 
-  constructor(private fb: FormBuilder, private auth: AuthDataService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private auth: AuthDataService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', Validators.required],
       password: ['', Validators.required],
     });
   }
@@ -31,14 +37,18 @@ export class Login {
     }
 
     this.submitting = true;
-    const result = this.auth.login(this.form.value);
-    this.submitting = false;
-
-    if (!result.success) {
-      this.error = result.error || 'Login failed. Please try again.';
-      return;
-    }
-
-    this.router.navigate(['/dashboard']);
+    this.auth.login(this.form.value).subscribe({
+      next: user => {
+        this.submitting = false;
+        this.cdr.detectChanges();
+        const route = DASHBOARD_ROUTE_BY_ROLE[user.role] || '/dashboard';
+        this.router.navigate([route]);
+      },
+      error: err => {
+        this.submitting = false;
+        this.error = err.message || 'Login failed. Please try again.';
+        this.cdr.detectChanges();
+      },
+    });
   }
 }

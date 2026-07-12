@@ -29,15 +29,33 @@ export class Register {
     this.roles = this.auth.roles;
     this.form = this.fb.group(
       {
-        fullName: ['', Validators.required],
+        username: ['', [Validators.required, Validators.minLength(3)]],
+        firstName: ['', Validators.required],
+        lastName: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         phoneNumber: ['', Validators.required],
         role: ['', Validators.required],
-        password: ['', [Validators.required, Validators.minLength(8)]],
+        companyName: [''],
+        taxId: [''],
+        employeeId: [''],
+        skillsOrTrade: [''],
+        password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', Validators.required],
       },
       { validators: passwordsMatch }
     );
+  }
+
+  get selectedRole(): string {
+    return this.form.get('role')?.value || '';
+  }
+
+  get showCompanyFields(): boolean {
+    return this.selectedRole === 'Contractor' || this.selectedRole === 'Client / Owner';
+  }
+
+  get showEmployeeFields(): boolean {
+    return this.selectedRole === 'Worker' || this.selectedRole === 'Site Engineer';
   }
 
   submit() {
@@ -49,16 +67,31 @@ export class Register {
     }
 
     this.submitting = true;
-    const { fullName, email, phoneNumber, role, password } = this.form.value;
-    const result = this.auth.register({ fullName, email, phoneNumber, role, password });
-    this.submitting = false;
-
-    if (!result.success) {
-      this.error = result.error || 'Registration failed. Please try again.';
-      return;
-    }
-
-    this.success = true;
-    setTimeout(() => this.router.navigate(['/login']), 1200);
+    const v = this.form.value;
+    this.auth
+      .register({
+        username: v.username,
+        email: v.email,
+        password: v.password,
+        firstName: v.firstName,
+        lastName: v.lastName,
+        phoneNumber: v.phoneNumber,
+        role: v.role,
+        companyName: v.companyName,
+        taxId: v.taxId,
+        employeeId: v.employeeId,
+        skillsOrTrade: v.skillsOrTrade,
+      })
+      .subscribe({
+        next: () => {
+          this.submitting = false;
+          this.success = true;
+          setTimeout(() => this.router.navigate(['/login']), 1200);
+        },
+        error: err => {
+          this.submitting = false;
+          this.error = err.message || 'Registration failed. Please try again.';
+        },
+      });
   }
 }

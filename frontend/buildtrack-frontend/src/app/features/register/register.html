@@ -13,8 +13,18 @@
 
     <form class="bt-auth-form" [formGroup]="form" (ngSubmit)="submit()" *ngIf="!success">
       <label class="bt-auth-field">
-        <span>Full Name</span>
-        <input type="text" formControlName="fullName" placeholder="e.g. Priya Menon" />
+        <span>Username</span>
+        <input type="text" formControlName="username" placeholder="e.g. priyamenon" autocomplete="username" />
+      </label>
+
+      <label class="bt-auth-field">
+        <span>First Name</span>
+        <input type="text" formControlName="firstName" placeholder="e.g. Priya" />
+      </label>
+
+      <label class="bt-auth-field">
+        <span>Last Name</span>
+        <input type="text" formControlName="lastName" placeholder="e.g. Menon" />
       </label>
 
       <label class="bt-auth-field">
@@ -35,9 +45,31 @@
         </select>
       </label>
 
+      <ng-container *ngIf="showCompanyFields">
+        <label class="bt-auth-field">
+          <span>Company Name</span>
+          <input type="text" formControlName="companyName" placeholder="e.g. Suresh Electricals" />
+        </label>
+        <label class="bt-auth-field">
+          <span>Tax ID</span>
+          <input type="text" formControlName="taxId" placeholder="GSTIN / Tax ID" />
+        </label>
+      </ng-container>
+
+      <ng-container *ngIf="showEmployeeFields">
+        <label class="bt-auth-field">
+          <span>Employee ID</span>
+          <input type="text" formControlName="employeeId" placeholder="e.g. EMP-1042" />
+        </label>
+        <label class="bt-auth-field">
+          <span>Skills / Trade</span>
+          <input type="text" formControlName="skillsOrTrade" placeholder="e.g. Electrician, Mason" />
+        </label>
+      </ng-container>
+
       <label class="bt-auth-field">
         <span>Password</span>
-        <input type="password" formControlName="password" placeholder="At least 8 characters" autocomplete="new-password" />
+        <input type="password" formControlName="password" placeholder="At least 6 characters" autocomplete="new-password" />
       </label>
 
       <label class="bt-auth-field">

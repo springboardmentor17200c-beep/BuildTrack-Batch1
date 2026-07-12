@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser } from '../../auth/models/auth.model';
 import { AnalyticsDataService } from '../../analytics/analytics-data.service';
@@ -14,7 +15,7 @@ interface UpdateItem {
 @Component({
   selector: 'app-client-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AppSidebarComponent],
   templateUrl: './client-dashboard.component.html',
   styleUrls: ['./client-dashboard.component.css'],
 })

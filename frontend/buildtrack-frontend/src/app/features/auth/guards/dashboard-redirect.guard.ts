@@ -20,7 +20,7 @@ const ROLE_DASHBOARD_PATH: Partial<Record<RoleName, string>> = {
   'Project Manager': 'pm',
   'Site Engineer': 'site-engineer',
   'Contractor': 'contractor',
-  'Client': 'client',
+  'Client / Owner': 'client',
   // 'Worker' has no dashboard route yet -- falls back to /unauthorized below.
 };
 

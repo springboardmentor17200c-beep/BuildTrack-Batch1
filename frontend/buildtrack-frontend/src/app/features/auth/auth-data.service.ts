@@ -1,32 +1,56 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import {
-  AppUser,
-  ChangePasswordPayload,
-  LoginPayload,
-  ProfileUpdatePayload,
-  RegisterPayload,
-  RoleName,
-} from './models/auth.model';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, map, switchMap, tap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { AppUser, ChangePasswordPayload, LoginPayload, ProfileUpdatePayload, RegisterPayload, RoleName } from './models/auth.model';
 
-// NOTE: mock/in-memory data for now. Your teammate's existing backend
-// already sends a real OTP to email (see the "send otp to mail" commit) —
-// once that's wired up, replace the methods below with HttpClient calls:
-//   POST /api/auth/login          -> JWT
-//   POST /api/auth/register       -> creates a `users` row
-//   POST /api/auth/request-otp    -> sends OTP to email
-//   POST /api/auth/reset-password -> verifies OTP, updates password_hash
-//   PATCH /api/users/:id          -> profile update
-//   POST /api/auth/change-password
-// The mock OTP below is always '123456' so the flow can be demoed without
-// a live email service.
+// Real backend integration for login/register/forgot-password/verify-otp/
+// reset-password/users-me — all hit FastAPI at environment.apiUrl.
 //
-// Session state (currentUser$) is persisted to localStorage so a page
-// refresh doesn't log the user out — swap for real JWT storage/refresh
-// logic once the backend is connected.
+// getAllUsers() / updateProfile() / changePassword() stay as local/mock
+// logic below because the backend doesn't have those endpoints yet
+// (no GET /users list, no PATCH /users/:id, no /change-password route).
+// Swap these for real HttpClient calls once your teammate adds them.
 
-const MOCK_OTP = '123456';
 const SESSION_KEY = 'buildtrack_current_user';
+const TOKEN_KEY = 'buildtrack_access_token';
+
+interface BackendUserProfile {
+  user_id: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  role: RoleName;
+  company_name?: string;
+  tax_id?: string;
+  employee_id?: string;
+  skills_or_trade?: string;
+  assigned_projects: string[];
+  is_active: boolean;
+  created_at?: string;
+}
+
+function toAppUser(u: BackendUserProfile): AppUser {
+  return {
+    userId: u.user_id,
+    username: u.username,
+    fullName: `${u.first_name} ${u.last_name}`.trim(),
+    email: u.email,
+    firstName: u.first_name,
+    lastName: u.last_name,
+    phoneNumber: u.phone_number,
+    role: u.role,
+    companyName: u.company_name,
+    taxId: u.tax_id,
+    employeeId: u.employee_id,
+    skillsOrTrade: u.skills_or_trade,
+    assignedProjects: u.assigned_projects ?? [],
+    isActive: u.is_active,
+    createdAt: u.created_at,
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthDataService {
@@ -36,28 +60,22 @@ export class AuthDataService {
     'Site Engineer',
     'Contractor',
     'Worker',
-    'Client',
+    'Client / Owner',
   ];
 
-  private users: AppUser[] = [
-    { userId: 'U-1', fullName: 'Arjun Rao', email: 'arjun.rao@buildtrack.com', phoneNumber: '+91 98450 00011', role: 'Administrator', isActive: true },
-    { userId: 'U-2', fullName: 'Priya Menon', email: 'priya.menon@buildtrack.com', phoneNumber: '+91 98450 00022', role: 'Project Manager', isActive: true },
-    { userId: 'U-3', fullName: 'Karthik Iyer', email: 'karthik.iyer@buildtrack.com', phoneNumber: '+91 98450 00033', role: 'Site Engineer', isActive: true },
-    { userId: 'U-4', fullName: 'Suresh Electricals', email: 'suresh.contractor@buildtrack.com', phoneNumber: '+91 98450 00044', role: 'Contractor', isActive: true },
-    { userId: 'U-5', fullName: 'Rohan Desai', email: 'rohan.client@buildtrack.com', phoneNumber: '+91 98450 00055', role: 'Client', isActive: true },
-    { userId: 'U-6', fullName: 'Mohan Das', email: 'mohan.worker@buildtrack.com', phoneNumber: '+91 98450 00066', role: 'Worker', isActive: true },
-  ];
+  private apiUrl = environment.apiUrl;
 
   private currentUser$$ = new BehaviorSubject<AppUser | null>(this.loadSession());
   currentUser$ = this.currentUser$$.asObservable();
+
+  constructor(private http: HttpClient) {}
 
   get currentUser(): AppUser | null {
     return this.currentUser$$.value;
   }
 
-  /** Read-only copy of all users — used by the Admin Dashboard's User Management panel. */
-  getAllUsers(): AppUser[] {
-    return [...this.users];
+  get token(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
   }
 
   private loadSession(): AppUser | null {
@@ -69,7 +87,7 @@ export class AuthDataService {
     }
   }
 
-  private setCurrentUser(user: AppUser | null) {
+  private setSession(user: AppUser | null) {
     this.currentUser$$.next(user);
     if (user) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(user));
@@ -78,68 +96,131 @@ export class AuthDataService {
     }
   }
 
-  /** Mock login check — any of the seeded users above, with password "password123". */
-  login(payload: LoginPayload): { success: boolean; error?: string; user?: AppUser } {
-    const user = this.users.find(u => u.email.toLowerCase() === payload.email.toLowerCase());
-    if (!user) return { success: false, error: 'No account found with this email.' };
-    if (!user.isActive) return { success: false, error: 'This account has been deactivated.' };
-    if (payload.password !== 'password123') return { success: false, error: 'Incorrect password.' };
+  private authHeaders(): HttpHeaders {
+    return new HttpHeaders({ Authorization: `Bearer ${this.token}` });
+  }
 
-    this.setCurrentUser(user);
-    return { success: true, user };
+  private handleError = (err: HttpErrorResponse) => {
+    const detail = err.error?.detail;
+    const message = typeof detail === 'string' ? detail : 'Something went wrong. Please try again.';
+    return throwError(() => new Error(message));
+  };
+
+  /** Real login — backend expects OAuth2 form fields (username + password), not JSON. */
+  login(payload: LoginPayload): Observable<AppUser> {
+    const body = new URLSearchParams();
+    body.set('grant_type', 'password');
+    body.set('username', payload.username);
+    body.set('password', payload.password);
+
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+
+    return this.http
+      .post<{ access_token: string; token_type: string }>(`${this.apiUrl}/login`, body.toString(), { headers })
+      .pipe(
+        tap(res => localStorage.setItem(TOKEN_KEY, res.access_token)),
+        switchMap(() => this.fetchCurrentUser()),
+        catchError(this.handleError)
+      );
+  }
+
+  /** GET /users/me — used right after login to know the role for dashboard routing. */
+  fetchCurrentUser(): Observable<AppUser> {
+    return this.http.get<BackendUserProfile>(`${this.apiUrl}/users/me`, { headers: this.authHeaders() }).pipe(
+      map(toAppUser),
+      tap(user => this.setSession(user)),
+      catchError(this.handleError)
+    );
   }
 
   logout() {
-    this.setCurrentUser(null);
+    this.setSession(null);
+    localStorage.removeItem(TOKEN_KEY);
   }
 
-  register(payload: RegisterPayload): { success: boolean; error?: string } {
-    const exists = this.users.some(u => u.email.toLowerCase() === payload.email.toLowerCase());
-    if (exists) return { success: false, error: 'An account with this email already exists.' };
-
-    this.users.push({
-      userId: 'U-' + Math.floor(100 + Math.random() * 900),
-      fullName: payload.fullName,
+  register(payload: RegisterPayload): Observable<AppUser> {
+    const body = {
+      username: payload.username,
       email: payload.email,
-      phoneNumber: payload.phoneNumber,
+      password: payload.password,
+      first_name: payload.firstName,
+      last_name: payload.lastName,
+      phone_number: payload.phoneNumber,
       role: payload.role,
-      isActive: true,
-    });
-    return { success: true };
+      company_name: payload.companyName || null,
+      tax_id: payload.taxId || null,
+      employee_id: payload.employeeId || null,
+      skills_or_trade: payload.skillsOrTrade || null,
+    };
+
+    return this.http
+      .post<BackendUserProfile>(`${this.apiUrl}/register`, body)
+      .pipe(map(toAppUser), catchError(this.handleError));
   }
 
-  /** Step 1 of password reset — pretend an OTP was emailed. */
-  requestOtp(email: string): { success: boolean; error?: string } {
-    const exists = this.users.some(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!exists) return { success: false, error: 'No account found with this email.' };
-    return { success: true };
+  /** Step 1 — request an OTP be emailed. */
+  requestOtp(email: string): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email })
+      .pipe(catchError(this.handleError));
   }
 
-  /** Step 2 — verify the OTP and "update" the password. */
-  confirmReset(email: string, otp: string, newPassword: string): { success: boolean; error?: string } {
-    if (otp !== MOCK_OTP) return { success: false, error: 'Invalid OTP. Please try again.' };
-    if (newPassword.length < 8) return { success: false, error: 'Password must be at least 8 characters.' };
-    return { success: true };
+  /** Step 2 — verify the OTP, returns a short-lived verification_token. */
+  verifyOtp(email: string, otpCode: string): Observable<{ verification_token: string }> {
+    return this.http
+      .post<{ verification_token: string }>(`${this.apiUrl}/verify-otp`, { email, otp_code: otpCode })
+      .pipe(catchError(this.handleError));
   }
 
+  /** Step 3 — reset the password using the verification_token from step 2. */
+  resetPassword(email: string, verificationToken: string, newPassword: string): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(`${this.apiUrl}/reset-password`, {
+        email,
+        verification_token: verificationToken,
+        new_password: newPassword,
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  // ---------------------------------------------------------------------
+  // MOCK / LOCAL ONLY — no matching backend endpoint exists yet.
+  // Kept so Admin Dashboard, Profile page, etc. keep compiling and working
+  // with placeholder behavior. Replace with real HttpClient calls once
+  // your teammate adds: GET /users, PATCH /users/:id, POST /change-password
+  // ---------------------------------------------------------------------
+
+  private mockUsers: AppUser[] = [];
+
+  /** Placeholder — backend has no GET /users list endpoint yet. */
+  getAllUsers(): AppUser[] {
+    const current = this.currentUser;
+    return current ? [current, ...this.mockUsers] : [...this.mockUsers];
+  }
+
+  /** Placeholder — backend has no PATCH /users/:id endpoint yet. */
   updateProfile(userId: string, updates: ProfileUpdatePayload): { success: boolean; error?: string } {
-    const index = this.users.findIndex(u => u.userId === userId);
-    if (index === -1) return { success: false, error: 'User not found.' };
-
-    this.users[index] = { ...this.users[index], ...updates };
-    if (this.currentUser?.userId === userId) {
-      this.setCurrentUser(this.users[index]);
+    if (!this.currentUser || this.currentUser.userId !== userId) {
+      return { success: false, error: 'User not found.' };
     }
+    const [firstName, ...rest] = updates.fullName.trim().split(' ');
+    const updated: AppUser = {
+      ...this.currentUser,
+      fullName: updates.fullName,
+      firstName: firstName || this.currentUser.firstName,
+      lastName: rest.join(' ') || this.currentUser.lastName,
+      phoneNumber: updates.phoneNumber,
+    };
+    this.setSession(updated);
     return { success: true };
   }
 
+  /** Placeholder — backend has no /change-password endpoint yet. */
   changePassword(payload: ChangePasswordPayload): { success: boolean; error?: string } {
-    if (payload.currentPassword !== 'password123') {
-      return { success: false, error: 'Current password is incorrect.' };
+    if (payload.newPassword.length < 6) {
+      return { success: false, error: 'New password must be at least 6 characters.' };
     }
-    if (payload.newPassword.length < 8) {
-      return { success: false, error: 'New password must be at least 8 characters.' };
-    }
+    // No real verification possible without a backend endpoint — optimistic success.
     return { success: true };
   }
 }

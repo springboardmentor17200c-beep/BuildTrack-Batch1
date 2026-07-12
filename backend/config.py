@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     otp_expiration_minutes: int = 5
 
     # Email / SendGrid settings (used for password reset emails)
-    sendgrid_api_key: str
-    mail_from_email: str
+    sendgrid_api_key: str = "dummy-key-for-local-dev"
+    mail_from_email: str = "noreply@buildtrack.local"
 
 
 settings = Settings()

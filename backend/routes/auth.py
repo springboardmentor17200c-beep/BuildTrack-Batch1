@@ -183,9 +183,14 @@ def register(payload: RegistrationRequest):
 @router.get("/users/me")
 def read_users_me(
     current_user: Annotated[dict, Depends(get_current_user)],
-) -> dict[str, str]:
+) -> dict:
     return {
+        "user_id": current_user.get("user_id"),
         "username": current_user["username"],
-        "full_name": current_user["full_name"],
         "email": current_user["email"],
+        "first_name": current_user.get("first_name", ""),
+        "last_name": current_user.get("last_name", ""),
+        "phone_number": current_user.get("phone_number", ""),
+        "role": current_user.get("role", ""),
+        "is_active": current_user.get("is_active", True),
     }

@@ -1,5 +1,5 @@
 // Shared types for authentication screens.
-// Field names mirror the BuildTrack database schema: `users`, `roles`.
+// Field names mirror the real FastAPI backend (routes/auth.py, models.py).
 
 export type RoleName =
   | 'Administrator'
@@ -7,31 +7,45 @@ export type RoleName =
   | 'Site Engineer'
   | 'Contractor'
   | 'Worker'
-  | 'Client';
+  | 'Client / Owner';
 
-// Maps to the `users` table. password is never stored/read back in plain
-// text in a real system — password_hash only. Kept here only so the mock
-// service can "check" a login without a real backend.
-export interface AppUser {
-  userId: string;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  role: RoleName;
-  isActive: boolean;
-}
+  export interface AppUser {
+    userId: string;
+    username: string;
+    fullName: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    role: RoleName;
+    companyName?: string;
+    taxId?: string;
+    employeeId?: string;
+    skillsOrTrade?: string;
+    assignedProjects: string[];
+    isActive: boolean;
+    createdAt?: string;
+  }
 
+// POST /login expects OAuth2 form fields: username + password (not email).
 export interface LoginPayload {
-  email: string;
+  username: string;
   password: string;
 }
 
+// POST /register — matches RegistrationRequest in models.py exactly.
 export interface RegisterPayload {
-  fullName: string;
+  username: string;
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
   role: RoleName;
+  companyName?: string;
+  taxId?: string;
+  employeeId?: string;
+  skillsOrTrade?: string;
 }
 
 export interface ProfileUpdatePayload {
@@ -45,11 +59,8 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
-// Which roles can access which modules. Adjust freely as your team firms
-// up the real access rules — this is a starting point based on how the
-// SRS describes each role's responsibilities (e.g. Workers and Clients
-// aren't described as managing resources/inventory/procurement, so
-// they're left out of those modules here).
+// Which roles can access which modules. Kept from the earlier Contractor
+// bug fix — Contractor is included in inventory/workforce access.
 export const MODULE_ACCESS: Record<string, RoleName[]> = {
   resources: ['Administrator', 'Project Manager', 'Site Engineer'],
   inventory: ['Administrator', 'Project Manager', 'Site Engineer', 'Contractor'],
@@ -59,16 +70,15 @@ export const MODULE_ACCESS: Record<string, RoleName[]> = {
   'dashboard-pm': ['Project Manager'],
   'dashboard-site-engineer': ['Site Engineer'],
   'dashboard-contractor': ['Contractor'],
-  'dashboard-client': ['Client'],
+  'dashboard-client': ['Client / Owner'],
 };
 
-// Maps each role to its dashboard route — used right after login to send
-// someone to the correct dashboard automatically instead of a generic one.
+// Maps each role to its dashboard route — used right after login.
 export const DASHBOARD_ROUTE_BY_ROLE: Record<RoleName, string> = {
   Administrator: '/dashboard/admin',
   'Project Manager': '/dashboard/pm',
   'Site Engineer': '/dashboard/site-engineer',
   Contractor: '/dashboard/contractor',
   Worker: '/dashboard/site-engineer',
-  Client: '/dashboard/client',
+  'Client / Owner': '/dashboard/client',
 };

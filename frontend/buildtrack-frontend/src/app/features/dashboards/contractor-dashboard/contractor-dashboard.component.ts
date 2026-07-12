@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser } from '../../auth/models/auth.model';
 import { WorkforceDataService } from '../../workforce/workforce-data.service';
@@ -13,7 +14,7 @@ import { MaterialRequest } from '../../inventory/models/inventory.model';
 @Component({
   selector: 'app-contractor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AppSidebarComponent],
   templateUrl: './contractor-dashboard.component.html',
   styleUrls: ['./contractor-dashboard.component.css'],
 })

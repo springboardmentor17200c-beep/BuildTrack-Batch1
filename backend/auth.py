@@ -17,9 +17,11 @@ FAKE_USER_DB = {
     "demo": {
         "username": "demo",
         "password": "secret123",
-        "full_name": "Demo User",
+        "first_name": "Demo",
+        "last_name": "User",
         "email": "demo@example.com",
         "phone_number": "+15550000001",
+        "role": "Administrator",
     }
 }
 
