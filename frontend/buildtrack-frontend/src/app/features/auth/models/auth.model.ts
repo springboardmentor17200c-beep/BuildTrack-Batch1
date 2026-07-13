@@ -66,6 +66,7 @@ export const MODULE_ACCESS: Record<string, RoleName[]> = {
   inventory: ['Administrator', 'Project Manager', 'Site Engineer', 'Contractor'],
   workforce: ['Administrator', 'Project Manager', 'Site Engineer', 'Contractor'],
   analytics: ['Administrator', 'Project Manager'],
+  projects: ['Administrator', 'Project Manager', 'Site Engineer', 'Contractor'],
   'dashboard-admin': ['Administrator'],
   'dashboard-pm': ['Project Manager'],
   'dashboard-site-engineer': ['Site Engineer'],

@@ -819,4 +819,298 @@
     .bt-sidebar-link { justify-content: center; padding: 12px; }
     .bt-sidebar-user { justify-content: center; margin-bottom: 0; }
   }
+   
+  /* ==========================================================================
+   Dark mode toggle switch (sidebar footer)
+   ========================================================================== */
+
+.bt-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--bt-border);
+  border-radius: 10px;
+  padding: 9px 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.bt-theme-toggle:hover { background: #f5f6fa; }
+
+.bt-theme-toggle-track {
+  width: 34px;
+  height: 19px;
+  border-radius: 999px;
+  background: #d8dce6;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.25s ease;
+}
+.bt-theme-toggle-track.on { background: var(--bt-blue); }
+
+.bt-theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease;
+}
+.bt-theme-toggle-track.on .bt-theme-toggle-thumb {
+  transform: translateX(15px);
+  color: var(--bt-blue);
+}
+
+.bt-theme-toggle-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--bt-muted);
+}
+
+/* ==========================================================================
+   DARK MODE — applied via body.bt-dark (set by ThemeService)
+   ========================================================================== */
+
+body.bt-dark {
+  --bt-text: #e5e7eb;
+  --bt-muted: #9aa1b1;
+  --bt-border: #2a2f3d;
+  --bt-blue-soft: rgba(59, 130, 246, 0.16);
+  --bt-green-soft: rgba(16, 185, 129, 0.14);
+  --bt-red-soft: rgba(239, 68, 68, 0.14);
+  color-scheme: dark;
+}
+
+/* Page backgrounds */
+body.bt-dark .bt-page,
+body.bt-dark .bt-settings-page,
+body.bt-dark .bt-shell,
+body.bt-dark .bt-auth-page {
+  background: linear-gradient(180deg, #14161f 0%, #0e1017 100%);
+}
+
+/* Glass panels / cards */
+body.bt-dark .bt-panel,
+body.bt-dark .bt-stat-card,
+body.bt-dark .bt-form-card,
+body.bt-dark .bt-option-card,
+body.bt-dark .bt-settings-cover-content,
+body.bt-dark .bt-settings-nav,
+body.bt-dark .bt-settings-content,
+body.bt-dark .bt-auth-card,
+body.bt-dark .bt-sidebar {
+  background: #1b1e29;
+  border-color: #2a2f3d;
+}
+
+body.bt-dark .bt-panel::after,
+body.bt-dark .bt-stat-card::after,
+body.bt-dark .bt-option-card::after {
+  background: radial-gradient(120% 90% at 8% 0%, rgba(255,255,255,0.04), transparent 55%);
+}
+
+/* Sidebar */
+body.bt-dark .bt-sidebar-link:hover { background: #242835; }
+body.bt-dark .bt-sidebar-link.active { background: rgba(59,130,246,0.16); }
+body.bt-dark .bt-sidebar-footer { border-top-color: #2a2f3d; }
+body.bt-dark .bt-sidebar-logout { border-color: #2a2f3d; color: var(--bt-muted); }
+body.bt-dark .bt-theme-toggle:hover { background: #242835; }
+
+/* Table */
+body.bt-dark .bt-table th,
+body.bt-dark .bt-table td { border-bottom-color: #2a2f3d; }
+body.bt-dark .bt-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* Settings / profile page specifics */
+body.bt-dark .bt-settings-section-header,
+body.bt-dark .bt-settings-actions { border-color: #2a2f3d; }
+body.bt-dark .bt-settings-nav-item:hover { background: #242835; }
+body.bt-dark .bt-input-icon-wrap input,
+body.bt-dark .bt-form-grid input,
+body.bt-dark .bt-form-grid select,
+body.bt-dark .bt-auth-field input,
+body.bt-dark .bt-auth-field select {
+  background: #12141c;
+  border-color: #2a2f3d;
+  color: var(--bt-text);
+}
+body.bt-dark .bt-input-icon-wrap input:focus,
+body.bt-dark .bt-form-grid input:focus,
+body.bt-dark .bt-auth-field input:focus {
+  background: #181b25;
+}
+body.bt-dark .bt-settings-signout {
+  background: #1b1e29;
+  border-color: #2a2f3d;
+}
+
+/* Cover banner keeps its vivid gradient — looks great in dark mode as-is */
+
+/* Filter pills / search */
+body.bt-dark .bt-filter-select,
+body.bt-dark .bt-filter-btn,
+body.bt-dark .bt-search {
+  background: #1b1e29;
+  border-color: #2a2f3d;
+}
+body.bt-dark .bt-filter-menu {
+  background: #1b1e29;
+  border-color: #2a2f3d;
+}
+body.bt-dark .bt-filter-option:hover { background: #242835; }
+
+body.bt-dark .bt-empty { color: var(--bt-muted); }
+
+/* ==========================================================================
+   Dark mode — additional fixes (progress bars, top-bar buttons, contrast)
+   ========================================================================== */
+
+/* Progress bar tracks were designed for light backgrounds — fix for dark */
+body.bt-dark .bt-progress-bar {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #2a2f3d;
+}
+
+/* Top-bar action buttons/links (e.g. "Profile") weren't picking up dark
+   styling due to specificity — force it explicitly here. */
+body.bt-dark .bt-actions .bt-filter-btn,
+body.bt-dark a.bt-filter-btn {
+  background: #232734;
+  border: 1px solid #2f3444;
+  color: #e5e7eb;
+}
+body.bt-dark .bt-actions .bt-filter-btn:hover,
+body.bt-dark a.bt-filter-btn:hover {
+  background: #2a2f3d;
+}
+
+/* Stat card icons keep their color gradients (fine as-is), but stat card
+   surface itself needs a touch more contrast against the page background */
+body.bt-dark .bt-stat-card {
+  background: #1e212d;
+  border-color: #2f3444;
+}
+
+/* Panel titles/headers need slightly stronger contrast in dark mode */
+body.bt-dark .bt-panel-title,
+body.bt-dark .bt-title {
+  color: #f3f4f6;
+}
+
+/* Badges — boost text contrast against dark backgrounds */
+body.bt-dark .bt-badge.blue { background: rgba(59, 130, 246, 0.22); color: #93c5fd; }
+body.bt-dark .bt-badge.green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+body.bt-dark .bt-badge.purple { background: rgba(139, 92, 246, 0.22); color: #c4b5fd; }
+body.bt-dark .bt-badge.orange { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
+body.bt-dark .bt-badge.red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+body.bt-dark .bt-badge.gray { background: rgba(156, 163, 175, 0.16); color: #cbd5e1; }
+
+/* ==========================================================================
+   Dark mode — fix white gap at bottom of page (html/body background)
+   ========================================================================== */
+
+   body.bt-dark {
+    background: #0e1017;
+  }
   
+  html:has(body.bt-dark) {
+    background: #0e1017;
+  }
+  /* ==========================================================================
+   Prevent horizontal scrollbar — some content was overflowing viewport width
+   ========================================================================== */
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.bt-shell {
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Language switcher (sidebar footer)
+   ========================================================================== */
+
+   .bt-lang-wrap {
+    position: relative;
+    margin-bottom: 8px;
+  }
+  
+  .bt-lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: none;
+    border: 1px solid var(--bt-border);
+    border-radius: 10px;
+    padding: 9px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--bt-muted);
+    transition: background 0.2s ease;
+  }
+  .bt-lang-btn:hover { background: #f5f6fa; }
+  .bt-lang-btn svg { flex-shrink: 0; }
+  .bt-lang-btn span:nth-child(2) { flex: 1; text-align: left; }
+  .bt-lang-current {
+    background: var(--bt-blue-soft);
+    color: var(--bt-blue);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+  }
+  
+  .bt-lang-menu {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background: #fff;
+    border: 1px solid var(--bt-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(15,30,60,0.16);
+    padding: 6px;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .bt-lang-option {
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--bt-text);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .bt-lang-option:hover { background: #f5f6fa; }
+  .bt-lang-option.active { background: var(--bt-blue-soft); color: var(--bt-blue); }
+  
+  body.bt-dark .bt-lang-btn { border-color: #2a2f3d; }
+  body.bt-dark .bt-lang-btn:hover { background: #242835; }
+  body.bt-dark .bt-lang-menu { background: #1b1e29; border-color: #2a2f3d; }
+  body.bt-dark .bt-lang-option:hover { background: #242835; }

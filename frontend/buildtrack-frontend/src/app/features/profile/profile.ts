@@ -29,6 +29,8 @@ export class Profile implements OnInit {
   passwordError = '';
   passwordSuccess = false;
 
+  activeSection: 'details' | 'security' = 'details';
+
   constructor(private fb: FormBuilder, private auth: AuthDataService, private router: Router, private location: Location) {
     this.profileForm = this.fb.group({
       fullName: ['', Validators.required],

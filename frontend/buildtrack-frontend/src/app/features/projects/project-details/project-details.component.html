@@ -1,0 +1,119 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+    <div class="bt-page" *ngIf="project">
+      <button class="bt-back-btn" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+        </svg>
+        Back
+      </button>
+
+      <div class="bt-topbar">
+        <div>
+          <h1 class="bt-title">{{ project.projectName }}</h1>
+          <p class="bt-subtitle">{{ project.location }} · {{ project.category }}</p>
+        </div>
+        <div class="bt-actions">
+          <span class="bt-badge" [ngClass]="statusClass(project.status)">{{ project.status }}</span>
+        </div>
+      </div>
+
+      <div class="bt-stats-row">
+        <div class="bt-stat-card">
+          <div class="bt-stat-icon blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
+          </div>
+          <div class="bt-stat-text">
+            <span class="bt-stat-value">{{ progress }}%</span>
+            <span class="bt-stat-label">Overall Progress</span>
+          </div>
+        </div>
+        <div class="bt-stat-card">
+          <div class="bt-stat-icon purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"></path><path d="M4 5h13l-2 4 2 4H4"></path></svg>
+          </div>
+          <div class="bt-stat-text">
+            <span class="bt-stat-value">{{ milestones.length }}</span>
+            <span class="bt-stat-label">Milestones</span>
+          </div>
+        </div>
+        <div class="bt-stat-card">
+          <div class="bt-stat-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M3 9h18"></path></svg>
+          </div>
+          <div class="bt-stat-text">
+            <span class="bt-stat-value">{{ project.expectedEndDate }}</span>
+            <span class="bt-stat-label">Expected End Date</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-bottom:20px;">
+        <div class="bt-panel">
+          <div class="bt-panel-header">
+            <div>
+              <h3 class="bt-panel-title">Project Details</h3>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Manager</span><span class="bt-strong">{{ project.manager }}</span></div>
+            <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Client</span><span class="bt-strong">{{ project.client }}</span></div>
+            <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Start Date</span><span class="bt-strong">{{ project.startDate }}</span></div>
+            <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Expected End</span><span class="bt-strong">{{ project.expectedEndDate }}</span></div>
+            <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Actual End</span><span class="bt-strong">{{ project.actualEndDate || '—' }}</span></div>
+          </div>
+          <p class="bt-muted" style="margin-top:14px;line-height:1.6;">{{ project.description }}</p>
+        </div>
+
+        <div class="bt-panel">
+          <div class="bt-panel-header">
+            <div>
+              <h3 class="bt-panel-title">Update Status</h3>
+              <span class="bt-panel-sub">Changing to "Completed" sets the closure date</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button
+              *ngFor="let s of statusOptions"
+              class="bt-filter-btn"
+              [class.active]="project.status === s"
+              (click)="setStatus(s)">
+              {{ s }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bt-panel">
+        <div class="bt-panel-header">
+          <div>
+            <h3 class="bt-panel-title">Milestones</h3>
+            <span class="bt-panel-sub">{{ milestones.length }} for this project</span>
+          </div>
+          <a class="bt-filter-btn" [routerLink]="['/projects/milestones']">Manage Milestones</a>
+        </div>
+        <div class="bt-table-wrap">
+          <table class="bt-table">
+            <thead><tr><th>Milestone</th><th>Due Date</th><th>Completed</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let m of milestones">
+                <td class="bt-strong">{{ m.milestoneName }}</td>
+                <td class="bt-muted">{{ m.dueDate }}</td>
+                <td class="bt-muted">{{ m.completionDate || '—' }}</td>
+                <td><span class="bt-badge" [ngClass]="milestoneStatusClass(m.status)">{{ m.status }}</span></td>
+              </tr>
+              <tr *ngIf="milestones.length === 0">
+                <td colspan="4" class="bt-empty">No milestones yet for this project.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="bt-page" *ngIf="!project">
+      <p class="bt-empty">Project not found.</p>
+    </div>
+  </div>
+</div>

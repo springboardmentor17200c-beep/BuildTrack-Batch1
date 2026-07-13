@@ -7,7 +7,7 @@ import { ResetPassword } from './features/reset-password/reset-password';
 import { Unauthorized } from './features/unauthorized/unauthorized';
 
 // In-app screens (logged in required)
-import { ProjectsComponent } from './features/projects/projects';
+import { PROJECTS_ROUTES } from './features/projects/projects.routes';
 import { Profile } from './features/profile/profile';
 
 // Guards
@@ -32,7 +32,7 @@ export const routes: Routes = [
   { path: 'unauthorized', component: Unauthorized },
 
   // Logged-in only — no role restriction
-  { path: 'projects', component: ProjectsComponent, canActivate: [authGuard] },
+  { path: 'projects', children: PROJECTS_ROUTES, canActivate: [roleGuard('projects')] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
 
   // Dashboard: bare /dashboard never renders anything itself — the guard
