@@ -55,6 +55,15 @@ export class ResourceHubComponent implements OnInit {
       stat: '54%',
       statLabel: 'Avg. utilization',
     },
+    {
+  title: 'Maintenance Scheduling',
+  description: 'Schedule and monitor equipment maintenance.',
+  icon: 'maintenance',
+  route: 'maintenance',
+  accent: 'red',
+  stat: '0',
+  statLabel: 'Scheduled'
+  },
   ];
 
   constructor(private router: Router, private data: ResourceDataService, private location: Location) {}

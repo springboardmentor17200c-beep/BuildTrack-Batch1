@@ -42,7 +42,7 @@ export const routes: Routes = [
   { path: 'dashboard', children: DASHBOARD_ROUTES },
 
   // Logged-in AND role-restricted
-  { path: 'resources', children: RESOURCE_MANAGEMENT_ROUTES, canActivate: [roleGuard('resources')] },
+  { path: 'resources', children: RESOURCE_MANAGEMENT_ROUTES },
   { path: 'inventory', children: INVENTORY_ROUTES, canActivate: [roleGuard('inventory')] },
   { path: 'workforce', children: WORKFORCE_ROUTES, canActivate: [roleGuard('workforce')] },
   { path: 'analytics', children: ANALYTICS_ROUTES, canActivate: [roleGuard('analytics')] },
