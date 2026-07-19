@@ -1,0 +1,167 @@
+/* ===================================================
+   KPI CARDS — Construction ERP Dashboard Cards
+   Pure CSS · No Bootstrap · No Material
+   =================================================== */
+
+:host {
+  display: block;
+  margin-top: 24px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Grid Layout ──────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ── Individual Card ──────────────────────────── */
+.kpi-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 6px 24px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 12px 36px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Accent Bar (top edge) ────────────────────── */
+.kpi-accent-bar {
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-from, #2563eb),
+    var(--accent-to, #3b82f6)
+  );
+}
+
+/* ── Card Body ────────────────────────────────── */
+.kpi-body {
+  padding: 20px 20px 22px;
+}
+
+/* ── Icon Row ─────────────────────────────────── */
+.kpi-icon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.kpi-icon-chip {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-from, #2563eb) 12%, transparent),
+    color-mix(in srgb, var(--accent-to, #3b82f6) 8%, transparent)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ── Trend Indicator ──────────────────────────── */
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 50px;
+  letter-spacing: 0.2px;
+}
+
+.trend-up {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.trend-down {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.trend-neutral {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.trend-arrow {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ── Value ─────────────────────────────────────── */
+.kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Label ─────────────────────────────────────── */
+.kpi-label {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.1px;
+}
+
+/* ── Responsive: 3 columns ────────────────────── */
+@media (max-width: 1200px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── Responsive: 2 columns ────────────────────── */
+@media (max-width: 900px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .kpi-value {
+    font-size: 22px;
+  }
+}
+
+/* ── Responsive: 1 column ─────────────────────── */
+@media (max-width: 500px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .kpi-card:hover {
+    transform: none;
+  }
+}

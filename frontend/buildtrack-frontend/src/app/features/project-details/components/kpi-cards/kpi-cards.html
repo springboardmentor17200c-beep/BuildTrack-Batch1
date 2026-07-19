@@ -1,0 +1,41 @@
+<section class="kpi-section">
+  <div class="kpi-grid">
+
+    <article
+      class="kpi-card"
+      *ngFor="let card of cards; let i = index"
+      [style.--accent-from]="card.accentFrom"
+      [style.--accent-to]="card.accentTo">
+
+      <!-- Accent bar top -->
+      <div class="kpi-accent-bar"></div>
+
+      <div class="kpi-body">
+
+        <!-- Icon chip -->
+        <div class="kpi-icon-row">
+          <div class="kpi-icon-chip">
+            <span class="kpi-icon">{{ card.icon }}</span>
+          </div>
+          <span
+            class="kpi-trend"
+            [class.trend-up]="card.trendDirection === 'up'"
+            [class.trend-down]="card.trendDirection === 'down'"
+            [class.trend-neutral]="card.trendDirection === 'neutral'">
+            <span class="trend-arrow" *ngIf="card.trendDirection === 'up'">↑</span>
+            <span class="trend-arrow" *ngIf="card.trendDirection === 'down'">↓</span>
+            {{ card.trend }}
+          </span>
+        </div>
+
+        <!-- Value -->
+        <div class="kpi-value">{{ card.value }}</div>
+
+        <!-- Label -->
+        <div class="kpi-label">{{ card.label }}</div>
+
+      </div>
+    </article>
+
+  </div>
+</section>

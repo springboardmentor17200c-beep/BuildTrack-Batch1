@@ -1,0 +1,125 @@
+<section class="progress-section">
+
+  <h2 class="section-title">Progress Overview</h2>
+
+  <div class="progress-layout">
+
+    <!-- ════════════ LEFT: Overall Ring + Today ════════════ -->
+    <div class="progress-left">
+
+      <!-- Overall Progress Ring -->
+      <div class="ring-card">
+        <div class="ring-wrapper">
+          <svg class="ring-svg" viewBox="0 0 160 160">
+            <circle class="ring-bg" cx="80" cy="80" r="70" />
+            <circle
+              class="ring-fill"
+              cx="80" cy="80" r="70"
+              [style.strokeDasharray]="circumference"
+              [style.strokeDashoffset]="overallOffset"
+              [style.stroke]="overallStrokeColor"
+            />
+          </svg>
+          <div class="ring-center">
+            <span class="ring-value">{{ progressData.overallProgress }}%</span>
+            <span class="ring-label">Overall</span>
+          </div>
+        </div>
+
+        <!-- Today's Progress -->
+        <div class="today-block">
+          <div class="today-header">
+            <span class="today-icon">📈</span>
+            <span class="today-title">Today's Progress</span>
+          </div>
+          <div class="today-bar-wrap">
+            <div class="today-bar-track">
+              <div class="today-bar-fill" [style.width.%]="progressData.todayProgress"></div>
+            </div>
+            <span class="today-value">{{ progressData.todayProgress }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════ RIGHT: Metrics + Materials ════════════ -->
+    <div class="progress-right">
+
+      <!-- Planned vs Actual + Delay -->
+      <div class="metrics-row">
+
+        <!-- Planned Progress -->
+        <div class="metric-card">
+          <div class="metric-icon-wrap planned-bg">
+            <span class="metric-icon">📋</span>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Planned Progress</span>
+            <span class="metric-value">{{ progressData.plannedProgress }}%</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill planned-fill" [style.width.%]="progressData.plannedProgress"></div>
+          </div>
+        </div>
+
+        <!-- Actual Progress -->
+        <div class="metric-card">
+          <div class="metric-icon-wrap actual-bg">
+            <span class="metric-icon">🏗️</span>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Actual Progress</span>
+            <span class="metric-value">{{ progressData.actualProgress }}%</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill actual-fill" [style.width.%]="progressData.actualProgress"></div>
+          </div>
+        </div>
+
+        <!-- Delay Indicator -->
+        <div class="metric-card delay-card" [class.delay-on-schedule]="delayStatus === 'on-schedule'" [class.delay-minor]="delayStatus === 'minor'" [class.delay-critical]="delayStatus === 'critical'">
+          <div class="delay-top">
+            <span class="delay-icon">{{ delayIcon }}</span>
+            <span class="delay-label">{{ delayLabel }}</span>
+          </div>
+          <div class="deviation-row">
+            <span class="deviation-tag" [class]="deviationClass">{{ deviationLabel }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Material Utilization -->
+      <div class="materials-card">
+        <div class="materials-header">
+          <span class="materials-icon">🧱</span>
+          <h3 class="materials-title">Material Utilization</h3>
+        </div>
+
+        <div class="materials-list">
+          <div class="mat-row" *ngFor="let mat of progressData.materials">
+            <div class="mat-info">
+              <span class="mat-name">{{ mat.name }}</span>
+              <span class="mat-ratio">{{ mat.used }} / {{ mat.total }} units</span>
+            </div>
+            <div class="mat-bar-wrap">
+              <div class="mat-bar-track">
+                <div
+                  class="mat-bar-fill"
+                  [class]="materialBarClass(mat)"
+                  [style.width.%]="materialPercent(mat)">
+                </div>
+              </div>
+              <span class="mat-percent">{{ materialPercent(mat) }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="materials-empty" *ngIf="progressData.materials.length === 0">
+          No material data available.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>

@@ -1,0 +1,68 @@
+<section class="milestones-section">
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <div class="section-title-block">
+      <h2 class="section-title">Milestones</h2>
+      <p class="section-subtitle">
+        {{ completedCount }} of {{ milestones.length }} completed · {{ overallPercent }}% overall
+      </p>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline" *ngIf="milestones.length > 0">
+    <div class="timeline-line"></div>
+
+    <div class="timeline-item" *ngFor="let ms of milestones; let i = index; let last = last">
+
+      <!-- Dot -->
+      <div [class]="dotClass(ms.status)">
+        <span class="dot-icon">{{ statusIcon(ms.status) }}</span>
+      </div>
+
+      <!-- Card -->
+      <div class="ms-card" [class.ms-completed]="ms.status === 'completed'" [class.ms-delayed]="ms.status === 'delayed'">
+
+        <!-- Top Row: Title + Status Badge -->
+        <div class="ms-top">
+          <h3 class="ms-title">{{ ms.title }}</h3>
+          <span class="ms-status-badge" [ngClass]="'badge-' + ms.status">
+            {{ statusLabel(ms.status) }}
+          </span>
+        </div>
+
+        <!-- Date Row -->
+        <div class="ms-dates">
+          <div class="ms-date-item">
+            <span class="ms-date-icon">📅</span>
+            <span class="ms-date-label">Start</span>
+            <span class="ms-date-value">{{ ms.startDate }}</span>
+          </div>
+          <div class="ms-date-divider"></div>
+          <div class="ms-date-item">
+            <span class="ms-date-icon">🏁</span>
+            <span class="ms-date-label">End</span>
+            <span class="ms-date-value">{{ ms.endDate }}</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="ms-progress">
+          <div class="ms-bar-track">
+            <div [class]="barClass(ms.status)" [style.width.%]="ms.completion"></div>
+          </div>
+          <span class="ms-bar-label">{{ ms.completion }}%</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="milestones.length === 0">
+    <span class="empty-icon">🏁</span>
+    <p>No milestones defined yet.</p>
+  </div>
+
+</section>

@@ -1,0 +1,496 @@
+/* ===================================================
+   PROGRESS OVERVIEW — Project Details
+   Pure CSS · No Bootstrap · No Material
+   =================================================== */
+
+:host {
+  display: block;
+  margin-top: 28px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Section Title ────────────────────────────── */
+.section-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 18px;
+  letter-spacing: -0.2px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Layout ───────────────────────────────────── */
+.progress-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.progress-left {
+  flex-shrink: 0;
+  width: 280px;
+}
+
+.progress-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ══════════════════════════════════════════════════
+   LEFT — Overall Ring Card
+   ══════════════════════════════════════════════════ */
+.ring-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 28px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* ── SVG Ring ─────────────────────────────────── */
+.ring-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.ring-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: #f1f5f9;
+  stroke-width: 12;
+}
+
+.ring-fill {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 0.4s ease;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.ring-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.8px;
+  line-height: 1;
+}
+
+.ring-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ── Today's Progress ─────────────────────────── */
+.today-block {
+  width: 100%;
+}
+
+.today-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.today-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.today-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.today-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.today-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.today-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #6366f1);
+  border-radius: 99px;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.today-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ══════════════════════════════════════════════════
+   RIGHT — Metrics Row
+   ══════════════════════════════════════════════════ */
+.metrics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── Metric Card ──────────────────────────────── */
+.metric-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 6px 22px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metric-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planned-bg {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(99, 102, 241, 0.08));
+}
+
+.actual-bg {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.08));
+}
+
+.metric-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+.metric-bar-track {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.planned-fill {
+  background: linear-gradient(90deg, #2563eb, #818cf8);
+}
+
+.actual-fill {
+  background: linear-gradient(90deg, #059669, #34d399);
+}
+
+/* ── Delay Card ───────────────────────────────── */
+.delay-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.delay-on-schedule {
+  border-color: #a7f3d0;
+  background: linear-gradient(135deg, #ffffff, #f0fdf4);
+}
+
+.delay-minor {
+  border-color: #fde68a;
+  background: linear-gradient(135deg, #ffffff, #fffbeb);
+}
+
+.delay-critical {
+  border-color: #fecaca;
+  background: linear-gradient(135deg, #ffffff, #fef2f2);
+}
+
+.delay-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.delay-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.delay-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.deviation-row {
+  display: flex;
+  justify-content: center;
+}
+
+.deviation-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.deviation-ahead {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.deviation-behind {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.deviation-on-target {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+/* ══════════════════════════════════════════════════
+   RIGHT — Materials Card
+   ══════════════════════════════════════════════════ */
+.materials-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 6px 22px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+.materials-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.materials-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.materials-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.materials-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mat-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.mat-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.mat-ratio {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.mat-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mat-bar-track {
+  flex: 1;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.mat-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mat-bar-normal {
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.mat-bar-warn {
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.mat-bar-critical {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.mat-percent {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  min-width: 36px;
+  text-align: right;
+}
+
+.materials-empty {
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 18px 0;
+}
+
+/* ══════════════════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .metrics-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .delay-card {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .progress-layout {
+    flex-direction: column;
+  }
+
+  .progress-left {
+    width: 100%;
+  }
+
+  .ring-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .ring-wrapper {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+  }
+
+  .ring-value {
+    font-size: 24px;
+  }
+
+  .today-block {
+    flex: 1;
+  }
+
+  .metrics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .delay-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 500px) {
+  .ring-card {
+    flex-direction: column;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+}

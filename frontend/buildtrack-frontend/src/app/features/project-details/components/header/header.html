@@ -1,0 +1,122 @@
+<section class="header-section">
+
+  <!-- Top Row: Breadcrumb + Actions -->
+  <div class="header-top-bar">
+    <div class="breadcrumb">
+      <span class="breadcrumb-icon">📁</span>
+      <span class="breadcrumb-text">Projects</span>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">{{ project.projectName }}</span>
+    </div>
+    <div class="header-actions">
+      <button class="action-btn action-secondary">
+        <span class="btn-icon">✏️</span>
+        Edit
+      </button>
+      <button class="action-btn action-secondary">
+        <span class="btn-icon">📤</span>
+        Export
+      </button>
+      <button class="action-btn action-primary">
+        <span class="btn-icon">📊</span>
+        Generate Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Header Card -->
+  <div class="header-card">
+
+    <!-- Left: Project Identity -->
+    <div class="header-main">
+      <div class="title-row">
+        <div class="project-icon-wrapper">
+          <span class="project-icon">🏗️</span>
+        </div>
+        <div class="title-block">
+          <div class="title-line">
+            <h1 class="project-title">{{ project.projectName }}</h1>
+            <span [class]="statusClass">{{ project.status }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meta Grid -->
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-icon">🏢</span>
+          <div class="meta-content">
+            <span class="meta-label">Client</span>
+            <span class="meta-value">{{ project.clientName }}</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📍</span>
+          <div class="meta-content">
+            <span class="meta-label">Location</span>
+            <span class="meta-value">{{ project.location }}</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📅</span>
+          <div class="meta-content">
+            <span class="meta-label">Start Date</span>
+            <span class="meta-value">{{ project.startDate }}</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🎯</span>
+          <div class="meta-content">
+            <span class="meta-label">End Date</span>
+            <span class="meta-value">{{ project.endDate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Manager + Progress -->
+    <div class="header-sidebar">
+
+      <!-- Project Manager -->
+      <div class="manager-card">
+        <div class="manager-avatar">{{ managerInitials }}</div>
+        <div class="manager-info">
+          <span class="manager-label">Project Manager</span>
+          <span class="manager-name">{{ project.projectManager }}</span>
+        </div>
+      </div>
+
+      <!-- Completion Ring -->
+      <div class="completion-block">
+        <div class="completion-ring-wrapper">
+          <svg class="completion-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52" />
+            <circle
+              class="ring-fill"
+              cx="60" cy="60" r="52"
+              [style.strokeDasharray]="circumference"
+              [style.strokeDashoffset]="strokeDashoffset"
+            />
+          </svg>
+          <div class="ring-label">
+            <span class="ring-percent">{{ project.progress }}%</span>
+            <span class="ring-subtext">Complete</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linear Progress Bar -->
+      <div class="linear-progress">
+        <div class="progress-header">
+          <span class="progress-title">Overall Progress</span>
+          <span class="progress-percent">{{ project.progress }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width]="progressBarWidth"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
