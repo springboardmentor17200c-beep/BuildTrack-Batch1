@@ -1,6 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 /* ============================================================
    Types
@@ -44,6 +45,9 @@ interface FilterOption {
   styleUrl: './projects.css'
 })
 export class ProjectsComponent {
+
+  constructor(private router: Router) {}
+
 
   /* ---------------- Search / filter state (signals) ---------------- */
   searchQuery = signal('');
@@ -236,9 +240,9 @@ export class ProjectsComponent {
     // Hook into the existing "create project" flow / route / dialog.
   }
 
-  viewProject(project: Project): void {
-    // Hook into the existing project detail route.
-  }
+ viewProject(project: Project): void {
+  this.router.navigate(['/projects', project.id]);
+}
 
   editProject(project: Project): void {
     // Hook into the existing "edit project" flow / route / dialog.
