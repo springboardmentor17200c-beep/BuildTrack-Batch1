@@ -1,4 +1,47 @@
-<!-- ActivityTimelineComponent Template -->
-<section class="activity-timeline-container">
-  <p>Activity Timeline works!</p>
+<section class="activity-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Activity Timeline</h2>
+      <p class="section-subtitle">Latest project updates and site activity</p>
+    </div>
+    <span class="activity-count" *ngIf="activities.length">
+      {{ activities.length }} updates
+    </span>
+  </div>
+
+  <div class="timeline" *ngIf="activities.length; else emptyTimeline">
+    <article
+      class="timeline-item"
+      *ngFor="let activity of activities; let index = index"
+      [class]="'timeline-item tone-' + (index % 4)"
+    >
+      <div class="timeline-rail" aria-hidden="true">
+        <span class="activity-marker">
+          <span class="marker-ring"></span>
+        </span>
+      </div>
+
+      <div class="activity-card">
+        <div class="activity-meta">
+          <div class="user-avatar" [attr.aria-label]="activity.user">
+            {{ initials(activity.user) }}
+          </div>
+          <div class="activity-user">
+            <span class="user-name">{{ activity.user }}</span>
+            <span class="activity-action">{{ activity.action }}</span>
+          </div>
+          <time class="activity-time">{{ activity.time }}</time>
+        </div>
+
+        <p class="activity-description">{{ activity.description }}</p>
+      </div>
+    </article>
+  </div>
+
+  <ng-template #emptyTimeline>
+    <div class="empty-state">
+      <span class="empty-icon">⌁</span>
+      <p>No project activity has been recorded yet.</p>
+    </div>
+  </ng-template>
 </section>

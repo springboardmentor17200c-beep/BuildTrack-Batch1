@@ -37,6 +37,113 @@ interface FilterOption {
   value: ProjectStatus | 'All';
 }
 
+export const DUMMY_PROJECTS: Project[] = [
+  {
+    id: 1,
+    name: 'Skyline Residency Tower',
+    site: 'Whitefield, Bengaluru',
+    manager: 'Priya Menon',
+    managerAvatar: 'https://i.pravatar.cc/40?img=32',
+    client: 'L&T Realty',
+    status: 'Active',
+    progress: 78,
+    budgetUsed: 18.4,
+    budgetTotal: 24,
+    deadline: '12 Oct 2026'
+  },
+  {
+    id: 2,
+    name: 'Riverside Business Park',
+    site: 'Gachibowli, Hyderabad',
+    manager: 'Karthik Iyer',
+    managerAvatar: 'https://i.pravatar.cc/40?img=15',
+    client: 'NCC Limited',
+    status: 'Planning',
+    progress: 12,
+    budgetUsed: 2.4,
+    budgetTotal: 20,
+    deadline: '30 Mar 2027'
+  },
+  {
+    id: 3,
+    name: 'Greenfield Metro Extension',
+    site: 'Patna Sector 4',
+    manager: 'Ananya Sharma',
+    managerAvatar: 'https://i.pravatar.cc/40?img=47',
+    client: 'Bihar State Infra Corp',
+    status: 'Completed',
+    progress: 100,
+    budgetUsed: 32,
+    budgetTotal: 32,
+    deadline: '05 Jan 2026'
+  },
+  {
+    id: 4,
+    name: 'Harborview Logistics Hub',
+    site: 'Vizag Port Area',
+    manager: 'Rohan Desai',
+    managerAvatar: 'https://i.pravatar.cc/40?img=8',
+    client: 'Adani Ports',
+    status: 'Delayed',
+    progress: 29,
+    budgetUsed: 6.7,
+    budgetTotal: 15,
+    deadline: '18 Aug 2026'
+  },
+  {
+    id: 5,
+    name: 'Emerald Heights Phase II',
+    site: 'Baner, Pune',
+    manager: 'Sneha Kulkarni',
+    managerAvatar: 'https://i.pravatar.cc/40?img=25',
+    client: 'Kolte-Patil Developers',
+    status: 'Active',
+    progress: 63,
+    budgetUsed: 11.2,
+    budgetTotal: 18,
+    deadline: '22 Dec 2026'
+  },
+  {
+    id: 6,
+    name: 'Coastal Highway Bridge',
+    site: 'Mangaluru Bypass',
+    manager: 'Vikram Nair',
+    managerAvatar: 'https://i.pravatar.cc/40?img=52',
+    client: 'NHAI',
+    status: 'Delayed',
+    progress: 41,
+    budgetUsed: 9.8,
+    budgetTotal: 16,
+    deadline: '02 Nov 2026'
+  },
+  {
+    id: 7,
+    name: 'Orion IT Park — Block C',
+    site: 'Electronic City, Bengaluru',
+    manager: 'Divya Reddy',
+    managerAvatar: 'https://i.pravatar.cc/40?img=44',
+    client: 'RMZ Corp',
+    status: 'Active',
+    progress: 55,
+    budgetUsed: 14.1,
+    budgetTotal: 26,
+    deadline: '15 Feb 2027'
+  },
+  {
+    id: 8,
+    name: 'Sundervan Township',
+    site: 'Sarjapur Road, Bengaluru',
+    manager: 'Arjun Rao',
+    managerAvatar: 'https://i.pravatar.cc/40?img=12',
+    client: 'Prestige Group',
+    status: 'Planning',
+    progress: 8,
+    budgetUsed: 1.2,
+    budgetTotal: 40,
+    deadline: '20 Jul 2027'
+  }
+];
+
 @Component({
   selector: 'app-projects',
   standalone: true,
@@ -53,6 +160,15 @@ export class ProjectsComponent {
   searchQuery = signal('');
   activeFilter = signal<ProjectStatus | 'All'>('All');
   isFilterMenuOpen = signal(false);
+  statusDropdownOpenFor = signal<number | null>(null);
+
+  isEditModalOpen = signal(false);
+  editingProject = signal<Project | null>(null);
+
+  isAddModalOpen = signal(false);
+  newProject = signal<Partial<Project>>({});
+
+  allStatuses: ProjectStatus[] = ['Planning', 'Active', 'Delayed', 'Completed'];
 
   filterOptions: FilterOption[] = [
     { label: 'All Projects', value: 'All' },
@@ -63,112 +179,7 @@ export class ProjectsComponent {
   ];
 
   /* ---------------- Dummy project data ---------------- */
-  projects = signal<Project[]>([
-    {
-      id: 1,
-      name: 'Skyline Residency Tower',
-      site: 'Whitefield, Bengaluru',
-      manager: 'Priya Menon',
-      managerAvatar: 'https://i.pravatar.cc/40?img=32',
-      client: 'L&T Realty',
-      status: 'Active',
-      progress: 78,
-      budgetUsed: 18.4,
-      budgetTotal: 24,
-      deadline: '12 Oct 2026'
-    },
-    {
-      id: 2,
-      name: 'Riverside Business Park',
-      site: 'Gachibowli, Hyderabad',
-      manager: 'Karthik Iyer',
-      managerAvatar: 'https://i.pravatar.cc/40?img=15',
-      client: 'NCC Limited',
-      status: 'Planning',
-      progress: 12,
-      budgetUsed: 2.4,
-      budgetTotal: 20,
-      deadline: '30 Mar 2027'
-    },
-    {
-      id: 3,
-      name: 'Greenfield Metro Extension',
-      site: 'Patna Sector 4',
-      manager: 'Ananya Sharma',
-      managerAvatar: 'https://i.pravatar.cc/40?img=47',
-      client: 'Bihar State Infra Corp',
-      status: 'Completed',
-      progress: 100,
-      budgetUsed: 32,
-      budgetTotal: 32,
-      deadline: '05 Jan 2026'
-    },
-    {
-      id: 4,
-      name: 'Harborview Logistics Hub',
-      site: 'Vizag Port Area',
-      manager: 'Rohan Desai',
-      managerAvatar: 'https://i.pravatar.cc/40?img=8',
-      client: 'Adani Ports',
-      status: 'Delayed',
-      progress: 29,
-      budgetUsed: 6.7,
-      budgetTotal: 15,
-      deadline: '18 Aug 2026'
-    },
-    {
-      id: 5,
-      name: 'Emerald Heights Phase II',
-      site: 'Baner, Pune',
-      manager: 'Sneha Kulkarni',
-      managerAvatar: 'https://i.pravatar.cc/40?img=25',
-      client: 'Kolte-Patil Developers',
-      status: 'Active',
-      progress: 63,
-      budgetUsed: 11.2,
-      budgetTotal: 18,
-      deadline: '22 Dec 2026'
-    },
-    {
-      id: 6,
-      name: 'Coastal Highway Bridge',
-      site: 'Mangaluru Bypass',
-      manager: 'Vikram Nair',
-      managerAvatar: 'https://i.pravatar.cc/40?img=52',
-      client: 'NHAI',
-      status: 'Delayed',
-      progress: 41,
-      budgetUsed: 9.8,
-      budgetTotal: 16,
-      deadline: '02 Nov 2026'
-    },
-    {
-      id: 7,
-      name: 'Orion IT Park — Block C',
-      site: 'Electronic City, Bengaluru',
-      manager: 'Divya Reddy',
-      managerAvatar: 'https://i.pravatar.cc/40?img=44',
-      client: 'RMZ Corp',
-      status: 'Active',
-      progress: 55,
-      budgetUsed: 14.1,
-      budgetTotal: 26,
-      deadline: '15 Feb 2027'
-    },
-    {
-      id: 8,
-      name: 'Sundervan Township',
-      site: 'Sarjapur Road, Bengaluru',
-      manager: 'Arjun Rao',
-      managerAvatar: 'https://i.pravatar.cc/40?img=12',
-      client: 'Prestige Group',
-      status: 'Planning',
-      progress: 8,
-      budgetUsed: 1.2,
-      budgetTotal: 40,
-      deadline: '20 Jul 2027'
-    },
-  ]);
+  projects = signal<Project[]>([...DUMMY_PROJECTS]);
 
   /* ---------------- KPI summary cards ---------------- */
   kpiCards = computed<KpiCard[]>(() => {
@@ -236,8 +247,62 @@ export class ProjectsComponent {
     this.isFilterMenuOpen.set(false);
   }
 
+  toggleStatusDropdown(projectId: number): void {
+    this.statusDropdownOpenFor.update(id => id === projectId ? null : projectId);
+  }
+
+  changeStatus(project: Project, newStatus: ProjectStatus): void {
+    this.statusDropdownOpenFor.set(null);
+    if (project.status === newStatus) return;
+
+    this.projects.update(list =>
+      list.map(p => {
+        if (p.id !== project.id) return p;
+        const progress = newStatus === 'Completed' ? 100 : p.progress;
+        return { ...p, status: newStatus, progress };
+      })
+    );
+  }
+
   addProject(): void {
-    // Hook into the existing "create project" flow / route / dialog.
+    this.newProject.set({
+      name: '',
+      site: '',
+      client: '',
+      manager: '',
+      managerAvatar: 'https://i.pravatar.cc/40?img=' + Math.floor(Math.random() * 70 + 1),
+      status: 'Planning',
+      progress: 0,
+      budgetUsed: 0,
+      budgetTotal: null as any,
+      deadline: ''
+    });
+    this.isAddModalOpen.set(true);
+  }
+
+  closeAddModal(): void {
+    this.isAddModalOpen.set(false);
+  }
+
+  saveNewProject(): void {
+    const p = this.newProject() as Project;
+    
+    // Auto Logic
+    if (p.status === 'Completed') p.progress = 100;
+    if (p.status === 'Planning') p.progress = 0;
+
+    // Format deadline from YYYY-MM-DD to DD MMM YYYY
+    if (p.deadline && p.deadline.includes('-')) {
+      const [y, m, d] = p.deadline.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      p.deadline = `${d} ${months[parseInt(m, 10) - 1]} ${y}`;
+    }
+
+    const maxId = this.projects().length > 0 ? Math.max(...this.projects().map(x => x.id)) : 0;
+    p.id = maxId + 1;
+
+    this.projects.update(list => [p, ...list]);
+    this.closeAddModal();
   }
 
  viewProject(project: Project): void {
@@ -245,12 +310,43 @@ export class ProjectsComponent {
 }
 
   editProject(project: Project): void {
-    // Hook into the existing "edit project" flow / route / dialog.
+    this.editingProject.set({ ...project });
+    this.isEditModalOpen.set(true);
+  }
+
+  closeEditModal(): void {
+    this.isEditModalOpen.set(false);
+    this.editingProject.set(null);
+  }
+
+  saveProject(): void {
+    const updated = this.editingProject();
+    if (!updated) return;
+
+    if (updated.status === 'Completed') {
+      updated.progress = 100;
+    }
+
+    this.projects.update(list =>
+      list.map(p => (p.id === updated.id ? updated : p))
+    );
+    this.closeEditModal();
   }
 
   deleteProject(project: Project): void {
     // Hook into the existing delete confirmation flow.
     this.projects.update(list => list.filter(p => p.id !== project.id));
+  }
+
+  completeProject(project: Project): void {
+    if (project.status === 'Completed') return;
+    this.projects.update(list =>
+      list.map(p =>
+        p.id === project.id
+          ? { ...p, progress: 100, status: 'Completed' as ProjectStatus }
+          : p
+      )
+    );
   }
 
   /** Formats the budget pair as "₹18.4Cr / ₹24Cr" for the table cell. */

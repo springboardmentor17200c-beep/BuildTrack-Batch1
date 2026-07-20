@@ -1,24 +1,33 @@
-<div class="project-details-page">
+<main class="project-details-page">
+  <div class="page-toolbar">
+    <button class="back-btn" type="button" (click)="goBack()">
+      <span aria-hidden="true">←</span>
+      Back to Projects
+    </button>
 
-  <div class="page-header">
-   <button class="back-btn" (click)="goBack()">
-  ← Back
-</button>
-
-    <h1>Project Tracking</h1>
-
-    <p>
-      This page will display complete tracking information of a selected project.
-    </p>
+    <p class="page-context">Construction Management / Project Details</p>
   </div>
 
-  <!-- Child Components -->
-  <app-header></app-header>
-  <app-kpi-cards></app-kpi-cards>
-  <app-progress-overview></app-progress-overview>
-  <app-milestones></app-milestones>
-  <app-activity-timeline></app-activity-timeline>
-  <app-team-members></app-team-members>
-  <app-budget-summary></app-budget-summary>
+  @if (error()) {
+    <div class="error-state">
+      <span class="error-icon">⚠️</span>
+      <p class="error-message">{{ error() }}</p>
+    </div>
+  } @else if (projectData(); as data) {
+    <app-header [project]="derivedHeaderData()!"></app-header>
 
-</div>
+    <app-kpi-cards [kpiData]="data.kpiData"></app-kpi-cards>
+
+    <section class="dashboard-grid overview-grid">
+      <app-progress-overview [progressData]="derivedProgressData()!"></app-progress-overview>
+      <app-budget-summary [budget]="data.budget"></app-budget-summary>
+    </section>
+
+    <app-milestones [milestones]="data.milestones"></app-milestones>
+
+    <section class="dashboard-grid collaboration-grid">
+      <app-activity-timeline [activities]="data.activities"></app-activity-timeline>
+      <app-team-members [members]="data.teamMembers"></app-team-members>
+    </section>
+  }
+</main>

@@ -1,4 +1,94 @@
-<!-- BudgetSummaryComponent Template -->
-<section class="budget-summary-container">
-  <p>Budget Summary works!</p>
+<section class="budget-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Budget Summary</h2>
+      <p class="section-subtitle">Project financial overview and cost allocation</p>
+    </div>
+
+    <span class="usage-chip" *ngIf="budget">
+      {{ budgetUsage | number: '1.0-0' }}% utilised
+    </span>
+  </div>
+
+  <ng-container *ngIf="budget; else emptyBudget">
+    <div class="budget-overview">
+      <article class="budget-card estimated-card">
+        <span class="card-label">Estimated Budget</span>
+        <strong class="card-value">
+          {{ budget.estimatedBudget | currency: currencyCode: 'symbol': '1.0-0' }}
+        </strong>
+        <span class="card-note">Approved project allocation</span>
+      </article>
+
+      <article class="budget-card used-card">
+        <span class="card-label">Budget Used</span>
+        <strong class="card-value">
+          {{ budget.budgetUsed | currency: currencyCode: 'symbol': '1.0-0' }}
+        </strong>
+        <div class="usage-progress" aria-label="Budget utilisation">
+          <span class="progress-fill" [style.width.%]="budgetUsage"></span>
+        </div>
+        <span class="card-note">{{ budgetUsage | number: '1.0-0' }}% of approved budget</span>
+      </article>
+
+      <article class="budget-card remaining-card">
+        <span class="card-label">Remaining Budget</span>
+        <strong class="card-value">
+          {{ budget.remainingBudget | currency: currencyCode: 'symbol': '1.0-0' }}
+        </strong>
+        <span class="card-note">Available for upcoming work</span>
+      </article>
+    </div>
+
+    <div class="cost-panel">
+      <div class="cost-panel-heading">
+        <div>
+          <h3>Cost Breakdown</h3>
+          <p>Current expenditure by project category</p>
+        </div>
+        <span class="total-cost">
+          {{ totalCost | currency: currencyCode: 'symbol': '1.0-0' }} total
+        </span>
+      </div>
+
+      <div class="cost-grid">
+        <article class="cost-card labour-cost">
+          <div class="cost-card-topline">
+            <span class="cost-indicator"></span>
+            <span class="cost-label">Labour Cost</span>
+            <span class="cost-percent">{{ costPercentage(budget.labourCost) }}%</span>
+          </div>
+          <strong>{{ budget.labourCost | currency: currencyCode: 'symbol': '1.0-0' }}</strong>
+          <div class="cost-bar"><span [style.width.%]="costPercentage(budget.labourCost)"></span></div>
+        </article>
+
+        <article class="cost-card material-cost">
+          <div class="cost-card-topline">
+            <span class="cost-indicator"></span>
+            <span class="cost-label">Material Cost</span>
+            <span class="cost-percent">{{ costPercentage(budget.materialCost) }}%</span>
+          </div>
+          <strong>{{ budget.materialCost | currency: currencyCode: 'symbol': '1.0-0' }}</strong>
+          <div class="cost-bar"><span [style.width.%]="costPercentage(budget.materialCost)"></span></div>
+        </article>
+
+        <article class="cost-card machinery-cost">
+          <div class="cost-card-topline">
+            <span class="cost-indicator"></span>
+            <span class="cost-label">Machinery Cost</span>
+            <span class="cost-percent">{{ costPercentage(budget.machineryCost) }}%</span>
+          </div>
+          <strong>{{ budget.machineryCost | currency: currencyCode: 'symbol': '1.0-0' }}</strong>
+          <div class="cost-bar"><span [style.width.%]="costPercentage(budget.machineryCost)"></span></div>
+        </article>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyBudget>
+    <div class="empty-state">
+      <span class="empty-icon">₹</span>
+      <p>No budget information is available for this project.</p>
+    </div>
+  </ng-template>
 </section>

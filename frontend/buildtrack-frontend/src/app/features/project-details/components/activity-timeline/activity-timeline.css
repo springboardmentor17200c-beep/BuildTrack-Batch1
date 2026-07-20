@@ -1,3 +1,268 @@
 :host {
   display: block;
+  margin-top: 28px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.section-title,
+.section-subtitle,
+.activity-description,
+.empty-state p {
+  margin: 0;
+}
+
+.section-title {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.section-subtitle {
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.activity-count {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.timeline {
+  position: relative;
+}
+
+.timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  min-height: 120px;
+}
+
+.timeline-item:last-child {
+  min-height: 0;
+}
+
+.timeline-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.timeline-item:not(:last-child) .timeline-rail::after {
+  position: absolute;
+  top: 30px;
+  bottom: -2px;
+  width: 2px;
+  background: #e2e8f0;
+  content: '';
+}
+
+.activity-marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  background: #eff6ff;
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #dbeafe;
+}
+
+.marker-ring {
+  width: 8px;
+  height: 8px;
+  background: #2563eb;
+  border-radius: 50%;
+}
+
+.tone-1 .activity-marker {
+  background: #ecfdf5;
+  box-shadow: 0 0 0 1px #bbf7d0;
+}
+
+.tone-1 .marker-ring {
+  background: #059669;
+}
+
+.tone-2 .activity-marker {
+  background: #fffbeb;
+  box-shadow: 0 0 0 1px #fde68a;
+}
+
+.tone-2 .marker-ring {
+  background: #d97706;
+}
+
+.tone-3 .activity-marker {
+  background: #f5f3ff;
+  box-shadow: 0 0 0 1px #ddd6fe;
+}
+
+.tone-3 .marker-ring {
+  background: #7c3aed;
+}
+
+.activity-card {
+  margin: 0 0 18px;
+  padding: 17px 18px;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.045);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.activity-card:hover {
+  border-color: #dbeafe;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.075);
+  transform: translateY(-2px);
+}
+
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  place-items: center;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+.tone-1 .user-avatar {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.tone-2 .user-avatar {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+.tone-3 .user-avatar {
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+}
+
+.activity-user {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-action {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-time {
+  flex-shrink: 0;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.activity-description {
+  margin: 13px 0 0 44px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.empty-icon {
+  display: block;
+  margin-bottom: 8px;
+  color: #2563eb;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.empty-state p {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .section-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .timeline-item {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .activity-card {
+    padding: 15px;
+  }
+
+  .activity-meta {
+    align-items: flex-start;
+  }
+
+  .activity-time {
+    max-width: 76px;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+  }
+
+  .activity-description {
+    margin-left: 0;
+  }
 }

@@ -1,47 +1,46 @@
 <section class="team-section">
-
-  <!-- Section Header -->
   <div class="section-header">
-    <div class="section-title-block">
+    <div>
       <h2 class="section-title">Team Members</h2>
       <p class="section-subtitle">
-        {{ members.length }} members · {{ activeCount }} active · {{ onLeaveCount }} on leave
+        {{ members.length }} members · {{ activeCount }} active ·
+        {{ onLeaveCount }} on leave
       </p>
     </div>
   </div>
 
-  <!-- Members Grid -->
   <div class="members-grid" *ngIf="members.length > 0">
     <article
       class="member-card"
       *ngFor="let member of members"
       [class.card-on-leave]="member.status === 'on-leave'"
-      [class.card-idle]="member.status === 'idle'">
-
-      <!-- Avatar + Status Dot -->
+      [class.card-idle]="member.status === 'idle'"
+    >
       <div class="member-avatar-wrap">
         <img
-          *ngIf="member.avatar"
+          *ngIf="member.avatar; else avatarFallback"
           class="member-avatar"
           [src]="member.avatar"
-          [alt]="member.name" />
-        <div
-          *ngIf="!member.avatar"
-          class="member-avatar-fallback">
-          {{ initials(member.name) }}
-        </div>
-        <span class="avatar-status-dot" [ngClass]="'dot-' + member.status"></span>
+          [alt]="member.name"
+        />
+
+        <ng-template #avatarFallback>
+          <div class="member-avatar-fallback">{{ initials(member.name) }}</div>
+        </ng-template>
+
+        <span
+          class="avatar-status-dot"
+          [ngClass]="'dot-' + member.status"
+          [attr.aria-label]="statusLabel(member.status)"
+        ></span>
       </div>
 
-      <!-- Info -->
       <div class="member-info">
         <h3 class="member-name">{{ member.name }}</h3>
         <span class="member-role">{{ member.role }}</span>
       </div>
 
-      <!-- Details -->
       <div class="member-details">
-
         <div class="detail-row">
           <span class="detail-icon">📞</span>
           <div class="detail-content">
@@ -57,23 +56,18 @@
             <span class="detail-value">{{ member.assignedWork }}</span>
           </div>
         </div>
-
       </div>
 
-      <!-- Status Footer -->
       <div class="member-footer">
         <span class="status-badge" [ngClass]="'status-' + member.status">
-          {{ statusIcon(member.status) }} {{ statusLabel(member.status) }}
+          {{ statusLabel(member.status) }}
         </span>
       </div>
-
     </article>
   </div>
 
-  <!-- Empty State -->
   <div class="empty-state" *ngIf="members.length === 0">
     <span class="empty-icon">👷</span>
     <p>No team members assigned yet.</p>
   </div>
-
 </section>
