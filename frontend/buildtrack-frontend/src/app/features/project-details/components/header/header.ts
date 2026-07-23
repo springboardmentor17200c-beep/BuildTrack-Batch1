@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface ProjectHeaderData {
@@ -20,6 +20,8 @@ export interface ProjectHeaderData {
   styleUrl: './header.css',
 })
 export class HeaderComponent {
+  @Output() editProject = new EventEmitter<void>();
+  @Output() closeProject = new EventEmitter<void>();
 
   @Input() project: ProjectHeaderData = {
     projectName: '',

@@ -186,143 +186,18 @@
 </div>
 
 @if (isEditModalOpen() && editingProject(); as editData) {
-  <div class="modal-backdrop" (click)="closeEditModal()">
-    <div class="modal-panel glass" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Edit Project</h2>
-        <button class="close-btn" (click)="closeEditModal()">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Project Name</label>
-          <input type="text" [(ngModel)]="editData.name" class="form-control" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Status</label>
-            <select [(ngModel)]="editData.status" class="form-control">
-              @for (s of allStatuses; track s) {
-                <option [value]="s">{{ s }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Progress (%)</label>
-            <input type="number" min="0" max="100" [(ngModel)]="editData.progress" class="form-control" [disabled]="editData.status === 'Completed'" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Manager Name</label>
-            <input type="text" [(ngModel)]="editData.manager" class="form-control" />
-          </div>
-          
-          <div class="form-group">
-            <label>Deadline</label>
-            <input type="text" [(ngModel)]="editData.deadline" class="form-control" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Budget Used (₹ Cr)</label>
-            <input type="number" min="0" step="0.1" [(ngModel)]="editData.budgetUsed" class="form-control" />
-          </div>
-          
-          <div class="form-group">
-            <label>Total Budget (₹ Cr)</label>
-            <input type="number" min="0" step="0.1" [(ngModel)]="editData.budgetTotal" class="form-control" />
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="qa-btn" (click)="closeEditModal()">Cancel</button>
-        <button class="qa-btn primary" (click)="saveProject()">Save Changes</button>
-      </div>
-    </div>
-  </div>
+  <app-project-form 
+    title="Edit Project"
+    [initialData]="editData" 
+    (save)="onProjectUpdate($event)" 
+    (cancel)="closeEditModal()">
+  </app-project-form>
 }
 
-@if (isAddModalOpen() && newProject(); as addData) {
-  <div class="modal-backdrop" (click)="closeAddModal()">
-    <div class="modal-panel glass" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Add New Project</h2>
-        <button class="close-btn" (click)="closeAddModal()">✕</button>
-      </div>
-
-      <form #addForm="ngForm" (ngSubmit)="saveNewProject()">
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Project Name <span class="req">*</span></label>
-            <input type="text" name="name" [(ngModel)]="addData.name" class="form-control" required #nameCtrl="ngModel" />
-            @if (nameCtrl.invalid && nameCtrl.touched) { <span class="error-msg">Project Name is required</span> }
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Location (Site) <span class="req">*</span></label>
-              <input type="text" name="site" [(ngModel)]="addData.site" class="form-control" required #siteCtrl="ngModel" />
-              @if (siteCtrl.invalid && siteCtrl.touched) { <span class="error-msg">Location is required</span> }
-            </div>
-
-            <div class="form-group">
-              <label>Client <span class="req">*</span></label>
-              <input type="text" name="client" [(ngModel)]="addData.client" class="form-control" required #clientCtrl="ngModel" />
-              @if (clientCtrl.invalid && clientCtrl.touched) { <span class="error-msg">Client is required</span> }
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Manager Name <span class="req">*</span></label>
-              <input type="text" name="manager" [(ngModel)]="addData.manager" class="form-control" required #mgrCtrl="ngModel" />
-              @if (mgrCtrl.invalid && mgrCtrl.touched) { <span class="error-msg">Manager is required</span> }
-            </div>
-
-            <div class="form-group">
-              <label>Deadline <span class="req">*</span></label>
-              <input type="date" name="deadline" [(ngModel)]="addData.deadline" class="form-control" required #dlCtrl="ngModel" />
-              @if (dlCtrl.invalid && dlCtrl.touched) { <span class="error-msg">Deadline is required</span> }
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Status <span class="req">*</span></label>
-              <select name="status" [(ngModel)]="addData.status" class="form-control" required>
-                @for (s of allStatuses; track s) {
-                  <option [value]="s">{{ s }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Progress (%) <span class="req">*</span></label>
-              <input type="number" name="progress" [(ngModel)]="addData.progress" class="form-control" required min="0" max="100" [disabled]="addData.status === 'Completed' || addData.status === 'Planning'" #progCtrl="ngModel" />
-              @if (progCtrl.errors?.['required'] && progCtrl.touched) { <span class="error-msg">Required</span> }
-              @if ((progCtrl.errors?.['min'] || progCtrl.errors?.['max']) && progCtrl.touched) { <span class="error-msg">0 to 100 only</span> }
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Total Budget (₹ Cr) <span class="req">*</span></label>
-            <input type="number" name="budgetTotal" [(ngModel)]="addData.budgetTotal" class="form-control" required min="0.1" step="0.1" #budgCtrl="ngModel" />
-            @if (budgCtrl.errors?.['required'] && budgCtrl.touched) { <span class="error-msg">Budget is required</span> }
-            @if (budgCtrl.errors?.['min'] && budgCtrl.touched) { <span class="error-msg">Must be > 0</span> }
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="qa-btn" (click)="closeAddModal()">Cancel</button>
-          <button type="submit" class="qa-btn primary" [disabled]="addForm.invalid">Create Project</button>
-        </div>
-      </form>
-    </div>
-  </div>
+@if (isAddModalOpen()) {
+  <app-project-form 
+    title="Add New Project"
+    (save)="onProjectSave($event)" 
+    (cancel)="closeAddModal()">
+  </app-project-form>
 }

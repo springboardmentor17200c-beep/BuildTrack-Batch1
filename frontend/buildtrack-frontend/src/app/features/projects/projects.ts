@@ -2,6 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ProjectForm } from './components/project-form/project-form';
 
 /* ============================================================
    Types
@@ -22,6 +23,11 @@ export interface Project {
   budgetUsed: number; // in ₹ Cr
   budgetTotal: number; // in ₹ Cr
   deadline: string;
+  category?: string;
+  startDate?: string;
+  endDate?: string;
+  budget?: number;
+  description?: string;
 }
 
 interface KpiCard {
@@ -147,7 +153,7 @@ export const DUMMY_PROJECTS: Project[] = [
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ProjectForm],
   templateUrl: './projects.html',
   styleUrl: './projects.css'
 })
@@ -166,7 +172,6 @@ export class ProjectsComponent {
   editingProject = signal<Project | null>(null);
 
   isAddModalOpen = signal(false);
-  newProject = signal<Partial<Project>>({});
 
   allStatuses: ProjectStatus[] = ['Planning', 'Active', 'Delayed', 'Completed'];
 
@@ -265,18 +270,6 @@ export class ProjectsComponent {
   }
 
   addProject(): void {
-    this.newProject.set({
-      name: '',
-      site: '',
-      client: '',
-      manager: '',
-      managerAvatar: 'https://i.pravatar.cc/40?img=' + Math.floor(Math.random() * 70 + 1),
-      status: 'Planning',
-      progress: 0,
-      budgetUsed: 0,
-      budgetTotal: null as any,
-      deadline: ''
-    });
     this.isAddModalOpen.set(true);
   }
 
@@ -284,34 +277,71 @@ export class ProjectsComponent {
     this.isAddModalOpen.set(false);
   }
 
-  saveNewProject(): void {
-    const p = this.newProject() as Project;
-    
-    // Auto Logic
-    if (p.status === 'Completed') p.progress = 100;
-    if (p.status === 'Planning') p.progress = 0;
-
-    // Format deadline from YYYY-MM-DD to DD MMM YYYY
-    if (p.deadline && p.deadline.includes('-')) {
-      const [y, m, d] = p.deadline.split('-');
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      p.deadline = `${d} ${months[parseInt(m, 10) - 1]} ${y}`;
-    }
-
+  onProjectSave(formData: any): void {
     const maxId = this.projects().length > 0 ? Math.max(...this.projects().map(x => x.id)) : 0;
-    p.id = maxId + 1;
+    
+    let progress = 0;
+    if (formData.status === 'Completed') progress = 100;
+
+    const p: Project = {
+      id: maxId + 1,
+      name: formData.name,
+      site: formData.client,
+      client: formData.client,
+      manager: formData.manager,
+      managerAvatar: 'https://i.pravatar.cc/40?img=' + Math.floor(Math.random() * 70 + 1),
+      status: formData.status as ProjectStatus,
+      progress: progress,
+      budgetUsed: 0,
+      budgetTotal: formData.budget,
+      deadline: this.formatDate(formData.endDate),
+      category: formData.category,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      budget: formData.budget,
+      description: formData.description
+    };
 
     this.projects.update(list => [p, ...list]);
     this.closeAddModal();
   }
 
+  formatDate(dateStr: string): string {
+    if (dateStr && dateStr.includes('-')) {
+      const [y, m, d] = dateStr.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${d} ${months[parseInt(m, 10) - 1]} ${y}`;
+    }
+    return dateStr;
+  }
+
  viewProject(project: Project): void {
-  this.router.navigate(['/projects', project.id]);
+  this.router.navigate(['/projects', project.id], { state: { fromProjects: true } });
 }
 
   editProject(project: Project): void {
-    this.editingProject.set({ ...project });
+    // Map project data to form structure for editing
+    const editData = {
+      ...project,
+      budget: project.budgetTotal, // Map budgetTotal to budget for form
+      // Use existing deadline if endDate is not set
+      endDate: project.endDate || (project.deadline ? this.parseDateToInput(project.deadline) : '')
+    };
+    this.editingProject.set(editData as any);
     this.isEditModalOpen.set(true);
+  }
+
+  parseDateToInput(dateStr: string): string {
+    // Basic parser for "DD MMM YYYY" -> "YYYY-MM-DD"
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const parts = dateStr.split(' ');
+    if (parts.length === 3) {
+      const d = parts[0].padStart(2, '0');
+      const m = (months.indexOf(parts[1]) + 1).toString().padStart(2, '0');
+      const y = parts[2];
+      return `${y}-${m}-${d}`;
+    }
+    return '';
   }
 
   closeEditModal(): void {
@@ -319,16 +349,27 @@ export class ProjectsComponent {
     this.editingProject.set(null);
   }
 
-  saveProject(): void {
+  onProjectUpdate(formData: any): void {
     const updated = this.editingProject();
     if (!updated) return;
 
-    if (updated.status === 'Completed') {
-      updated.progress = 100;
-    }
-
     this.projects.update(list =>
-      list.map(p => (p.id === updated.id ? updated : p))
+      list.map(p => {
+        if (p.id !== updated.id) return p;
+        
+        let progress = p.progress;
+        if (formData.status === 'Completed') {
+          progress = 100;
+        }
+
+        return {
+          ...p,
+          ...formData,
+          budgetTotal: formData.budget,
+          deadline: formData.endDate ? this.formatDate(formData.endDate) : p.deadline,
+          progress
+        };
+      })
     );
     this.closeEditModal();
   }

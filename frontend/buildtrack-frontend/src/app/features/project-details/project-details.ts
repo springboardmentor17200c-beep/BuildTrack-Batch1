@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +19,8 @@ import {
   BudgetSummaryComponent,
   type BudgetSummary,
 } from './components/budget-summary/budget-summary';
-import { DUMMY_PROJECTS, Project } from '../projects/projects';
+import { DUMMY_PROJECTS, Project, ProjectStatus } from '../projects/projects';
+import { ProjectForm } from '../projects/components/project-form/project-form';
 
 export interface ProjectDetailsResponse {
   project: ProjectHeaderData;
@@ -43,6 +44,7 @@ export interface ProjectDetailsResponse {
     ActivityTimelineComponent,
     TeamMembersComponent,
     BudgetSummaryComponent,
+    ProjectForm
   ],
   templateUrl: './project-details.html',
   styleUrl: './project-details.css',
@@ -50,6 +52,11 @@ export interface ProjectDetailsResponse {
 export class ProjectDetails implements OnInit {
   projectData = signal<ProjectDetailsResponse | null>(null);
   error = signal<string | null>(null);
+  
+  isEditModalOpen = signal(false);
+  editingProject = signal<any | null>(null);
+  
+  currentProjectRef: Project | null = null;
 
   /** Computed: Completed Milestones / Total Milestones × 100 */
   milestoneProgress = computed(() => {
@@ -82,6 +89,7 @@ export class ProjectDetails implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly location = inject(Location);
 
   ngOnInit(): void {
     this.route.paramMap
@@ -103,6 +111,7 @@ export class ProjectDetails implements OnInit {
           return;
         }
 
+        this.currentProjectRef = found;
         this.projectData.set(this.buildDummyDetails(found));
       });
   }
@@ -170,6 +179,93 @@ export class ProjectDetails implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/projects']);
+    const state = this.location.getState() as any;
+    if (state && state.fromProjects) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/projects'], { replaceUrl: true });
+    }
+  }
+  
+  openEditModal(): void {
+    if (!this.currentProjectRef) return;
+    const project = this.currentProjectRef;
+    
+    // Map project data to form structure for editing
+    const editData = {
+      ...project,
+      budget: project.budgetTotal, 
+      endDate: project.endDate || (project.deadline ? this.parseDateToInput(project.deadline) : '')
+    };
+    
+    this.editingProject.set(editData);
+    this.isEditModalOpen.set(true);
+  }
+  
+  parseDateToInput(dateStr: string): string {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const parts = dateStr.split(' ');
+    if (parts.length === 3) {
+      const d = parts[0].padStart(2, '0');
+      const m = (months.indexOf(parts[1]) + 1).toString().padStart(2, '0');
+      const y = parts[2];
+      return `${y}-${m}-${d}`;
+    }
+    return '';
+  }
+  
+  closeEditModal(): void {
+    this.isEditModalOpen.set(false);
+    this.editingProject.set(null);
+  }
+  
+  onProjectUpdate(formData: any): void {
+    if (!this.currentProjectRef) return;
+    
+    let progress = this.currentProjectRef.progress;
+    if (formData.status === 'Completed') {
+      progress = 100;
+    }
+    
+    // Update the ref
+    Object.assign(this.currentProjectRef, {
+      ...formData,
+      budgetTotal: formData.budget,
+      deadline: formData.endDate ? this.formatDate(formData.endDate) : this.currentProjectRef.deadline,
+      progress
+    });
+    
+    // Refresh view
+    this.projectData.set(this.buildDummyDetails(this.currentProjectRef));
+    this.closeEditModal();
+  }
+  
+  formatDate(dateStr: string): string {
+    if (dateStr && dateStr.includes('-')) {
+      const [y, m, d] = dateStr.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${d} ${months[parseInt(m, 10) - 1]} ${y}`;
+    }
+    return dateStr;
+  }
+  
+  confirmCloseProject(): void {
+    if (!this.currentProjectRef) return;
+    
+    const confirm = window.confirm("Are you sure you want to close this project?");
+    if (confirm) {
+      // Mark as closed/completed
+      this.currentProjectRef.status = 'Completed' as ProjectStatus;
+      this.currentProjectRef.progress = 100;
+      // Mark completion date
+      const today = new Date();
+      this.currentProjectRef.deadline = this.formatDate(`${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`);
+      
+      // Refresh view
+      this.projectData.set(this.buildDummyDetails(this.currentProjectRef));
+      
+      // Success message
+      window.alert("Project closed successfully.");
+    }
   }
 }

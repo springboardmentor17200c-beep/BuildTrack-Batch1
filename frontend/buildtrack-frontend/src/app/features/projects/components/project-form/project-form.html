@@ -1,0 +1,107 @@
+<div class="modal-backdrop" (click)="onCancel()">
+  <div class="modal-panel glass" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ title }}</h2>
+      <button class="close-btn" (click)="onCancel()">✕</button>
+    </div>
+    
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Project Name <span class="req">*</span></label>
+      <input type="text" formControlName="name" class="form-control" />
+      @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
+        <span class="error-msg">Project Name is required.</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Project Category <span class="req">*</span></label>
+        <select formControlName="category" class="form-control">
+          <option value="" disabled>Select Category</option>
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+        @if (projectForm.get('category')?.invalid && projectForm.get('category')?.touched) {
+          <span class="error-msg">Category is required.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Client <span class="req">*</span></label>
+        <input type="text" formControlName="client" class="form-control" />
+        @if (projectForm.get('client')?.invalid && projectForm.get('client')?.touched) {
+          <span class="error-msg">Client is required.</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Project Manager <span class="req">*</span></label>
+        <input type="text" formControlName="manager" class="form-control" />
+        @if (projectForm.get('manager')?.invalid && projectForm.get('manager')?.touched) {
+          <span class="error-msg">Manager is required.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Status <span class="req">*</span></label>
+        <select formControlName="status" class="form-control">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+        @if (projectForm.get('status')?.invalid && projectForm.get('status')?.touched) {
+          <span class="error-msg">Status is required.</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start Date <span class="req">*</span></label>
+        <input type="date" formControlName="startDate" class="form-control" />
+        @if (projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched) {
+          <span class="error-msg">Start Date is required.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>End Date <span class="req">*</span></label>
+        <input type="date" formControlName="endDate" class="form-control" />
+        @if (projectForm.get('endDate')?.hasError('required') && projectForm.get('endDate')?.touched) {
+          <span class="error-msg">End Date is required.</span>
+        }
+        @if (projectForm.hasError('dateMismatch') && projectForm.get('endDate')?.touched) {
+          <span class="error-msg">End Date cannot be before Start Date.</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Budget <span class="req">*</span></label>
+      <input type="number" formControlName="budget" class="form-control" step="0.01" />
+      @if (projectForm.get('budget')?.hasError('required') && projectForm.get('budget')?.touched) {
+        <span class="error-msg">Budget is required.</span>
+      }
+      @if (projectForm.get('budget')?.hasError('min') && projectForm.get('budget')?.touched) {
+        <span class="error-msg">Budget must be greater than zero.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea formControlName="description" class="form-control" rows="3"></textarea>
+    </div>
+  </div>
+
+    <div class="modal-footer">
+      <button type="button" class="qa-btn" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="qa-btn primary">Save</button>
+    </div>
+  </form>
+  </div>
+</div>

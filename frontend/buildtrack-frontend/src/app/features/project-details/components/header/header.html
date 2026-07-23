@@ -9,17 +9,13 @@
       <span class="breadcrumb-current">{{ project.projectName }}</span>
     </div>
     <div class="header-actions">
-      <button class="action-btn action-secondary">
+      <button class="action-btn action-secondary" (click)="editProject.emit()" [disabled]="project.status === 'Closed' || project.status === 'Completed'">
         <span class="btn-icon">✏️</span>
         Edit
       </button>
-      <button class="action-btn action-secondary">
-        <span class="btn-icon">📤</span>
-        Export
-      </button>
-      <button class="action-btn action-primary">
-        <span class="btn-icon">📊</span>
-        Generate Report
+      <button class="action-btn action-primary" (click)="closeProject.emit()" [disabled]="project.status === 'Closed' || project.status === 'Completed'">
+        <span class="btn-icon">🛑</span>
+        Close Project
       </button>
     </div>
   </div>

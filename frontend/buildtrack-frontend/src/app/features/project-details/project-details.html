@@ -14,7 +14,11 @@
       <p class="error-message">{{ error() }}</p>
     </div>
   } @else if (projectData(); as data) {
-    <app-header [project]="derivedHeaderData()!"></app-header>
+    <app-header 
+      [project]="derivedHeaderData()!" 
+      (editProject)="openEditModal()" 
+      (closeProject)="confirmCloseProject()">
+    </app-header>
 
     <app-kpi-cards [kpiData]="data.kpiData"></app-kpi-cards>
 
@@ -31,3 +35,12 @@
     </section>
   }
 </main>
+
+@if (isEditModalOpen() && editingProject(); as editData) {
+  <app-project-form 
+    title="Edit Project"
+    [initialData]="editData" 
+    (save)="onProjectUpdate($event)" 
+    (cancel)="closeEditModal()">
+  </app-project-form>
+}
