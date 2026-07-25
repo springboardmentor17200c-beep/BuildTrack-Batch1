@@ -64,6 +64,15 @@ export class ResourceHubComponent implements OnInit {
   stat: '0',
   statLabel: 'Scheduled'
   },
+  {
+  title: 'Resource Categories',
+  description: 'Manage resource categories such as Heavy Machinery, Vehicles, Power Equipment and Safety Equipment.',
+  icon: 'category',
+  route: 'resource-categories',
+  accent: 'green',
+  stat: '4',
+  statLabel: 'Categories'
+},
   ];
 
   constructor(private router: Router, private data: ResourceDataService, private location: Location) {}
