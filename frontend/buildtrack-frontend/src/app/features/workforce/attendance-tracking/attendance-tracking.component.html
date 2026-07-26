@@ -29,7 +29,7 @@
     </button>
     <div class="bt-search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
-      <input type="text" placeholder="Search worker..." [(ngModel)]="search" />
+      <input type="text" placeholder="Search employee..." [(ngModel)]="search" />
     </div>
   </div>
 
@@ -76,35 +76,33 @@
     <div class="bt-panel-header">
       <div>
         <h3 class="bt-panel-title">{{ selectedDate }}</h3>
-        <span class="bt-panel-sub">{{ workers.length }} workers</span>
+        <span class="bt-panel-sub">{{ employees.length }} employees</span>
       </div>
     </div>
 
     <div class="bt-table-wrap">
       <table class="bt-table">
-        <thead>
-          <tr><th>Worker</th><th>Role</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Mark Attendance</th></tr>
-        </thead>
+        <thead><tr><th>Employee</th><th>Role</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Mark Attendance</th></tr></thead>
         <tbody>
-          <tr *ngFor="let w of workers">
-            <td class="bt-strong">{{ w.name }}</td>
-            <td>{{ w.category }}</td>
-            <td class="bt-muted">{{ recordFor(w.id)?.checkIn || '—' }}</td>
-            <td class="bt-muted">{{ recordFor(w.id)?.checkOut || '—' }}</td>
-            <td><span class="bt-badge" [ngClass]="statusClass(recordFor(w.id)?.status)">{{ recordFor(w.id)?.status || 'Not marked' }}</span></td>
+          <tr *ngFor="let e of employees">
+            <td class="bt-strong">{{ e.fullName }}</td>
+            <td>{{ e.workforceCategory }}</td>
+            <td class="bt-muted">{{ recordFor(e.employeeId)?.checkInTime || '—' }}</td>
+            <td class="bt-muted">{{ recordFor(e.employeeId)?.checkOutTime || '—' }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(recordFor(e.employeeId)?.status)">{{ recordFor(e.employeeId)?.status || 'Not marked' }}</span></td>
             <td>
               <select
                 class="bt-filter-select"
                 style="padding:6px 10px;font-size:13px;"
-                [ngModel]="recordFor(w.id)?.status"
-                (ngModelChange)="setStatus(w.id, $event)">
+                [ngModel]="recordFor(e.employeeId)?.status"
+                (ngModelChange)="setStatus(e.employeeId, $event)">
                 <option [ngValue]="undefined" disabled>Mark as...</option>
                 <option *ngFor="let s of statusOptions" [ngValue]="s">{{ s }}</option>
               </select>
             </td>
           </tr>
-          <tr *ngIf="workers.length === 0">
-            <td colspan="6" class="bt-empty">No workers match your search.</td>
+          <tr *ngIf="employees.length === 0">
+            <td colspan="6" class="bt-empty">No employees match your search.</td>
           </tr>
         </tbody>
       </table>

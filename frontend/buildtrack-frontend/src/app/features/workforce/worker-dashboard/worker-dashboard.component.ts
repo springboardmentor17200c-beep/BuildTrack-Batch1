@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Worker, WorkforceCategory, WorkerStatus } from '../models/workforce.model';
+import { Location } from '@angular/common';
+import { Employee, WorkforceCategory } from '../models/workforce.model';
 import { WorkforceDataService } from '../workforce-data.service';
 
 interface CategorySummary {
@@ -21,13 +21,13 @@ interface CategorySummary {
   styleUrls: ['./worker-dashboard.component.css'],
 })
 export class WorkerDashboardComponent implements OnInit {
-  workers: Worker[] = [];
+  employees: Employee[] = [];
   categorySummaries: CategorySummary[] = [];
 
-  totalWorkers = 0;
+  totalEmployees = 0;
   activeCount = 0;
   onLeaveCount = 0;
-  inactiveCount = 0;
+  terminatedCount = 0;
 
   search = '';
   categoryFilter: WorkforceCategory | 'All' = 'All';
@@ -41,42 +41,46 @@ export class WorkerDashboardComponent implements OnInit {
 
   constructor(private data: WorkforceDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      category: ['', Validators.required],
+      fullName: ['', Validators.required],
+      employeeCode: ['', Validators.required],
+      workforceCategory: ['', Validators.required],
       project: ['', Validators.required],
       contact: ['', Validators.required],
+      experienceYears: ['', [Validators.required, Validators.min(0)]],
+      payRate: ['', [Validators.required, Validators.min(0)]],
+      paymentType: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
-    this.data.workers$.subscribe(w => {
-      this.workers = w;
+    this.data.employees$.subscribe(e => {
+      this.employees = e;
       this.computeStats();
     });
     this.projectNames = this.data.projectNames;
   }
 
   private computeStats() {
-    this.totalWorkers = this.workers.length;
-    this.activeCount = this.workers.filter(w => w.status === 'Active').length;
-    this.onLeaveCount = this.workers.filter(w => w.status === 'On Leave').length;
-    this.inactiveCount = this.workers.filter(w => w.status === 'Inactive').length;
+    this.totalEmployees = this.employees.length;
+    this.activeCount = this.employees.filter(e => e.employmentStatus === 'Active').length;
+    this.onLeaveCount = this.employees.filter(e => e.employmentStatus === 'On Leave').length;
+    this.terminatedCount = this.employees.filter(e => e.employmentStatus === 'Terminated').length;
 
-    const categories = Array.from(new Set(this.workers.map(w => w.category)));
+    const categories = Array.from(new Set(this.employees.map(e => e.workforceCategory)));
     this.categorySummaries = categories.map(category => {
-      const items = this.workers.filter(w => w.category === category);
+      const items = this.employees.filter(e => e.workforceCategory === category);
       return {
         category,
         count: items.length,
-        active: items.filter(w => w.status === 'Active').length,
+        active: items.filter(e => e.employmentStatus === 'Active').length,
       };
     });
   }
 
-  get filtered(): Worker[] {
-    return this.workers.filter(w => {
-      const matchesSearch = !this.search || w.name.toLowerCase().includes(this.search.toLowerCase()) || w.id.toLowerCase().includes(this.search.toLowerCase());
-      const matchesCategory = this.categoryFilter === 'All' || w.category === this.categoryFilter;
+  get filtered(): Employee[] {
+    return this.employees.filter(e => {
+      const matchesSearch = !this.search || e.fullName.toLowerCase().includes(this.search.toLowerCase()) || e.employeeCode.toLowerCase().includes(this.search.toLowerCase());
+      const matchesCategory = this.categoryFilter === 'All' || e.workforceCategory === this.categoryFilter;
       return matchesSearch && matchesCategory;
     });
   }
@@ -91,24 +95,20 @@ export class WorkerDashboardComponent implements OnInit {
       return;
     }
 
-    const { name, category, project, contact } = this.form.value;
-    const worker: Worker = {
-      id: 'W-' + Math.floor(400 + Math.random() * 600),
-      name,
-      category,
-      status: 'Active',
-      project,
-      contact,
-      joinDate: new Date().toISOString().slice(0, 10),
+    const employee: Employee = {
+      employeeId: 'E-' + Math.floor(400 + Math.random() * 600),
+      employmentStatus: 'Active',
+      joiningDate: new Date().toISOString().slice(0, 10),
+      ...this.form.value,
     };
 
-    this.data.addWorker(worker);
+    this.data.addEmployee(employee);
     this.form.reset();
     this.showForm = false;
   }
 
-  statusClass(status: Worker['status']) {
-    return { Active: 'green', 'On Leave': 'orange', Inactive: 'gray' }[status];
+  statusClass(status: Employee['employmentStatus']) {
+    return { Active: 'green', 'On Leave': 'orange', Terminated: 'gray' }[status];
   }
 
   goBack(): void {

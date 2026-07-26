@@ -108,13 +108,13 @@
         <thead><tr><th>Worker</th><th>Status</th><th>Check In</th></tr></thead>
         <tbody>
           <tr *ngFor="let a of attendance">
-            <td class="bt-strong">{{ a.workerName }}</td>
+            <td class="bt-strong">{{ a.employeeName }}</td>
             <td>
               <span class="bt-badge" [ngClass]="{ green: a.status === 'Present', red: a.status === 'Absent', orange: a.status === 'Half Day', blue: a.status === 'On Leave' }">
                 {{ a.status }}
               </span>
             </td>
-            <td class="bt-muted">{{ a.checkIn || '—' }}</td>
+            <td class="bt-muted">{{ a.checkInTime || '—' }}</td>
           </tr>
         </tbody>
       </table>

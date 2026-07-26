@@ -1,39 +1,39 @@
 <div class="bt-auth-page">
   <div class="bt-auth-card">
-    <div class="bt-auth-logo">
+    <a class="bt-auth-logo" [routerLink]="['/']" style="text-decoration:none;">
       <div class="bt-auth-logo-badge">BT</div>
       <span class="bt-auth-logo-text">BuildTrack</span>
-    </div>
+    </a>
 
-    <h1 class="bt-auth-title">Welcome back</h1>
-    <p class="bt-auth-subtitle">Sign in to manage your projects, sites, and teams.</p>
+    <h1 class="bt-auth-title">{{ 'auth.welcomeBack' | translate }}</h1>
+    <p class="bt-auth-subtitle">{{ 'auth.signInSubtitle' | translate }}</p>
 
     <div class="bt-auth-error" *ngIf="error">{{ error }}</div>
 
     <form class="bt-auth-form" [formGroup]="form" (ngSubmit)="submit()">
       <label class="bt-auth-field">
-        <span>Username</span>
-        <input type="text" formControlName="username" placeholder="Enter your username" autocomplete="username" />
+        <span>{{ 'auth.username' | translate }}</span>
+        <input type="text" formControlName="username" placeholder="Your username" autocomplete="username" />
       </label>
 
       <label class="bt-auth-field">
-        <span>Password</span>
+        <span>{{ 'auth.password' | translate }}</span>
         <input type="password" formControlName="password" placeholder="Enter your password" autocomplete="current-password" />
       </label>
 
       <div class="bt-auth-row">
         <span></span>
-        <a class="bt-auth-link" [routerLink]="['/reset-password']">Forgot password?</a>
+        <a class="bt-auth-link" [routerLink]="['/reset-password']">{{ 'auth.forgotPassword' | translate }}</a>
       </div>
 
       <button type="submit" class="bt-auth-submit" [disabled]="submitting">
-        {{ submitting ? 'Signing in...' : 'Sign In' }}
+        {{ (submitting ? 'auth.signingIn' : 'auth.signIn') | translate }}
       </button>
     </form>
 
     <div class="bt-auth-footer">
-      Don't have an account?
-      <a class="bt-auth-link" [routerLink]="['/register']">Create one</a>
+      {{ 'auth.noAccount' | translate }}
+      <a class="bt-auth-link" [routerLink]="['/register']">{{ 'auth.createOne' | translate }}</a>
     </div>
   </div>
 </div>

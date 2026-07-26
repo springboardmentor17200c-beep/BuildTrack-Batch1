@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AttendanceRecord, AttendanceStatus, Worker } from '../models/workforce.model';
+import { Location } from '@angular/common';
+import { AttendanceRecord, AttendanceStatus, Employee } from '../models/workforce.model';
 import { WorkforceDataService } from '../workforce-data.service';
 
 @Component({
@@ -14,7 +14,7 @@ import { WorkforceDataService } from '../workforce-data.service';
   styleUrls: ['./attendance-tracking.component.css'],
 })
 export class AttendanceTrackingComponent implements OnInit {
-  allWorkers: Worker[] = [];
+  allEmployees: Employee[] = [];
   attendance: AttendanceRecord[] = [];
   selectedDate = new Date().toISOString().slice(0, 10);
   search = '';
@@ -29,20 +29,20 @@ export class AttendanceTrackingComponent implements OnInit {
   constructor(private data: WorkforceDataService, private location: Location) {}
 
   ngOnInit(): void {
-    this.data.workers$.subscribe(w => (this.allWorkers = w.filter(x => x.status !== 'Inactive')));
+    this.data.employees$.subscribe(e => (this.allEmployees = e.filter(x => x.employmentStatus !== 'Terminated')));
     this.data.attendance$.subscribe(a => {
       this.attendance = a;
       this.computeStats();
     });
   }
 
-  get workers(): Worker[] {
-    if (!this.search) return this.allWorkers;
-    return this.allWorkers.filter(w => w.name.toLowerCase().includes(this.search.toLowerCase()));
+  get employees(): Employee[] {
+    if (!this.search) return this.allEmployees;
+    return this.allEmployees.filter(e => e.fullName.toLowerCase().includes(this.search.toLowerCase()));
   }
 
   private computeStats() {
-    const dayRecords = this.attendance.filter(a => a.date === this.selectedDate);
+    const dayRecords = this.attendance.filter(a => a.attendanceDate === this.selectedDate);
     this.presentCount = dayRecords.filter(a => a.status === 'Present').length;
     this.absentCount = dayRecords.filter(a => a.status === 'Absent').length;
     this.halfDayCount = dayRecords.filter(a => a.status === 'Half Day').length;
@@ -60,12 +60,12 @@ export class AttendanceTrackingComponent implements OnInit {
     this.computeStats();
   }
 
-  recordFor(workerId: string): AttendanceRecord | undefined {
-    return this.attendance.find(a => a.workerId === workerId && a.date === this.selectedDate);
+  recordFor(employeeId: string): AttendanceRecord | undefined {
+    return this.attendance.find(a => a.employeeId === employeeId && a.attendanceDate === this.selectedDate);
   }
 
-  setStatus(workerId: string, status: AttendanceStatus) {
-    this.data.markAttendance(workerId, status, this.selectedDate);
+  setStatus(employeeId: string, status: AttendanceStatus) {
+    this.data.markAttendance(employeeId, status, this.selectedDate);
   }
 
   markAllPresent() {

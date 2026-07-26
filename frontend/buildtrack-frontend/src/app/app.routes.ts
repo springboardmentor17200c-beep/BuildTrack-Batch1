@@ -5,6 +5,7 @@ import { Login } from './features/login/login';
 import { Register } from './features/register/register';
 import { ResetPassword } from './features/reset-password/reset-password';
 import { Unauthorized } from './features/unauthorized/unauthorized';
+import { Landing } from './features/landing/landing';
 
 // In-app screens (logged in required)
 import { PROJECTS_ROUTES } from './features/projects/projects.routes';
@@ -23,7 +24,7 @@ import { ANALYTICS_ROUTES } from './features/analytics/analytics.routes';
 import { DASHBOARD_ROUTES } from './features/dashboards/dashboards.routes';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', component: Landing },
 
   // Public — no guard, anyone can reach these
   { path: 'login', component: Login },
@@ -47,5 +48,5 @@ export const routes: Routes = [
   { path: 'workforce', children: WORKFORCE_ROUTES, canActivate: [roleGuard('workforce')] },
   { path: 'analytics', children: ANALYTICS_ROUTES, canActivate: [roleGuard('analytics')] },
 
-  { path: '**', redirectTo: 'login' },
+  { path: '**', redirectTo: 'landing' },
 ];

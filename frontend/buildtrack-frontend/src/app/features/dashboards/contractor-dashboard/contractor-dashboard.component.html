@@ -65,9 +65,9 @@
           <thead><tr><th>Worker</th><th>Shift</th><th>Date</th></tr></thead>
           <tbody>
             <tr *ngFor="let s of shifts">
-              <td class="bt-strong">{{ s.workerName }}</td>
+              <td class="bt-strong">{{ s.employeeName }}</td>
               <td><span class="bt-badge" [ngClass]="shiftClass(s.shiftType)">{{ s.shiftType }}</span></td>
-              <td class="bt-muted">{{ s.date }}</td>
+              <td class="bt-muted">{{ s.shiftDate }}</td>
             </tr>
           </tbody>
         </table>

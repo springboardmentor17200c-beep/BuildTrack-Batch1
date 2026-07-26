@@ -1,15 +1,19 @@
+Here's the complete updated file — same PowerShell here-string method to save it cleanly:
+
+powershell
+@'
 <div class="bt-shell">
   <app-sidebar></app-sidebar>
   <div class="bt-main">
 <div class="bt-page">
   <div class="bt-topbar">
     <div>
-      <h1 class="bt-title">Welcome back, {{ currentUser?.fullName || 'Administrator' }}</h1>
-      <p class="bt-subtitle">Company-wide overview — users, projects, budgets, and system activity.</p>
+      <h1 class="bt-title">{{ 'dashboard.welcomeBack' | translate }} {{ currentUser?.fullName || 'Administrator' }}</h1>
+      <p class="bt-subtitle">{{ 'dashboard.adminSubtitle' | translate }}</p>
     </div>
     <div class="bt-actions">
       <span class="bt-badge purple">{{ currentUser?.role }}</span>
-      <a class="bt-filter-btn" [routerLink]="['/profile']">Profile</a>
+      <a class="bt-filter-btn" [routerLink]="['/profile']">{{ 'nav.profile' | translate }}</a>
     </div>
   </div>
 
@@ -20,7 +24,7 @@
       </div>
       <div class="bt-stat-text">
         <span class="bt-stat-value">{{ totalUsers }}</span>
-        <span class="bt-stat-label">Total Users</span>
+        <span class="bt-stat-label">{{ 'dashboard.totalUsers' | translate }}</span>
       </div>
     </div>
     <div class="bt-stat-card">
@@ -29,7 +33,7 @@
       </div>
       <div class="bt-stat-text">
         <span class="bt-stat-value">{{ activeProjects }}</span>
-        <span class="bt-stat-label">Active Projects</span>
+        <span class="bt-stat-label">{{ 'dashboard.activeProjects' | translate }}</span>
       </div>
     </div>
     <div class="bt-stat-card">
@@ -38,7 +42,7 @@
       </div>
       <div class="bt-stat-text">
         <span class="bt-stat-value">{{ budgetUsedPercent }}%</span>
-        <span class="bt-stat-label">Budget Used</span>
+        <span class="bt-stat-label">{{ 'dashboard.budgetUsed' | translate }}</span>
       </div>
     </div>
     <div class="bt-stat-card">
@@ -47,7 +51,7 @@
       </div>
       <div class="bt-stat-text">
         <span class="bt-stat-value">{{ avgUtilization }}%</span>
-        <span class="bt-stat-label">Avg. Resource Utilization</span>
+        <span class="bt-stat-label">{{ 'dashboard.avgUtilization' | translate }}</span>
       </div>
     </div>
   </div>
@@ -56,10 +60,10 @@
     <div class="bt-panel">
       <div class="bt-panel-header">
         <div>
-          <h3 class="bt-panel-title">Project Monitoring</h3>
-          <span class="bt-panel-sub">Live status across all projects</span>
+          <h3 class="bt-panel-title">{{ 'dashboard.projectMonitoring' | translate }}</h3>
+          <span class="bt-panel-sub">{{ 'dashboard.liveStatus' | translate }}</span>
         </div>
-        <a class="bt-filter-btn" [routerLink]="['/analytics/progress']">View All</a>
+        <a class="bt-filter-btn" [routerLink]="['/analytics/progress']">{{ 'dashboard.viewAll' | translate }}</a>
       </div>
       <div class="bt-table-wrap">
         <table class="bt-table">
@@ -83,8 +87,8 @@
     <div class="bt-panel">
       <div class="bt-panel-header">
         <div>
-          <h3 class="bt-panel-title">User Management</h3>
-          <span class="bt-panel-sub">{{ totalUsers }} accounts</span>
+          <h3 class="bt-panel-title">{{ 'dashboard.userManagement' | translate }}</h3>
+          <span class="bt-panel-sub">{{ totalUsers }} {{ 'dashboard.accounts' | translate }}</span>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;">
@@ -100,23 +104,23 @@
     <div class="bt-panel">
       <div class="bt-panel-header">
         <div>
-          <h3 class="bt-panel-title">Reports</h3>
-          <span class="bt-panel-sub">Jump to detailed analytics</span>
+          <h3 class="bt-panel-title">{{ 'dashboard.reports' | translate }}</h3>
+          <span class="bt-panel-sub">{{ 'dashboard.jumpToAnalytics' | translate }}</span>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/budget']">Budget Analytics</a>
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/progress']">Project Progress</a>
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/resources']">Resource Analytics</a>
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/procurement']">Procurement Analytics</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/budget']">{{ 'dashboard.budgetAnalytics' | translate }}</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/progress']">{{ 'dashboard.projectProgress' | translate }}</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/resources']">{{ 'dashboard.resourceAnalytics' | translate }}</a>
+        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/procurement']">{{ 'dashboard.procurementAnalytics' | translate }}</a>
       </div>
     </div>
 
     <div class="bt-panel">
       <div class="bt-panel-header">
         <div>
-          <h3 class="bt-panel-title">Activity Monitoring</h3>
-          <span class="bt-panel-sub">Recent system activity</span>
+          <h3 class="bt-panel-title">{{ 'dashboard.activityMonitoring' | translate }}</h3>
+          <span class="bt-panel-sub">{{ 'dashboard.recentActivity' | translate }}</span>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:14px;">

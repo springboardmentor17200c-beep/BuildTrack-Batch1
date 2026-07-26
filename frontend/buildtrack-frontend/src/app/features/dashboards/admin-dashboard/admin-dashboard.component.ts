@@ -7,6 +7,7 @@ import { AppUser, RoleName } from '../../auth/models/auth.model';
 import { AnalyticsDataService } from '../../analytics/analytics-data.service';
 import { ProjectProgressSummary } from '../../analytics/models/analytics.model';
 import { ResourceDataService } from '../../resource-management/resource-data.service';
+import { TranslatePipe } from '../../shared/translate.pipe';
 
 interface RoleCount {
   role: RoleName;
@@ -22,7 +23,7 @@ interface ActivityItem {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule, AppSidebarComponent, TranslatePipe],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css'],
 })

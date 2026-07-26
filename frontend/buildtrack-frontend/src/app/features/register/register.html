@@ -1,90 +1,95 @@
+Here's the translated version, matching your exact structure (including the max-width:480px card and the two-column first/last name grid):
+
+powershell
+@'
 <div class="bt-auth-page">
-  <div class="bt-auth-card">
-    <div class="bt-auth-logo">
+  <div class="bt-auth-card" style="max-width:480px;">
+    <a class="bt-auth-logo" [routerLink]="['/']" style="text-decoration:none;">
       <div class="bt-auth-logo-badge">BT</div>
       <span class="bt-auth-logo-text">BuildTrack</span>
-    </div>
+    </a>
 
-    <h1 class="bt-auth-title">Create your account</h1>
-    <p class="bt-auth-subtitle">Set up access to manage projects, sites, and teams.</p>
+    <h1 class="bt-auth-title">{{ 'auth.createAccount' | translate }}</h1>
+    <p class="bt-auth-subtitle">{{ 'auth.registerSubtitle' | translate }}</p>
 
     <div class="bt-auth-error" *ngIf="error">{{ error }}</div>
-    <div class="bt-auth-success" *ngIf="success">Account created! Redirecting to sign in...</div>
+    <div class="bt-auth-success" *ngIf="success">{{ 'auth.accountCreated' | translate }}</div>
 
     <form class="bt-auth-form" [formGroup]="form" (ngSubmit)="submit()" *ngIf="!success">
       <label class="bt-auth-field">
-        <span>Username</span>
-        <input type="text" formControlName="username" placeholder="e.g. priyamenon" autocomplete="username" />
+        <span>{{ 'auth.username' | translate }}</span>
+        <input type="text" formControlName="username" placeholder="e.g. priya.menon" />
       </label>
 
-      <label class="bt-auth-field">
-        <span>First Name</span>
-        <input type="text" formControlName="firstName" placeholder="e.g. Priya" />
-      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <label class="bt-auth-field">
+          <span>{{ 'auth.firstName' | translate }}</span>
+          <input type="text" formControlName="firstName" placeholder="Priya" />
+        </label>
+        <label class="bt-auth-field">
+          <span>{{ 'auth.lastName' | translate }}</span>
+          <input type="text" formControlName="lastName" placeholder="Menon" />
+        </label>
+      </div>
 
       <label class="bt-auth-field">
-        <span>Last Name</span>
-        <input type="text" formControlName="lastName" placeholder="e.g. Menon" />
-      </label>
-
-      <label class="bt-auth-field">
-        <span>Email</span>
+        <span>{{ 'auth.email' | translate }}</span>
         <input type="email" formControlName="email" placeholder="you@company.com" autocomplete="email" />
       </label>
 
       <label class="bt-auth-field">
-        <span>Phone Number</span>
+        <span>{{ 'auth.phoneNumber' | translate }}</span>
         <input type="text" formControlName="phoneNumber" placeholder="+91 98765 43210" />
       </label>
 
       <label class="bt-auth-field">
-        <span>Role</span>
+        <span>{{ 'auth.role' | translate }}</span>
         <select formControlName="role">
-          <option value="" disabled selected>Select your role</option>
+          <option value="" disabled selected>{{ 'auth.selectRole' | translate }}</option>
           <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
         </select>
       </label>
 
       <ng-container *ngIf="showCompanyFields">
         <label class="bt-auth-field">
-          <span>Company Name</span>
+          <span>{{ 'auth.companyName' | translate }}</span>
           <input type="text" formControlName="companyName" placeholder="e.g. Suresh Electricals" />
         </label>
         <label class="bt-auth-field">
-          <span>Tax ID</span>
+          <span>{{ 'auth.taxId' | translate }}</span>
           <input type="text" formControlName="taxId" placeholder="GSTIN / Tax ID" />
         </label>
       </ng-container>
 
       <ng-container *ngIf="showEmployeeFields">
         <label class="bt-auth-field">
-          <span>Employee ID</span>
+          <span>{{ 'auth.employeeId' | translate }}</span>
           <input type="text" formControlName="employeeId" placeholder="e.g. EMP-1042" />
         </label>
         <label class="bt-auth-field">
-          <span>Skills / Trade</span>
+          <span>{{ 'auth.skillsOrTrade' | translate }}</span>
           <input type="text" formControlName="skillsOrTrade" placeholder="e.g. Electrician, Mason" />
         </label>
       </ng-container>
 
       <label class="bt-auth-field">
-        <span>Password</span>
+        <span>{{ 'auth.password' | translate }}</span>
         <input type="password" formControlName="password" placeholder="At least 6 characters" autocomplete="new-password" />
       </label>
 
       <label class="bt-auth-field">
-        <span>Confirm Password</span>
+        <span>{{ 'auth.confirmPassword' | translate }}</span>
         <input type="password" formControlName="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password" />
       </label>
 
       <button type="submit" class="bt-auth-submit" [disabled]="submitting">
-        {{ submitting ? 'Creating account...' : 'Create Account' }}
+        {{ (submitting ? 'auth.creatingAccount' : 'auth.createAccountBtn') | translate }}
       </button>
     </form>
 
     <div class="bt-auth-footer">
-      Already have an account?
-      <a class="bt-auth-link" [routerLink]="['/login']">Sign in</a>
+      {{ 'auth.alreadyHaveAccount' | translate }}
+      <a class="bt-auth-link" [routerLink]="['/login']">{{ 'auth.signInLink' | translate }}</a>
     </div>
   </div>
 </div>

@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Shift, ShiftType, Worker } from '../models/workforce.model';
+import { Location } from '@angular/common';
+import { Employee, Shift, ShiftType } from '../models/workforce.model';
 import { WorkforceDataService } from '../workforce-data.service';
 
 const SHIFT_TIMES: Record<ShiftType, { start: string; end: string }> = {
@@ -22,27 +22,27 @@ const SHIFT_TIMES: Record<ShiftType, { start: string; end: string }> = {
 })
 export class ShiftSchedulingComponent implements OnInit {
   allShifts: Shift[] = [];
-  workers: Worker[] = [];
+  employees: Employee[] = [];
   projectNames: string[] = [];
   shiftTypes: ShiftType[] = ['Morning', 'Evening', 'Night'];
   showForm = false;
   form: FormGroup;
 
-  projectFilter: string = 'All';
+  projectFilter = 'All';
   shiftTypeFilter: ShiftType | 'All' = 'All';
 
   constructor(private data: WorkforceDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
-      workerId: ['', Validators.required],
+      employeeId: ['', Validators.required],
       project: ['', Validators.required],
       shiftType: ['', Validators.required],
-      date: ['', Validators.required],
+      shiftDate: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
     this.data.shifts$.subscribe(s => (this.allShifts = s));
-    this.data.workers$.subscribe(w => (this.workers = w.filter(x => x.status === 'Active')));
+    this.data.employees$.subscribe(e => (this.employees = e.filter(x => x.employmentStatus === 'Active')));
     this.projectNames = this.data.projectNames;
   }
 
@@ -64,19 +64,19 @@ export class ShiftSchedulingComponent implements OnInit {
       return;
     }
 
-    const { workerId, project, shiftType, date } = this.form.value;
-    const worker = this.workers.find(w => w.id === workerId);
-    if (!worker) return;
+    const { employeeId, project, shiftType, shiftDate } = this.form.value;
+    const employee = this.employees.find(e => e.employeeId === employeeId);
+    if (!employee) return;
 
     const times = SHIFT_TIMES[shiftType as ShiftType];
 
     const shift: Shift = {
-      id: 'SH-' + Math.floor(6000 + Math.random() * 9000),
-      workerId,
-      workerName: worker.name,
+      shiftId: 'SH-' + Math.floor(6000 + Math.random() * 9000),
+      employeeId,
+      employeeName: employee.fullName,
       project,
       shiftType,
-      date,
+      shiftDate,
       startTime: times.start,
       endTime: times.end,
     };

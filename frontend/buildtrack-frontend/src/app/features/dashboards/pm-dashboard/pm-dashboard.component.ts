@@ -55,9 +55,9 @@ export class PmDashboardComponent implements OnInit {
     this.budgetUsedPercent = approved ? Math.round((spent / approved) * 100) : 0;
     this.pendingOrders = this.analytics.orderStatusBreakdown().find(s => s.status === 'Pending')?.count || 0;
 
-    this.workforceData.workers$.subscribe(workers => {
-      this.totalWorkers = workers.length;
-      this.onLeave = workers.filter(w => w.status === 'On Leave').length;
+    this.workforceData.employees$.subscribe(employees => {
+      this.totalWorkers = employees.length;
+      this.onLeave = employees.filter(e => e.employmentStatus === 'On Leave').length;
     });
     this.workforceData.attendance$.subscribe(records => {
       this.presentToday = records.filter(r => r.status === 'Present').length;

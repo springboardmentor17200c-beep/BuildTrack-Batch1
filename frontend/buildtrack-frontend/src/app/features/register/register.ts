@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractContro
 import { Router, RouterModule } from '@angular/router';
 import { AuthDataService } from '../auth/auth-data.service';
 import { RoleName } from '../auth/models/auth.model';
+import { TranslatePipe } from '../shared/translate.pipe';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -14,7 +15,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslatePipe],
   templateUrl: './register.html',
   styleUrls: ['./register.css'],
 })

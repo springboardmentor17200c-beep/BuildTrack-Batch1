@@ -9,12 +9,12 @@
   <div class="bt-topbar">
     <div>
       <h1 class="bt-title">Worker Management Dashboard</h1>
-      <p class="bt-subtitle">Every worker on your sites, grouped by role, with status at a glance.</p>
+      <p class="bt-subtitle">Every employee on your sites, grouped by role, with status at a glance.</p>
     </div>
     <div class="bt-actions">
       <button class="bt-add-btn" (click)="toggleForm()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
-        <span *ngIf="!showForm">Add Worker</span>
+        <span *ngIf="!showForm">Add Employee</span>
         <span *ngIf="showForm">Cancel</span>
       </button>
     </div>
@@ -24,11 +24,15 @@
     <div class="bt-form-grid">
       <label>
         <span>Full Name</span>
-        <input type="text" formControlName="name" placeholder="e.g. Rajesh Sharma" />
+        <input type="text" formControlName="fullName" placeholder="e.g. Rajesh Sharma" />
+      </label>
+      <label>
+        <span>Employee Code</span>
+        <input type="text" formControlName="employeeCode" placeholder="e.g. EMP-1042" />
       </label>
       <label>
         <span>Role</span>
-        <select formControlName="category">
+        <select formControlName="workforceCategory">
           <option value="" disabled selected>Select role</option>
           <option *ngFor="let c of categories.slice(1)" [value]="c">{{ c }}</option>
         </select>
@@ -44,9 +48,26 @@
         <span>Contact Number</span>
         <input type="text" formControlName="contact" placeholder="e.g. +91 98765 43210" />
       </label>
+      <label>
+        <span>Experience (years)</span>
+        <input type="number" formControlName="experienceYears" step="0.5" min="0" />
+      </label>
+      <label>
+        <span>Pay Rate (₹)</span>
+        <input type="number" formControlName="payRate" min="0" />
+      </label>
+      <label>
+        <span>Payment Type</span>
+        <select formControlName="paymentType">
+          <option value="" disabled selected>Select type</option>
+          <option value="Hourly">Hourly</option>
+          <option value="Daily">Daily</option>
+          <option value="Monthly">Monthly</option>
+        </select>
+      </label>
     </div>
     <div class="bt-form-actions">
-      <button type="submit" class="bt-add-btn">Register Worker</button>
+      <button type="submit" class="bt-add-btn">Register Employee</button>
     </div>
   </form>
 
@@ -56,8 +77,8 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"></circle><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"></path></svg>
       </div>
       <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ totalWorkers }}</span>
-        <span class="bt-stat-label">Total Workers</span>
+        <span class="bt-stat-value">{{ totalEmployees }}</span>
+        <span class="bt-stat-label">Total Employees</span>
       </div>
     </div>
     <div class="bt-stat-card">
@@ -83,8 +104,8 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6"></path><path d="M9 9l6 6"></path></svg>
       </div>
       <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ inactiveCount }}</span>
-        <span class="bt-stat-label">Inactive</span>
+        <span class="bt-stat-value">{{ terminatedCount }}</span>
+        <span class="bt-stat-label">Terminated</span>
       </div>
     </div>
   </div>
@@ -110,13 +131,13 @@
   <div class="bt-panel">
     <div class="bt-panel-header">
       <div>
-        <h3 class="bt-panel-title">All Workers</h3>
-        <span class="bt-panel-sub">{{ filtered.length }} of {{ workers.length }} workers</span>
+        <h3 class="bt-panel-title">All Employees</h3>
+        <span class="bt-panel-sub">{{ filtered.length }} of {{ employees.length }}</span>
       </div>
       <div class="bt-actions">
         <div class="bt-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
-          <input type="text" placeholder="Search by name or ID..." [(ngModel)]="search" />
+          <input type="text" placeholder="Search by name or code..." [(ngModel)]="search" />
         </div>
         <select class="bt-filter-select" [(ngModel)]="categoryFilter">
           <option *ngFor="let c of categories" [value]="c">{{ c === 'All' ? 'All Roles' : c }}</option>
@@ -126,20 +147,19 @@
 
     <div class="bt-table-wrap">
       <table class="bt-table">
-        <thead>
-          <tr><th>Worker</th><th>Role</th><th>Project</th><th>Contact</th><th>Joined</th><th>Status</th></tr>
-        </thead>
+        <thead><tr><th>Employee</th><th>Code</th><th>Role</th><th>Project</th><th>Contact</th><th>Pay</th><th>Status</th></tr></thead>
         <tbody>
-          <tr *ngFor="let w of filtered">
-            <td class="bt-strong">{{ w.name }}</td>
-            <td>{{ w.category }}</td>
-            <td>{{ w.project }}</td>
-            <td class="bt-muted">{{ w.contact }}</td>
-            <td class="bt-muted">{{ w.joinDate }}</td>
-            <td><span class="bt-badge" [ngClass]="statusClass(w.status)">{{ w.status }}</span></td>
+          <tr *ngFor="let e of filtered">
+            <td class="bt-strong">{{ e.fullName }}</td>
+            <td class="bt-muted">{{ e.employeeCode }}</td>
+            <td>{{ e.workforceCategory }}</td>
+            <td>{{ e.project }}</td>
+            <td class="bt-muted">{{ e.contact }}</td>
+            <td class="bt-muted">₹{{ e.payRate | number }} / {{ e.paymentType }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(e.employmentStatus)">{{ e.employmentStatus }}</span></td>
           </tr>
           <tr *ngIf="filtered.length === 0">
-            <td colspan="6" class="bt-empty">No workers match your search.</td>
+            <td colspan="7" class="bt-empty">No employees match your search.</td>
           </tr>
         </tbody>
       </table>

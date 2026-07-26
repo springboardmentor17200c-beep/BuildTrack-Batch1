@@ -1114,3 +1114,583 @@ html, body {
   body.bt-dark .bt-lang-btn:hover { background: #242835; }
   body.bt-dark .bt-lang-menu { background: #1b1e29; border-color: #2a2f3d; }
   body.bt-dark .bt-lang-option:hover { background: #242835; }
+
+  /* ==========================================================================
+   Fix: sidebar showing a gap/background bleed-through when page content
+   is taller than one viewport. Switch from sticky to fixed so the
+   sidebar always spans the full screen height, independent of page length.
+   ========================================================================== */
+
+.bt-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.bt-main {
+  margin-left: 240px;
+}
+
+@media (max-width: 900px) {
+  .bt-main {
+    margin-left: 72px;
+  }
+}
+
+/* Landing page — public marketing/entry page, styled to match the
+   existing auth pages (bt-auth-*) and dashboard theme (bt-panel,
+   bt-option-card, bt-badge) so the transition into the app feels seamless. */
+
+   .bt-landing {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f7f9ff 0%, #eef1fb 100%);
+    font-family: var(--bt-font);
+    overflow-x: hidden;
+  }
+  
+  /* No underlines anywhere on this page, ever */
+  .bt-landing a {
+    text-decoration: none;
+  }
+  
+  /* --- Top nav --- */
+  .bt-landing-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  
+  .bt-landing-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .bt-landing-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .bt-landing-link {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bt-text);
+  }
+  .bt-landing-link:hover { color: var(--bt-blue); }
+  
+  .bt-landing-icon-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff;
+    border: 1.5px solid var(--bt-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    color: var(--bt-muted);
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .bt-landing-icon-btn:hover { border-color: var(--bt-blue); color: var(--bt-blue); }
+  .bt-landing-lang-code { font-size: 11.5px; font-weight: 800; }
+  
+  .bt-lang-wrap { position: relative; }
+  .bt-landing-lang-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    bottom: auto;
+  }
+  
+  .bt-landing-auth-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bt-border);
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .bt-landing-auth-pill:hover {
+    border-color: var(--bt-green);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  }
+  
+  .bt-landing-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa, var(--bt-blue));
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .bt-landing-online-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--bt-green);
+    border: 2px solid #fff;
+    margin-left: -14px;
+    margin-top: 12px;
+    flex-shrink: 0;
+  }
+  
+  .bt-landing-auth-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+  .bt-landing-auth-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--bt-green);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .bt-landing-auth-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--bt-text);
+  }
+  
+  /* --- Hero --- */
+  .bt-landing-hero {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 40px 80px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  
+  .bt-landing-hero-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .bt-landing-eyebrow { margin-bottom: 18px; }
+  
+  .bt-landing-title {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    color: var(--bt-text);
+  }
+  
+  .bt-landing-subtitle {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--bt-muted);
+    margin: 0 0 32px;
+  }
+  
+  .bt-landing-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .bt-landing-link-btn {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--bt-text);
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bt-border);
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .bt-landing-link-btn:hover {
+    border-color: var(--bt-blue);
+    color: var(--bt-blue);
+  }
+  
+  .bt-landing-hero-media {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(30, 41, 59, 0.16);
+    aspect-ratio: 4 / 3;
+  }
+  .bt-landing-hero-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  /* --- Stats bar --- */
+  .bt-landing-stats {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px 72px;
+  }
+  .bt-landing-stats-row {
+    background: #fff;
+    border: 1px solid var(--bt-border);
+    border-radius: 20px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    box-shadow: 0 8px 24px rgba(30, 41, 59, 0.06);
+  }
+  .bt-landing-stat {
+    text-align: center;
+    padding: 0 12px;
+    border-right: 1px solid var(--bt-border);
+  }
+  .bt-landing-stat:last-child { border-right: none; }
+  .bt-landing-stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--bt-blue);
+  }
+  .bt-landing-stat-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--bt-muted);
+    margin-top: 4px;
+  }
+  
+  /* --- Why BuildTrack (image + benefits) --- */
+  .bt-landing-benefits {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .bt-landing-benefits-media {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(30, 41, 59, 0.16);
+    aspect-ratio: 4 / 5;
+  }
+  .bt-landing-benefits-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bt-landing-benefits-text h2 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 24px;
+    color: var(--bt-text);
+  }
+  .bt-landing-benefit {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+  }
+  .bt-landing-benefit:last-child { margin-bottom: 0; }
+  .bt-landing-benefit h3 {
+    font-size: 15.5px;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: var(--bt-text);
+  }
+  .bt-landing-benefit p {
+    font-size: 13.5px;
+    color: var(--bt-muted);
+    line-height: 1.55;
+    margin: 0;
+  }
+  
+  /* --- Features section --- */
+  .bt-landing-features {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px 72px;
+  }
+  
+  .bt-landing-features-header {
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 36px;
+  }
+  .bt-landing-features-header h2 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    color: var(--bt-text);
+  }
+  .bt-landing-features-header p {
+    font-size: 14.5px;
+    color: var(--bt-muted);
+    margin: 0;
+  }
+  
+  .bt-landing-feature-card {
+    border: none;
+    width: 100%;
+  }
+  
+  /* --- How it works --- */
+  .bt-landing-how {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px 72px;
+  }
+  .bt-landing-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .bt-landing-step {
+    background: #fff;
+    border: 1px solid var(--bt-border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 8px 24px rgba(30, 41, 59, 0.06);
+  }
+  .bt-landing-step-number {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--bt-blue);
+    background: var(--bt-blue-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .bt-landing-step h3 {
+    font-size: 16.5px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    color: var(--bt-text);
+  }
+  .bt-landing-step p {
+    font-size: 13.5px;
+    color: var(--bt-muted);
+    line-height: 1.55;
+    margin: 0;
+  }
+  
+  /* --- Roles strip --- */
+  .bt-landing-roles {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    text-align: center;
+  }
+  .bt-landing-roles-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  /* --- Testimonials --- */
+  .bt-landing-testimonials {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+  .bt-landing-testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .bt-landing-testimonial {
+    background: #fff;
+    border: 1px solid var(--bt-border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 8px 24px rgba(30, 41, 59, 0.06);
+    display: flex;
+    flex-direction: column;
+  }
+  .bt-landing-quote-icon {
+    color: var(--bt-blue-soft);
+    margin-bottom: 12px;
+  }
+  .bt-landing-quote {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--bt-text);
+    margin: 0 0 20px;
+    flex: 1;
+  }
+  .bt-landing-testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  /* --- FAQ --- */
+  .bt-landing-faq {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+  .bt-landing-faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bt-landing-faq-item {
+    background: #fff;
+    border: 1px solid var(--bt-border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .bt-landing-faq-item.open { border-color: var(--bt-blue); }
+  .bt-landing-faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 18px 22px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--bt-text);
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+  .bt-landing-faq-chevron {
+    flex-shrink: 0;
+    color: var(--bt-muted);
+    transition: transform 0.25s ease;
+  }
+  .bt-landing-faq-item.open .bt-landing-faq-chevron {
+    transform: rotate(180deg);
+    color: var(--bt-blue);
+  }
+  .bt-landing-faq-answer {
+    padding: 0 22px 20px;
+  }
+  .bt-landing-faq-answer p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--bt-muted);
+  }
+  
+  /* --- Final CTA banner --- */
+  .bt-landing-cta {
+    max-width: 1180px;
+    margin: 0 auto 72px;
+    padding: 0 40px;
+  }
+  .bt-landing-cta-inner {
+    background: linear-gradient(120deg, #4f46e5 0%, #3b82f6 45%, #8b5cf6 100%);
+    border-radius: 24px;
+    padding: 56px 40px;
+    text-align: center;
+    color: #fff;
+  }
+  .bt-landing-cta-inner h2 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 10px;
+  }
+  .bt-landing-cta-inner p {
+    font-size: 14.5px;
+    opacity: 0.9;
+    margin: 0 0 26px;
+  }
+  .bt-landing-cta-btn {
+    background: #fff;
+    color: var(--bt-blue);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  .bt-landing-cta-btn:hover { background: #f3f4f6; }
+  
+  /* --- Footer --- */
+  .bt-landing-footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    border-top: 1px solid var(--bt-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .bt-landing-footer p {
+    margin: 0;
+    font-size: 13px;
+  }
+  
+  @media (max-width: 900px) {
+    .bt-landing-hero,
+    .bt-landing-benefits { grid-template-columns: 1fr; }
+    .bt-landing-hero-media,
+    .bt-landing-benefits-media { order: -1; }
+    .bt-landing-stats-row { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .bt-landing-stat { border-right: none; border-bottom: 1px solid var(--bt-border); padding-bottom: 16px; }
+    .bt-landing-steps,
+    .bt-landing-testimonial-grid { grid-template-columns: 1fr; }
+  }
+  
+  @media (max-width: 700px) {
+    .bt-landing-nav { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
+    .bt-landing-title { font-size: 28px; }
+    .bt-landing-hero { padding: 24px 20px 56px; }
+    .bt-landing-features, .bt-landing-how, .bt-landing-benefits, .bt-landing-testimonials, .bt-landing-faq { padding-left: 20px; padding-right: 20px; }
+    .bt-landing-hero-actions { flex-direction: column; width: 100%; }
+    .bt-landing-hero-actions .bt-add-btn,
+    .bt-landing-hero-actions .bt-landing-link-btn { width: 100%; justify-content: center; text-align: center; }
+    .bt-landing-auth-text { display: none; }
+  }
+  
+  /* --- Dark mode --- */
+  body.bt-dark .bt-landing {
+    background: linear-gradient(180deg, #14161f 0%, #0e1017 100%);
+  }
+  body.bt-dark .bt-landing-title,
+  body.bt-dark .bt-landing-features-header h2,
+  body.bt-dark .bt-landing-step h3,
+  body.bt-dark .bt-landing-benefits-text h2,
+  body.bt-dark .bt-landing-benefit h3,
+  body.bt-dark .bt-landing-quote,
+  body.bt-dark .bt-landing-faq-question {
+    color: #f3f4f6;
+  }
+  body.bt-dark .bt-landing-link { color: #e5e7eb; }
+  body.bt-dark .bt-landing-link-btn,
+  body.bt-dark .bt-landing-icon-btn,
+  body.bt-dark .bt-landing-auth-pill,
+  body.bt-dark .bt-landing-stats-row,
+  body.bt-dark .bt-landing-step,
+  body.bt-dark .bt-landing-testimonial,
+  body.bt-dark .bt-landing-faq-item {
+    background: #1b1e29;
+    color: #e5e7eb;
+    border-color: #2a2f3d;
+  }
+  body.bt-dark .bt-landing-link-btn:hover,
+  body.bt-dark .bt-landing-icon-btn:hover {
+    border-color: var(--bt-blue);
+    color: var(--bt-blue);
+  }
+  body.bt-dark .bt-landing-auth-name { color: #f3f4f6; }
+  body.bt-dark .bt-landing-stat { border-right-color: #2a2f3d; }
+  body.bt-dark .bt-landing-footer { border-top-color: #2a2f3d; }

@@ -60,10 +60,10 @@ export class WorkforceHubComponent implements OnInit {
   constructor(private router: Router, private data: WorkforceDataService, private location: Location) {}
 
   ngOnInit(): void {
-    this.data.workers$.subscribe(workers => {
-      this.totalWorkers = workers.length;
-      this.activeCount = workers.filter(w => w.status === 'Active').length;
-      this.onLeaveCount = workers.filter(w => w.status === 'On Leave').length;
+    this.data.employees$.subscribe(employees => {
+      this.totalWorkers = employees.length;
+      this.activeCount = employees.filter(e => e.employmentStatus === 'Active').length;
+      this.onLeaveCount = employees.filter(e => e.employmentStatus === 'On Leave').length;
     });
     this.data.attendance$.subscribe(records => {
       this.presentTodayCount = records.filter(r => r.status === 'Present').length;
