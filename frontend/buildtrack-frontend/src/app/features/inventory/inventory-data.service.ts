@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { InventoryRecord, InventoryTransaction, Material, MaterialRequest, StockStatus } from './models/inventory.model';
+import { InventoryRecord, InventoryTransaction, Material, MaterialRequest, StockStatus, MaterialAllocation, StockAdjustment, AllocationStatus } from './models/inventory.model';
 
 // NOTE: mock/in-memory data for now. When the FastAPI endpoints are ready,
 // replace the arrays below with HttpClient calls against:
@@ -58,15 +58,52 @@ export class InventoryDataService {
     { requestId: 'MR-3004', project: 'Skyline Residency Tower', requestedBy: 'Priya Menon', materialId: 'MAT-208', materialName: 'M-Sand', category: 'Sand', unitOfMeasure: 'tons', requestedQuantity: 40, requestDate: '2026-06-28', requestStatus: 'Rejected', remarks: 'Insufficient stock and no pending purchase order' },
   ];
 
+  // ====== NEW: Material Allocations ======
+  private allocations: MaterialAllocation[] = [
+    {
+      allocationId: 'ALL-001',
+      materialId: 'MAT-201',
+      materialName: 'OPC 53 Grade Cement',
+      projectId: 'Skyline Residency Tower',
+      projectName: 'Skyline Residency Tower',
+      allocatedQuantity: 200,
+      issuedQuantity: 150,
+      returnedQuantity: 0,
+      allocatedDate: '2026-07-08',
+      issuedDate: '2026-07-09',
+      status: 'Issued',
+      allocatedBy: 'Manager A',
+      issuedTo: 'Site Supervisor',
+      remarks: 'Foundation work'
+    },
+    {
+      allocationId: 'ALL-002',
+      materialId: 'MAT-203',
+      materialName: 'TMT Steel Bars (12mm)',
+      projectId: 'Riverside Business Park',
+      projectName: 'Riverside Business Park',
+      allocatedQuantity: 10,
+      issuedQuantity: 0,
+      returnedQuantity: 0,
+      allocatedDate: '2026-07-10',
+      status: 'Reserved',
+      allocatedBy: 'Manager B',
+      issuedTo: 'Project Manager',
+      remarks: 'Pending delivery'
+    }
+  ];
+
   private materials$$ = new BehaviorSubject<Material[]>(this.materials);
   private inventory$$ = new BehaviorSubject<InventoryRecord[]>(this.inventoryRecords);
   private transactions$$ = new BehaviorSubject<InventoryTransaction[]>(this.transactions);
   private requests$$ = new BehaviorSubject<MaterialRequest[]>(this.materialRequests);
+  private allocations$$ = new BehaviorSubject<MaterialAllocation[]>(this.allocations);
 
   materials$ = this.materials$$.asObservable();
   inventory$ = this.inventory$$.asObservable();
   transactions$ = this.transactions$$.asObservable();
   requests$ = this.requests$$.asObservable();
+  allocations$ = this.allocations$$.asObservable();
 
   get projectNames(): string[] {
     return ['Skyline Residency Tower', 'Riverside Business Park'];
@@ -138,5 +175,131 @@ export class InventoryDataService {
   hasSufficientStock(materialId: string, quantity: number): boolean {
     const record = this.inventoryRecords.find(inv => inv.materialId === materialId);
     return !!record && record.availableQuantity >= quantity;
+  }
+
+  // ====== ALLOCATION METHODS ======
+  createAllocation(allocation: Omit<MaterialAllocation, 'allocationId' | 'allocatedDate' | 'status'>): void {
+    const newAllocation: MaterialAllocation = {
+      ...allocation,
+      allocationId: `ALL-${String(this.allocations.length + 1).padStart(3, '0')}`,
+      allocatedDate: new Date().toISOString().split('T')[0],
+      status: 'Reserved'
+    };
+    
+    this.allocations = [newAllocation, ...this.allocations];
+    this.allocations$$.next(this.allocations);
+    
+    // Reduce stock
+    this.reduceStock(allocation.materialId, allocation.allocatedQuantity);
+  }
+
+  issueAllocation(allocationId: string): void {
+    const allocation = this.allocations.find(a => a.allocationId === allocationId);
+    if (!allocation || allocation.status !== 'Reserved') return;
+    
+    this.allocations = this.allocations.map(a =>
+      a.allocationId === allocationId
+        ? { ...a, status: 'Issued', issuedDate: new Date().toISOString().split('T')[0], issuedQuantity: a.allocatedQuantity }
+        : a
+    );
+    this.allocations$$.next(this.allocations);
+  }
+
+  returnAllocation(allocationId: string, returnedQuantity: number): void {
+    const allocation = this.allocations.find(a => a.allocationId === allocationId);
+    if (!allocation || allocation.status === 'Returned') return;
+    
+    const currentReturned = allocation.returnedQuantity || 0;
+    const newReturned = currentReturned + returnedQuantity;
+    
+    let newStatus: AllocationStatus = 'Returned';
+    if (newReturned < allocation.allocatedQuantity) {
+      newStatus = 'PartiallyReturned';
+    }
+    
+    this.allocations = this.allocations.map(a =>
+      a.allocationId === allocationId
+        ? { ...a, returnedQuantity: newReturned, status: newStatus }
+        : a
+    );
+    this.allocations$$.next(this.allocations);
+    
+    // Add back to stock
+    this.addToStock(allocation.materialId, returnedQuantity);
+  }
+
+  getAvailableForAllocation(materialId: string): number {
+    const record = this.inventoryRecords.find(inv => inv.materialId === materialId);
+    if (!record) return 0;
+    
+    const reserved = this.allocations
+      .filter(a => a.materialId === materialId && a.status === 'Reserved')
+      .reduce((sum, a) => sum + a.allocatedQuantity, 0);
+    
+    return record.availableQuantity - reserved;
+  }
+
+  // ====== STOCK MANAGEMENT METHODS ======
+  addMaterial(material: Omit<Material, 'materialId'>): void {
+    const newMaterial: Material = {
+      ...material,
+      materialId: `MAT-${Math.floor(200 + Math.random() * 900)}`
+    };
+    this.materials = [newMaterial, ...this.materials];
+    this.materials$$.next(this.materials);
+  }
+
+  updateMaterial(materialId: string, updates: Partial<Material>): void {
+    this.materials = this.materials.map(m =>
+      m.materialId === materialId ? { ...m, ...updates } : m
+    );
+    this.materials$$.next(this.materials);
+  }
+
+  deleteMaterial(materialId: string): void {
+    this.materials = this.materials.filter(m => m.materialId !== materialId);
+    this.materials$$.next(this.materials);
+  }
+
+  addInventoryRecord(record: Omit<InventoryRecord, 'inventoryId' | 'lastUpdated'>): void {
+    const newRecord: InventoryRecord = {
+      ...record,
+      inventoryId: `INV-${String(this.inventoryRecords.length + 1).padStart(3, '0')}`,
+      lastUpdated: new Date().toISOString().split('T')[0]
+    };
+    this.inventoryRecords = [newRecord, ...this.inventoryRecords];
+    this.inventory$$.next(this.inventoryRecords);
+  }
+
+  updateInventoryRecord(inventoryId: string, updates: Partial<InventoryRecord>): void {
+    this.inventoryRecords = this.inventoryRecords.map(inv =>
+      inv.inventoryId === inventoryId ? { ...inv, ...updates, lastUpdated: new Date().toISOString().split('T')[0] } : inv
+    );
+    this.inventory$$.next(this.inventoryRecords);
+  }
+
+  // ====== HELPER METHODS ======
+  private reduceStock(materialId: string, quantity: number): void {
+    const record = this.inventoryRecords.find(inv => inv.materialId === materialId);
+    if (record) {
+      this.inventoryRecords = this.inventoryRecords.map(inv =>
+        inv.inventoryId === record.inventoryId
+          ? { ...inv, availableQuantity: inv.availableQuantity - quantity, lastUpdated: new Date().toISOString().split('T')[0] }
+          : inv
+      );
+      this.inventory$$.next(this.inventoryRecords);
+    }
+  }
+
+  private addToStock(materialId: string, quantity: number): void {
+    const record = this.inventoryRecords.find(inv => inv.materialId === materialId);
+    if (record) {
+      this.inventoryRecords = this.inventoryRecords.map(inv =>
+        inv.inventoryId === record.inventoryId
+          ? { ...inv, availableQuantity: inv.availableQuantity + quantity, lastUpdated: new Date().toISOString().split('T')[0] }
+          : inv
+      );
+      this.inventory$$.next(this.inventoryRecords);
+    }
   }
 }

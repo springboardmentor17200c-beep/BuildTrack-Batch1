@@ -1,30 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, Material, MaterialRequest } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
-
-// NOTE: this page represents the DB's `material_requests` table — a project
-// asking to draw material from existing stock. It is NOT the vendor-facing
-// Procurement module (procurement_requests / purchase_orders / invoices),
-// which is a separate module not yet built.
+import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-procurement-request',
+  selector: 'app-material-requests',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './procurement-request.component.html',
-  styleUrls: ['./procurement-request.component.css'],
+  templateUrl: './material-requests.component.html',  // ← Must match file name
+  styleUrls: ['./material-requests.component.css'],  // ← Must match file name
 })
-export class ProcurementRequestComponent implements OnInit {
+export class MaterialRequestsComponent implements OnInit, OnDestroy {
   requests: MaterialRequest[] = [];
   materials: Material[] = [];
   inventoryRecords: InventoryRecord[] = [];
   projectNames: string[] = [];
   showForm = false;
   form: FormGroup;
+  private subscriptions = new Subscription();
 
   constructor(private data: InventoryDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
@@ -36,10 +33,20 @@ export class ProcurementRequestComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.data.requests$.subscribe(r => (this.requests = r));
-    this.data.materials$.subscribe(m => (this.materials = m));
-    this.data.inventory$.subscribe(inv => (this.inventoryRecords = inv));
+    this.subscriptions.add(
+      this.data.requests$.subscribe(r => (this.requests = r))
+    );
+    this.subscriptions.add(
+      this.data.materials$.subscribe(m => (this.materials = m))
+    );
+    this.subscriptions.add(
+      this.data.inventory$.subscribe(inv => (this.inventoryRecords = inv))
+    );
     this.projectNames = this.data.projectNames;
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   toggleForm() {
@@ -65,7 +72,7 @@ export class ProcurementRequestComponent implements OnInit {
       category: material.category,
       unitOfMeasure: material.unitOfMeasure,
       requestedQuantity: Number(quantity),
-      requestDate: '2026-07-10',
+      requestDate: new Date().toISOString().split('T')[0],
       requestStatus: 'Pending',
     };
 
@@ -74,7 +81,6 @@ export class ProcurementRequestComponent implements OnInit {
     this.showForm = false;
   }
 
-  /** Whether there's enough stock to approve this request right now. */
   canApprove(request: MaterialRequest): boolean {
     return this.data.hasSufficientStock(request.materialId, request.requestedQuantity);
   }

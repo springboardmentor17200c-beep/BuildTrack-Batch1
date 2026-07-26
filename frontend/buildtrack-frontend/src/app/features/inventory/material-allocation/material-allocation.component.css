@@ -1,0 +1,25 @@
+.bt-row-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bt-badge.orange {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.bt-badge.green {
+  background: #d4edda;
+  color: #155724;
+}
+
+.bt-badge.blue {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.bt-badge.gray {
+  background: #e2e3e5;
+  color: #383d41;
+}

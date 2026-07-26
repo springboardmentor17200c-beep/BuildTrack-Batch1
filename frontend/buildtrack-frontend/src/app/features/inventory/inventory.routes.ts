@@ -1,15 +1,22 @@
 import { Routes } from '@angular/router';
 import { InventoryHubComponent } from './inventory-hub/inventory-hub.component';
 import { MaterialDashboardComponent } from './material-dashboard/material-dashboard.component';
+import { MaterialRequestsComponent } from './material-requests/material-requests.component';
 import { StockMonitoringComponent } from './stock-monitoring/stock-monitoring.component';
-import { ProcurementRequestComponent } from './procurement-request/procurement-request.component';
+import { MaterialAllocationComponent } from './material-allocation/material-allocation.component';
+import { StockManagementComponent } from './stock-management/stock-management.component';
 
-// Mount these under your main app routes, e.g.:
-//   { path: 'inventory', children: INVENTORY_ROUTES }
-// Result: /inventory, /inventory/dashboard, /inventory/stock, /inventory/requests
 export const INVENTORY_ROUTES: Routes = [
-  { path: '', component: InventoryHubComponent },
-  { path: 'dashboard', component: MaterialDashboardComponent },
-  { path: 'stock', component: StockMonitoringComponent },
-  { path: 'requests', component: ProcurementRequestComponent },
+  {
+    path: '',
+    component: InventoryHubComponent,
+    children: [
+      { path: 'dashboard', component: MaterialDashboardComponent },
+      { path: 'requests', component: MaterialRequestsComponent },
+      { path: 'stock', component: StockMonitoringComponent },
+      { path: 'allocation', component: MaterialAllocationComponent },
+      { path: 'management', component: StockManagementComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  }
 ];
