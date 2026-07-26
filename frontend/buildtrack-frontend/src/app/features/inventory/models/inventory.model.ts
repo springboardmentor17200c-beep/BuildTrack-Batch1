@@ -75,3 +75,43 @@ export interface MaterialRequest {
   requestStatus: RequestStatus;
   remarks?: string;
 }
+
+// ====== NEW: Material Allocation ======
+export type AllocationStatus = 'Reserved' | 'Issued' | 'Returned' | 'PartiallyReturned';
+
+export interface MaterialAllocation {
+  allocationId: string;
+  materialId: string;
+  materialName: string;
+  projectId: string;
+  projectName: string;
+  allocatedQuantity: number;
+  issuedQuantity?: number;
+  returnedQuantity?: number;
+  allocatedDate: string;
+  issuedDate?: string;
+  status: AllocationStatus;
+  allocatedBy: string;
+  issuedTo: string;
+  remarks?: string;
+}
+
+// ====== NEW: Stock Adjustment ======
+export type AdjustmentType = 'Addition' | 'Reduction' | 'Transfer' | 'Return';
+
+export interface StockAdjustment {
+  adjustmentId: string;
+  inventoryId: string;
+  materialName: string;
+  adjustmentType: AdjustmentType;
+  quantity: number;
+  previousQuantity: number;
+  newQuantity: number;
+  reason: string;
+  referenceNumber?: string;
+  fromSiteId?: string;
+  toSiteId?: string;
+  adjustedBy: string;
+  adjustmentDate: string;
+  approvedBy?: string;
+}

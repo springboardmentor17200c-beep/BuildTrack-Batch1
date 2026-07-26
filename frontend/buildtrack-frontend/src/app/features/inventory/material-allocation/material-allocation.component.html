@@ -1,0 +1,132 @@
+<div class="bt-page">
+  <button class="bt-back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back
+  </button>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Material Allocation</h1>
+      <p class="bt-subtitle">Reserve and allocate materials to specific projects.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="toggleForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14"></path><path d="M5 12h14"></path>
+        </svg>
+        <span *ngIf="!showForm">New Allocation</span>
+        <span *ngIf="showForm">Cancel</span>
+      </button>
+    </div>
+  </div>
+
+  <form class="bt-form-card" *ngIf="showForm" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="bt-form-grid">
+      <label>
+        <span>Material</span>
+        <select formControlName="materialId">
+          <option value="" disabled selected>Select material</option>
+          <option *ngFor="let m of inventoryRecords" [value]="m.materialId">
+            {{ m.materialName }} (Available: {{ getAvailableQuantity(m.materialId) }} {{ m.unitOfMeasure }})
+          </option>
+        </select>
+      </label>
+      <label>
+        <span>Quantity</span>
+        <input type="number" formControlName="quantity" placeholder="Enter quantity" min="1" />
+      </label>
+      <label>
+        <span>Project</span>
+        <select formControlName="projectId">
+          <option value="" disabled selected>Select project</option>
+          <option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Allocated By</span>
+        <input type="text" formControlName="allocatedBy" placeholder="e.g. Manager Name" />
+      </label>
+      <label>
+        <span>Issued To</span>
+        <input type="text" formControlName="issuedTo" placeholder="e.g. Site Supervisor" />
+      </label>
+      <label>
+        <span>Remarks</span>
+        <input type="text" formControlName="remarks" placeholder="Optional notes" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Create Allocation</button>
+    </div>
+  </form>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">All Allocations</h3>
+        <span class="bt-panel-sub">{{ allocations.length }} allocation{{ allocations.length === 1 ? '' : 's' }}</span>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th>Allocation ID</th>
+            <th>Material</th>
+            <th>Quantity</th>
+            <th>Project</th>
+            <th>Allocated By</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let alloc of allocations">
+            <td class="bt-muted">{{ alloc.allocationId }}</td>
+            <td class="bt-strong">{{ alloc.materialName }}</td>
+            <td>{{ alloc.allocatedQuantity }}</td>
+            <td>{{ alloc.projectName }}</td>
+            <td>{{ alloc.allocatedBy }}</td>
+            <td class="bt-muted">{{ alloc.allocatedDate }}</td>
+            <td>
+              <span class="bt-badge" [ngClass]="getStatusBadge(alloc.status)">
+                {{ alloc.status }}
+              </span>
+              <div *ngIf="alloc.returnedQuantity" class="bt-muted" style="font-size:12px;">
+                Returned: {{ alloc.returnedQuantity }}
+              </div>
+            </td>
+            <td>
+              <div class="bt-row-actions">
+                <button *ngIf="alloc.status === 'Reserved'" 
+                        class="bt-icon-btn" 
+                        (click)="issueAllocation(alloc.allocationId)" 
+                        title="Issue Material">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </button>
+                <button *ngIf="alloc.status === 'Issued' || alloc.status === 'PartiallyReturned'" 
+                        class="bt-icon-btn" 
+                        (click)="returnAllocation(alloc.allocationId)" 
+                        title="Return Material">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4l16 16"></path>
+                    <path d="M20 4L4 20"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="allocations.length === 0">
+            <td colspan="8" class="bt-empty">No allocations yet. Create one to get started.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
