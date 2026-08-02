@@ -69,3 +69,9 @@ class User(Base):
     foreign_keys="Project.client_id",
     back_populates="client",
 )
+
+    procurement_requests = relationship(
+        "ProcurementRequest",
+        foreign_keys="ProcurementRequest.requested_by",
+        back_populates="requester",
+    )

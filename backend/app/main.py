@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, company, project, project_milestone
+from app.routes import auth, company, project, project_milestone, vendor, procurement
 
 app = FastAPI(
     title="BuildTrack API",
@@ -42,3 +42,5 @@ app.include_router(auth.router)
 app.include_router(company.router)
 app.include_router(project.router)
 app.include_router(project_milestone.router)
+app.include_router(vendor.router)
+app.include_router(procurement.router)
