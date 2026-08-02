@@ -17,20 +17,27 @@ export class ThemeService {
 
   toggle(): void {
     this.darkMode = !this.darkMode;
-    try {
-      localStorage.setItem(THEME_KEY, this.darkMode ? 'dark' : 'light');
-    } catch {}
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(THEME_KEY, this.darkMode ? 'dark' : 'light');
+      } catch {}
+    }
     this.apply();
   }
 
   private loadPreference(): boolean {
-    try {
-      const stored = localStorage.getItem(THEME_KEY);
-      if (stored) return stored === 'dark';
-      return !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    } catch {
-      return false;
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(THEME_KEY);
+        if (stored) return stored === 'dark';
+      } catch {}
     }
+    if (typeof window !== 'undefined' && !!window.matchMedia) {
+      try {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      } catch {}
+    }
+    return false;
   }
 
   private apply(): void {
