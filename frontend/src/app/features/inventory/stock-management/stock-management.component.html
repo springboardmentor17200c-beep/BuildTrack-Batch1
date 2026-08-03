@@ -1,0 +1,167 @@
+<div class="bt-page">
+  <button class="bt-back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back
+  </button>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Stock Management</h1>
+      <p class="bt-subtitle">Manage materials catalog and inventory levels.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="toggleAddForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14"></path><path d="M5 12h14"></path>
+        </svg>
+        <span *ngIf="!showAddForm">Add Material</span>
+        <span *ngIf="showAddForm">Cancel</span>
+      </button>
+    </div>
+  </div>
+
+  <form class="bt-form-card" *ngIf="showAddForm" [formGroup]="addForm" (ngSubmit)="addMaterial()">
+    <div class="bt-form-grid">
+      <label>
+        <span>Material Name *</span>
+        <input type="text" formControlName="materialName" placeholder="e.g. OPC 53 Grade Cement" />
+      </label>
+      <label>
+        <span>Category *</span>
+        <select formControlName="category">
+          <option value="" disabled selected>Select category</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Unit of Measure *</span>
+        <input type="text" formControlName="unitOfMeasure" placeholder="e.g. bags, tons, pieces" />
+      </label>
+      <label>
+        <span>Initial Quantity *</span>
+        <input type="number" formControlName="quantity" placeholder="e.g. 1000" min="0" />
+      </label>
+      <label>
+        <span>Minimum Stock Level *</span>
+        <input type="number" formControlName="minimumStockLevel" placeholder="e.g. 200" min="0" />
+      </label>
+      <label>
+        <span>Storage Location *</span>
+        <input type="text" formControlName="storageLocation" placeholder="e.g. Central Warehouse" />
+      </label>
+      <label>
+        <span>Description</span>
+        <input type="text" formControlName="description" placeholder="Optional description" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Add Material</button>
+    </div>
+  </form>
+
+  <form class="bt-form-card" *ngIf="showEditForm" [formGroup]="editForm" (ngSubmit)="updateMaterial()">
+    <h3 style="margin-bottom:16px;">Edit Material: {{ selectedMaterial?.materialName }}</h3>
+    <div class="bt-form-grid">
+      <label>
+        <span>Material Name *</span>
+        <input type="text" formControlName="materialName" />
+      </label>
+      <label>
+        <span>Category *</span>
+        <select formControlName="category">
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Unit of Measure *</span>
+        <input type="text" formControlName="unitOfMeasure" />
+      </label>
+      <label>
+        <span>Minimum Stock Level *</span>
+        <input type="number" formControlName="minimumStockLevel" min="0" />
+      </label>
+      <label>
+        <span>Storage Location *</span>
+        <input type="text" formControlName="storageLocation" />
+      </label>
+      <label>
+        <span>Description</span>
+        <input type="text" formControlName="description" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Update Material</button>
+      <button type="button" class="bt-back-btn" (click)="showEditForm = false" style="margin-left:8px;">Cancel</button>
+    </div>
+  </form>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Materials Catalog</h3>
+        <span class="bt-panel-sub">{{ materials.length }} materials</span>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Stock</th>
+            <th>Min Level</th>
+            <th>Status</th>
+            <th>Location</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let material of materials">
+            <td class="bt-muted">{{ material.materialId }}</td>
+            <td class="bt-strong">{{ material.materialName }}</td>
+            <td>{{ material.category }}</td>
+            <td>
+              {{ getInventoryRecord(material.materialId)?.availableQuantity || 0 }} 
+              {{ material.unitOfMeasure }}
+            </td>
+            <td>{{ getInventoryRecord(material.materialId)?.minimumStockLevel || 0 }}</td>
+            <td>
+              <span class="bt-badge" 
+                    [ngClass]="{
+                      green: getStockStatus(getInventoryRecord(material.materialId)) === 'In Stock',
+                      orange: getStockStatus(getInventoryRecord(material.materialId)) === 'Low Stock',
+                      red: getStockStatus(getInventoryRecord(material.materialId)) === 'Out of Stock'
+                    }">
+                {{ getStockStatus(getInventoryRecord(material.materialId)) }}
+              </span>
+            </td>
+            <td>{{ getInventoryRecord(material.materialId)?.storageLocation || 'N/A' }}</td>
+            <td>
+              <div class="bt-row-actions">
+                <button class="bt-icon-btn" (click)="editMaterial(material)" title="Edit">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="bt-icon-btn danger" (click)="deleteMaterial(material.materialId)" title="Delete">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="materials.length === 0">
+            <td colspan="8" class="bt-empty">No materials in catalog. Add one to get started.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

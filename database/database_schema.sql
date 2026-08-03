@@ -165,9 +165,16 @@ CREATE TABLE users (
 
     phone_number VARCHAR(20) NOT NULL,
 
-    profile_image TEXT,
-
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    registration_status VARCHAR(20) NOT NULL DEFAULT 'Pending'
+        CHECK (registration_status IN ('Pending', 'Approved', 'Rejected')),
+
+    approved_by INTEGER,
+
+    approved_at TIMESTAMP,
+
+    rejected_reason TEXT,
 
     last_login TIMESTAMP,
 
@@ -181,10 +188,30 @@ CREATE TABLE users (
 
     CONSTRAINT fk_users_role
         FOREIGN KEY (role_id)
-        REFERENCES roles(role_id)
+        REFERENCES roles(role_id),
 
+    CONSTRAINT fk_users_approved_by
+        FOREIGN KEY (approved_by)
+        REFERENCES users(user_id)
 );
 
+CREATE TABLE clients (
+
+    client_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    client_code VARCHAR(20) NOT NULL UNIQUE,
+
+    full_name VARCHAR(100) NOT NULL,
+
+    email VARCHAR(255) NOT NULL UNIQUE,
+
+    password_hash TEXT NOT NULL,
+
+    phone_number VARCHAR(20),
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
 -- =========================================================
 -- TABLE: projects
 -- Purpose: Stores construction projects.
@@ -932,193 +959,3 @@ CREATE TABLE notifications (
 
 );
 
--- =========================================================
--- TABLE: attendance
--- Purpose: Stores employee attendance records.
--- =========================================================
-
-CREATE TABLE attendance (
-
-    attendance_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    employee_id INTEGER NOT NULL,
-
-    project_id INTEGER NOT NULL,
-
-    attendance_date DATE NOT NULL,
-
-    check_in_time TIMESTAMP,
-
-    check_out_time TIMESTAMP,
-
-    attendance_status VARCHAR(20) NOT NULL,
-
-    remarks TEXT,
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_attendance_employee
-        FOREIGN KEY (employee_id)
-        REFERENCES employee_profiles(employee_id),
-
-    CONSTRAINT fk_attendance_project
-        FOREIGN KEY (project_id)
-        REFERENCES projects(project_id),
-
-    CONSTRAINT uq_employee_attendance
-        UNIQUE (employee_id, attendance_date),
-
-    CONSTRAINT chk_attendance_status
-        CHECK (attendance_status IN ('Present', 'Absent', 'Leave', 'Half Day'))
-
-);
-
--- =========================================================
--- TABLE: shifts
--- Purpose: Stores predefined work shifts.
--- =========================================================
-
-CREATE TABLE shifts (
-
-    shift_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    shift_name VARCHAR(50) NOT NULL UNIQUE,
-
-    start_time TIME NOT NULL,
-
-    end_time TIME NOT NULL,
-
-    description TEXT,
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-
-);
-
--- =========================================================
--- TABLE: employee_shift_assignments
--- Purpose: Stores employee shift assignments.
--- =========================================================
-
-CREATE TABLE employee_shift_assignments (
-
-    assignment_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    employee_id INTEGER NOT NULL,
-
-    project_id INTEGER NOT NULL,
-
-    shift_id INTEGER NOT NULL,
-
-    assigned_by INTEGER NOT NULL,
-
-    assignment_date DATE NOT NULL,
-
-    assignment_status VARCHAR(30) NOT NULL DEFAULT 'Assigned',
-
-    remarks TEXT,
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_shift_assignment_employee
-        FOREIGN KEY (employee_id)
-        REFERENCES employee_profiles(employee_id),
-
-    CONSTRAINT fk_shift_assignment_project
-        FOREIGN KEY (project_id)
-        REFERENCES projects(project_id),
-
-    CONSTRAINT fk_shift_assignment_shift
-        FOREIGN KEY (shift_id)
-        REFERENCES shifts(shift_id),
-
-    CONSTRAINT fk_shift_assignment_user
-        FOREIGN KEY (assigned_by)
-        REFERENCES users(user_id)
-
-);
-
--- =========================================================
--- TABLE: payroll
--- Purpose: Stores employee payroll information.
--- =========================================================
-
-CREATE TABLE payroll (
-
-    payroll_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    employee_id INTEGER NOT NULL,
-
-    project_id INTEGER NOT NULL,
-
-    payroll_month DATE NOT NULL,
-
-    basic_salary DECIMAL(12,2) NOT NULL,
-
-    overtime_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
-
-    deductions DECIMAL(12,2) NOT NULL DEFAULT 0,
-
-    bonus DECIMAL(12,2) NOT NULL DEFAULT 0,
-
-    net_salary DECIMAL(12,2) NOT NULL,
-
-    payment_status VARCHAR(30) NOT NULL DEFAULT 'Pending',
-
-    payment_date DATE,
-
-    remarks TEXT,
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_payroll_employee
-        FOREIGN KEY (employee_id)
-        REFERENCES employee_profiles(employee_id),
-
-    CONSTRAINT fk_payroll_project
-        FOREIGN KEY (project_id)
-        REFERENCES projects(project_id),
-
-    CONSTRAINT uq_employee_payroll
-        UNIQUE (employee_id, payroll_month),
-
-    CONSTRAINT chk_payment_status
-        CHECK (payment_status IN ('Pending', 'Paid', 'Cancelled'))
-
-);
-
--- =========================================================
--- TABLE: reports
--- Purpose: Stores generated reports.
--- =========================================================
-
-CREATE TABLE reports (
-
-    report_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    generated_by INTEGER NOT NULL,
-
-    project_id INTEGER,
-
-    report_type VARCHAR(50) NOT NULL,
-
-    file_name VARCHAR(255) NOT NULL,
-
-    file_path TEXT NOT NULL,
-
-    generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_reports_user
-        FOREIGN KEY (generated_by)
-        REFERENCES users(user_id),
-
-    CONSTRAINT fk_reports_project
-        FOREIGN KEY (project_id)
-        REFERENCES projects(project_id)
-
-);

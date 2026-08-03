@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -17,6 +19,14 @@ from app.schemas.project import (
 router = APIRouter(
     prefix="/projects",
     tags=["Projects"],
+)
+
+READ_PROJECT_ROLES = (
+    "Administrator",
+    "Project Manager",
+    "Site Engineer",
+    "Contractor",
+    "Client",
 )
 
 @router.post(
@@ -54,6 +64,12 @@ def create_project(
             detail="Project manager not found.",
         )
 
+    if manager.company_id != payload.company_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Project manager must belong to the selected company.",
+        )
+
     client = db.query(User).filter(
         User.user_id == payload.client_id
     ).first()
@@ -62,6 +78,12 @@ def create_project(
         raise HTTPException(
             status_code=404,
             detail="Client not found.",
+        )
+
+    if client.company_id != payload.company_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Client must belong to the selected company.",
         )
 
     category = db.query(ProjectCategory).filter(
@@ -115,9 +137,14 @@ def create_project(
 )
 def get_projects(
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("Administrator", "Project Manager")),
+    current_user=Depends(require_roles(*READ_PROJECT_ROLES)),
 ):
-    return db.query(Project).all()
+    query = db.query(Project)
+
+    if current_user.role.role_name != "Administrator":
+        query = query.filter(Project.company_id == current_user.company_id)
+
+    return query.order_by(Project.created_at.desc()).all()
 
 @router.get(
     "/{project_id}",
@@ -126,7 +153,7 @@ def get_projects(
 def get_project(
     project_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("Administrator", "Project Manager")),
+    current_user=Depends(require_roles(*READ_PROJECT_ROLES)),
 ):
     project = db.query(Project).filter(
         Project.project_id == project_id
@@ -136,6 +163,12 @@ def get_project(
         raise HTTPException(
             status_code=404,
             detail="Project not found.",
+        )
+
+    if current_user.role.role_name != "Administrator" and project.company_id != current_user.company_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this project.",
         )
 
     return project
@@ -160,6 +193,24 @@ def update_project(
             detail="Project not found.",
         )
 
+    if payload.manager_id is not None:
+        manager = db.query(User).filter(User.user_id == payload.manager_id).first()
+
+        if not manager:
+            raise HTTPException(status_code=404, detail="Project manager not found.")
+
+        if manager.company_id != project.company_id:
+            raise HTTPException(status_code=400, detail="Project manager must belong to this project company.")
+
+    if payload.client_id is not None:
+        client = db.query(User).filter(User.user_id == payload.client_id).first()
+
+        if not client:
+            raise HTTPException(status_code=404, detail="Client not found.")
+
+        if client.company_id != project.company_id:
+            raise HTTPException(status_code=400, detail="Client must belong to this project company.")
+
     new_start = payload.start_date or project.start_date
     new_end = payload.expected_end_date or project.expected_end_date
 
@@ -179,11 +230,8 @@ def update_project(
 
     return project
 
-@router.delete(
-    "/{project_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-def delete_project(
+@router.delete("/{project_id}")
+def close_project(
     project_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(require_roles("Administrator")),
@@ -198,5 +246,23 @@ def delete_project(
             detail="Project not found.",
         )
 
-    db.delete(project)
+    closed_status = (
+        db.query(ProjectStatus)
+        .filter(ProjectStatus.status_name.in_(["Closed", "Completed"]))
+        .order_by(ProjectStatus.status_name.desc())
+        .first()
+    )
+
+    if not closed_status:
+        raise HTTPException(
+            status_code=500,
+            detail="Closed project status is not configured.",
+        )
+
+    project.status_id = closed_status.status_id
+    project.actual_end_date = project.actual_end_date or date.today()
     db.commit()
+
+    return {
+        "message": "Project closed successfully.",
+    }

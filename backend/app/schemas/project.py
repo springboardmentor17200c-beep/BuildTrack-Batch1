@@ -47,3 +47,28 @@ class ProjectResponse(BaseModel):
     actual_end_date: Optional[date]
     created_at: datetime
     updated_at: Optional[datetime]
+
+class ProjectListResponse(BaseModel):
+    project_id: int
+
+    project_name: str
+    description: str | None
+    location: str
+
+    company_name: str
+    manager_name: str
+    client_name: str
+
+    category_name: str
+    status_name: str
+
+    start_date: date
+    expected_end_date: date
+    actual_end_date: date | None
+
+    created_at: datetime
+    updated_at: datetime | None
+
+    model_config = {
+        "from_attributes": True
+    }

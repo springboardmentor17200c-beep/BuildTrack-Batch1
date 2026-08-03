@@ -50,3 +50,15 @@ class Company(Base):
         back_populates="company",
         cascade="all, delete-orphan"
     )
+
+    resources = relationship(
+        "Resource",
+        back_populates="company",
+        cascade="all, delete-orphan"
+    )
+
+    inventory_items = relationship(
+        "Inventory",
+        back_populates="company",
+        cascade="all, delete-orphan"
+    )

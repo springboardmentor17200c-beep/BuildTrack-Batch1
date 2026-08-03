@@ -1,0 +1,492 @@
+<div class="bt-landing">
+  <header class="bt-landing-nav">
+    <div class="bt-auth-logo" style="margin: 0">
+      <div class="bt-auth-logo-badge">BT</div>
+      <span class="bt-auth-logo-text">BuildTrack</span>
+    </div>
+
+    <div class="bt-landing-nav-right">
+      <div class="bt-lang-wrap">
+        <button class="bt-landing-icon-btn" (click)="toggleLangMenu()" aria-label="Change language">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M2 12h20"></path>
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            ></path>
+          </svg>
+          <span class="bt-landing-lang-code">{{ lang.current.toUpperCase() }}</span>
+        </button>
+        <ul class="bt-lang-menu bt-landing-lang-menu" *ngIf="langMenuOpen">
+          <li *ngFor="let l of lang.languages">
+            <button
+              class="bt-lang-option"
+              [class.active]="l.code === lang.current"
+              (click)="selectLanguage(l.code)"
+            >
+              {{ l.native }}
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <button
+        class="bt-landing-icon-btn"
+        (click)="toggleTheme()"
+        [attr.aria-label]="theme.isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+      >
+        <svg
+          *ngIf="!theme.isDark"
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <path
+            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+          ></path>
+        </svg>
+        <svg
+          *ngIf="theme.isDark"
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <nav class="bt-landing-nav-actions" *ngIf="!currentUser">
+        <a class="bt-landing-link" [routerLink]="['/login']">Sign In</a>
+        <a class="bt-add-btn" [routerLink]="['/register']">Get Started</a>
+      </nav>
+
+      <a class="bt-landing-auth-pill" *ngIf="currentUser" [routerLink]="['/profile']">
+        <span class="bt-landing-avatar">{{ currentUser.full_name.charAt(0) }}</span>
+        <span class="bt-landing-online-dot"></span>
+        <span class="bt-landing-auth-text">
+          <span class="bt-landing-auth-label">Signed in as</span>
+          <span class="bt-landing-auth-name">{{ currentUser.full_name }}</span>
+        </span>
+      </a>
+      <a class="bt-add-btn" *ngIf="currentUser" [routerLink]="[dashboardRoute]">Dashboard</a>
+    </div>
+  </header>
+
+  <section class="bt-landing-hero">
+    <div class="bt-landing-hero-text">
+      <span class="bt-badge blue bt-landing-eyebrow"
+        >Construction Project Management, Simplified</span
+      >
+      <h1 class="bt-landing-title">Run every site, project, and team from one platform.</h1>
+      <p class="bt-landing-subtitle">
+        BuildTrack helps administrators, project managers, site engineers, contractors, and clients
+        plan projects, track progress, manage resources, and stay on budget — all in real time.
+      </p>
+      <div class="bt-landing-hero-actions" *ngIf="!currentUser">
+        <a class="bt-add-btn" [routerLink]="['/register']">Create Free Account</a>
+        <a class="bt-landing-link-btn" [routerLink]="['/login']">Sign In</a>
+      </div>
+      <div class="bt-landing-hero-actions" *ngIf="currentUser">
+        <a class="bt-add-btn" [routerLink]="[dashboardRoute]">Continue to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="bt-landing-hero-media">
+      <img
+        src="https://images.unsplash.com/photo-1541976590-713941681591?auto=format&fit=crop&w=1000&q=80"
+        alt="Construction site with crane and steel framework"
+      />
+    </div>
+  </section>
+
+  <section class="bt-landing-stats">
+    <div class="bt-landing-stats-row">
+      <div class="bt-landing-stat" *ngFor="let s of stats">
+        <span class="bt-landing-stat-value">{{ s.value }}</span>
+        <span class="bt-landing-stat-label">{{ s.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why BuildTrack -->
+  <section class="bt-landing-benefits">
+    <div class="bt-landing-benefits-media">
+      <img
+        src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80"
+        alt="Construction blueprint and site planning"
+      />
+    </div>
+    <div class="bt-landing-benefits-text">
+      <h2>Why teams choose BuildTrack</h2>
+      <div class="bt-landing-benefit" *ngFor="let b of benefits">
+        <div class="bt-stat-icon blue" style="width: 40px; height: 40px; flex-shrink: 0">
+          <svg
+            *ngIf="b.icon === 'clock'"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v5l4 2"></path>
+          </svg>
+          <svg
+            *ngIf="b.icon === 'shield'"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"></path>
+          </svg>
+          <svg
+            *ngIf="b.icon === 'trend'"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 3v18h18"></path>
+            <path d="M7 15l3-4 3 3 5-7"></path>
+          </svg>
+          <svg
+            *ngIf="b.icon === 'users'"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>{{ b.title }}</h3>
+          <p>{{ b.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bt-landing-features">
+    <div class="bt-landing-features-header">
+      <h2>Everything your team needs</h2>
+      <p>Explore the modules built for every role on your project — sign in to get started.</p>
+    </div>
+
+    <div class="bt-option-grid">
+      <button
+        class="bt-option-card bt-landing-feature-card"
+        *ngFor="let f of features"
+        (click)="exploreFeature(f)"
+      >
+        <div class="bt-stat-icon" [ngClass]="f.color">
+          <svg
+            *ngIf="f.icon === 'projects'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 3v18h18"></path>
+            <path d="M7 15l3-4 3 3 5-7"></path>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'resources'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'inventory'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 3v18h18"></path>
+            <rect x="7" y="12" width="3" height="6"></rect>
+            <rect x="12" y="8" width="3" height="10"></rect>
+            <rect x="17" y="5" width="3" height="13"></rect>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'workforce'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="9" cy="7" r="3"></circle>
+            <path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"></path>
+            <circle cx="18" cy="8" r="2.5"></circle>
+            <path d="M22 21v-1.5a4 4 0 0 0-3-3.87"></path>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'analytics'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 3v18h18"></path>
+            <path d="M7 15l3-4 3 3 5-7"></path>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'budget'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v10"></path>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'procurement'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"
+            ></path>
+            <rect x="9" y="3" width="6" height="4" rx="1"></rect>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'notifications'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <svg
+            *ngIf="f.icon === 'reports'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M8 8h8M8 12h8M8 16h5"></path>
+          </svg>
+        </div>
+        <div class="bt-option-body">
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.description }}</p>
+        </div>
+        <div class="bt-option-footer">
+          <span class="bt-muted">{{ currentUser ? 'Open module' : 'Sign in to explore' }}</span>
+          <span class="bt-option-arrow">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </span>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <section class="bt-landing-how">
+    <div class="bt-landing-features-header">
+      <h2>How BuildTrack works</h2>
+      <p>Get your team up and running in three simple steps.</p>
+    </div>
+    <div class="bt-landing-steps">
+      <div class="bt-landing-step" *ngFor="let s of steps">
+        <span class="bt-landing-step-number">{{ s.number }}</span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bt-landing-roles">
+    <div class="bt-landing-features-header">
+      <h2>Built for every role on the project</h2>
+      <p>Each account gets a dashboard tailored to how they work.</p>
+    </div>
+    <div class="bt-landing-roles-row">
+      <span class="bt-badge purple">Administrator</span>
+      <span class="bt-badge blue">Project Manager</span>
+      <span class="bt-badge orange">Site Engineer</span>
+      <span class="bt-badge green">Contractor</span>
+      <span class="bt-badge gray">Worker</span>
+      <span class="bt-badge blue">Client / Owner</span>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="bt-landing-testimonials">
+    <div class="bt-landing-features-header">
+      <h2>What site teams are saying</h2>
+      <p>Feedback from the people who use BuildTrack day to day.</p>
+    </div>
+    <div class="bt-landing-testimonial-grid">
+      <div class="bt-landing-testimonial" *ngFor="let t of testimonials">
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="bt-landing-quote-icon"
+        >
+          <path
+            d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"
+          ></path>
+        </svg>
+        <p class="bt-landing-quote">{{ t.quote }}</p>
+        <div class="bt-landing-testimonial-author">
+          <span class="bt-landing-avatar">{{ t.name.charAt(0) }}</span>
+          <div>
+            <div class="bt-strong">{{ t.name }}</div>
+            <div class="bt-muted">{{ t.role }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="bt-landing-faq">
+    <div class="bt-landing-features-header">
+      <h2>Frequently asked questions</h2>
+      <p>Everything you need to know before getting started.</p>
+    </div>
+    <div class="bt-landing-faq-list">
+      <div
+        class="bt-landing-faq-item"
+        *ngFor="let f of faqs; let i = index"
+        [class.open]="openFaqIndex === i"
+      >
+        <button class="bt-landing-faq-question" (click)="toggleFaq(i)">
+          <span>{{ f.q }}</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="bt-landing-faq-chevron"
+          >
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="bt-landing-faq-answer" *ngIf="openFaqIndex === i">
+          <p>{{ f.a }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bt-landing-cta" *ngIf="!currentUser">
+    <div class="bt-landing-cta-inner">
+      <h2>Ready to bring your projects into one place?</h2>
+      <p>Create your free account and start managing your sites today.</p>
+      <a class="bt-add-btn bt-landing-cta-btn" [routerLink]="['/register']">Create Free Account</a>
+    </div>
+  </section>
+
+  <footer class="bt-landing-footer">
+    <div class="bt-auth-logo" style="margin: 0">
+      <div class="bt-auth-logo-badge">BT</div>
+      <span class="bt-auth-logo-text">BuildTrack</span>
+    </div>
+    <p class="bt-muted">&copy; 2026 BuildTrack. Construction project management, simplified.</p>
+  </footer>
+</div>

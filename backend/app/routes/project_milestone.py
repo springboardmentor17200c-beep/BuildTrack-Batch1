@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.permissions import require_roles
@@ -80,6 +80,7 @@ def create_milestone(
     response_model=list[ProjectMilestoneResponse],
 )
 def get_milestones(
+    project_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
@@ -89,7 +90,12 @@ def get_milestones(
         )
     ),
 ):
-    return db.query(ProjectMilestone).all()
+    query = db.query(ProjectMilestone)
+
+    if project_id is not None:
+        query = query.filter(ProjectMilestone.project_id == project_id)
+
+    return query.order_by(ProjectMilestone.due_date).all()
 
 @router.get(
     "/{milestone_id}",
@@ -147,6 +153,12 @@ def update_milestone(
     update_data = payload.model_dump(exclude_unset=True)
 
     status = update_data.get("status")
+
+    if status is not None and status not in VALID_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Status must be one of: {', '.join(sorted(VALID_STATUSES))}",
+        )
 
     if status == "Completed":
         if update_data.get("completion_date") is None:

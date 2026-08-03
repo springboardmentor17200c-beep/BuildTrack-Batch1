@@ -1,0 +1,120 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+    <div class="bt-page">
+      <button class="bt-back-btn" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+        </svg>
+        Back
+      </button>
+
+      <div class="bt-topbar">
+        <div>
+          <h1 class="bt-title">All Projects</h1>
+          <p class="bt-subtitle">Browse, search, and create projects.</p>
+        </div>
+        <div class="bt-actions">
+          <button class="bt-add-btn" (click)="toggleForm()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            <span *ngIf="!showForm">New Project</span>
+            <span *ngIf="showForm">Cancel</span>
+          </button>
+        </div>
+      </div>
+
+      <form class="bt-form-card" *ngIf="showForm" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="bt-form-grid">
+          <label>
+            <span>Project Name</span>
+            <input type="text" formControlName="projectName" placeholder="e.g. Lakeside Villas" />
+          </label>
+          <label>
+            <span>Category</span>
+            <select formControlName="category">
+              <option value="" disabled selected>Select category</option>
+              <option *ngFor="let c of categories.slice(1)" [value]="c">{{ c }}</option>
+            </select>
+          </label>
+          <label>
+            <span>Location</span>
+            <input type="text" formControlName="location" placeholder="e.g. Pune, Maharashtra" />
+          </label>
+          <label>
+            <span>Manager</span>
+            <input type="text" formControlName="manager" placeholder="e.g. Priya Menon" />
+          </label>
+          <label>
+            <span>Client</span>
+            <input type="text" formControlName="client" placeholder="e.g. L&T Realty" />
+          </label>
+          <label>
+            <span>Start Date</span>
+            <input type="date" formControlName="startDate" />
+          </label>
+          <label>
+            <span>Expected End Date</span>
+            <input type="date" formControlName="expectedEndDate" />
+          </label>
+        </div>
+        <label class="bt-auth-field" style="margin-top:16px;">
+          <span>Description</span>
+          <input type="text" formControlName="description" placeholder="Brief scope of work" />
+        </label>
+        <div class="bt-form-actions">
+          <button type="submit" class="bt-add-btn">Create Project</button>
+        </div>
+      </form>
+
+      <div class="bt-topbar" style="margin-bottom:0;">
+        <div class="bt-actions" style="width:100%;">
+          <div class="bt-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+            <input type="text" placeholder="Search projects..." [(ngModel)]="search" [ngModelOptions]="{standalone: true}" />
+          </div>
+          <select class="bt-filter-select" [(ngModel)]="categoryFilter" [ngModelOptions]="{standalone: true}">
+            <option *ngFor="let c of categories" [value]="c">{{ c === 'All' ? 'All Categories' : c }}</option>
+          </select>
+          <select class="bt-filter-select" [(ngModel)]="statusFilter" [ngModelOptions]="{standalone: true}">
+            <option *ngFor="let s of statuses" [value]="s">{{ s === 'All' ? 'All Statuses' : s }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bt-panel" style="margin-top:20px;">
+        <div class="bt-panel-header">
+          <div>
+            <h3 class="bt-panel-title">Projects</h3>
+            <span class="bt-panel-sub">{{ filtered.length }} of {{ allProjects.length }}</span>
+          </div>
+        </div>
+        <div class="bt-table-wrap">
+          <table class="bt-table">
+            <thead><tr><th>Project</th><th>Category</th><th>Manager</th><th>Status</th><th>Progress</th><th>Deadline</th><th></th></tr></thead>
+            <tbody>
+              <tr *ngFor="let p of filtered">
+                <td class="bt-strong">{{ p.projectName }}<div class="bt-muted">{{ p.location }}</div></td>
+                <td>{{ p.category }}</td>
+                <td>{{ p.manager }}</td>
+                <td><span class="bt-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span></td>
+                <td>
+                  <div class="bt-progress">
+                    <div class="bt-progress-bar" style="width:100px;"><div class="bt-progress-fill blue" [style.width.%]="progress(p.projectId)"></div></div>
+                    <span class="bt-progress-value">{{ progress(p.projectId) }}%</span>
+                  </div>
+                </td>
+                <td class="bt-muted">{{ p.expectedEndDate }}</td>
+                <td>
+                  <a class="bt-filter-btn" [routerLink]="['/projects/detail', p.projectId]">View</a>
+                </td>
+              </tr>
+              <tr *ngIf="filtered.length === 0">
+                <td colspan="7" class="bt-empty">No projects match your filters.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

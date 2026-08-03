@@ -1,0 +1,3 @@
+/* Styling now comes from the shared bt-theme.css (global stylesheet).
+   Add src/app/shared/bt-theme.css to your angular.json "styles" array
+   or @import it in src/styles.css. No component-scoped styles needed here. */

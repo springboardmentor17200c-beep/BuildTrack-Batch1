@@ -1,0 +1,105 @@
+<div class="bt-page">
+  <button class="bt-back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back
+  </button>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Material Inventory Dashboard</h1>
+      <p class="bt-subtitle">Overview of every material category and its stock health, company-wide.</p>
+    </div>
+  </div>
+
+  <div class="bt-stats-row">
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ totalMaterials }}</span>
+        <span class="bt-stat-label">Total Materials</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ inStockCount }}</span>
+        <span class="bt-stat-label">In Stock</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ lowStockCount }}</span>
+        <span class="bt-stat-label">Low Stock</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6"></path><path d="M9 9l6 6"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ outOfStockCount }}</span>
+        <span class="bt-stat-label">Out of Stock</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">By Category</h3>
+        <span class="bt-panel-sub">Item count and stock alerts per category</span>
+      </div>
+    </div>
+    <div class="bt-option-grid" style="margin-bottom:0;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+      <div class="bt-stat-card" *ngFor="let c of categorySummaries" style="display:block;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;">
+          <span class="bt-strong">{{ c.category }}</span>
+          <span class="bt-badge" [ngClass]="c.lowOrOutCount > 0 ? 'orange' : 'green'">
+            {{ c.lowOrOutCount > 0 ? c.lowOrOutCount + ' alert' : 'Healthy' }}
+          </span>
+        </div>
+        <div class="bt-muted">{{ c.itemCount }} material{{ c.itemCount === 1 ? '' : 's' }} tracked</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">All Materials</h3>
+        <span class="bt-panel-sub">{{ records.length }} tracked</span>
+      </div>
+    </div>
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr><th>Material</th><th>Category</th><th>Stock</th><th>Reorder Level</th><th>Location</th><th>Status</th><th>Last Updated</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of records">
+            <td class="bt-strong">{{ m.materialName }}</td>
+            <td>{{ m.category }}</td>
+            <td>{{ m.availableQuantity | number }} {{ m.unitOfMeasure }}</td>
+            <td class="bt-muted">{{ m.minimumStockLevel | number }} {{ m.unitOfMeasure }}</td>
+            <td class="bt-muted">{{ m.storageLocation }}</td>
+            <td>
+              <span class="bt-badge" [ngClass]="{ green: statusOf(m) === 'In Stock', orange: statusOf(m) === 'Low Stock', red: statusOf(m) === 'Out of Stock' }">
+                {{ statusOf(m) }}
+              </span>
+            </td>
+            <td class="bt-muted">{{ m.lastUpdated }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

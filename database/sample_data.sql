@@ -110,3 +110,15 @@ SELECT user_id, full_name, email, role_id FROM users;
 -- =========================================================
 
 SELECT 'BuildTrack sample data inserted successfully.' AS status;
+
+SELECT * FROM buildtrack.project_categories;
+
+SELECT company_id, company_name FROM buildtrack.companies;
+
+SELECT user_id, full_name, role_id FROM buildtrack.users;
+
+SELECT category_id, category_name FROM buildtrack.project_categories;
+
+SELECT status_id, status_name FROM buildtrack.project_statuses;
+
+SELECT * FROM buildtrack.roles;

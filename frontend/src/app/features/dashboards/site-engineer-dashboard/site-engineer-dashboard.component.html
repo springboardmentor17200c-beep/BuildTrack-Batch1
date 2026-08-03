@@ -1,0 +1,125 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+<div class="bt-page">
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Welcome back, {{ currentUser?.full_name || 'Site Engineer' }}</h1>
+      <p class="bt-subtitle">Equipment status, stock alerts, and today's attendance for your site.</p>
+    </div>
+    <div class="bt-actions">
+      <span class="bt-badge orange">{{ currentUser?.role_name }}</span>
+      <a class="bt-filter-btn" [routerLink]="['/profile']">Profile</a>
+    </div>
+  </div>
+
+  <div class="bt-stats-row">
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ inUseCount }}</span>
+        <span class="bt-stat-label">Equipment In Use</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ maintenanceCount }}</span>
+        <span class="bt-stat-label">Under Maintenance</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ lowStockCount }}</span>
+        <span class="bt-stat-label">Stock Alerts</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ presentToday }}</span>
+        <span class="bt-stat-label">Present Today</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;margin-bottom:20px;">
+    <div class="bt-panel">
+      <div class="bt-panel-header">
+        <div>
+          <h3 class="bt-panel-title">Equipment Status</h3>
+          <span class="bt-panel-sub">All tracked assets</span>
+        </div>
+        <a class="bt-filter-btn" [routerLink]="['/resources/tracking']">View All</a>
+      </div>
+      <div class="bt-table-wrap">
+        <table class="bt-table">
+          <thead><tr><th>Asset</th><th>Category</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of equipment">
+              <td class="bt-strong">{{ r.resourceName }}</td>
+              <td>{{ r.category }}</td>
+              <td><span class="bt-badge" [ngClass]="resourceStatusClass(r.currentStatus)">{{ r.currentStatus }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bt-panel">
+      <div class="bt-panel-header">
+        <div>
+          <h3 class="bt-panel-title">Stock Alerts</h3>
+          <span class="bt-panel-sub">Needs attention</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div *ngFor="let s of stockAlerts" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bt-border);">
+          <span class="bt-strong" style="font-size:13.5px;">{{ s.materialName }}</span>
+          <span class="bt-badge" [ngClass]="stockStatusClass(s)">{{ s.availableQuantity }} {{ s.unitOfMeasure }}</span>
+        </div>
+        <div *ngIf="stockAlerts.length === 0" class="bt-muted">No stock alerts right now.</div>
+      </div>
+      <div class="bt-form-actions" style="margin-top:14px;">
+        <a class="bt-filter-btn" [routerLink]="['/inventory/stock']">View Stock</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Today's Attendance</h3>
+        <span class="bt-panel-sub">{{ presentToday }} present so far</span>
+      </div>
+      <a class="bt-filter-btn" [routerLink]="['/workforce/attendance']">Mark Attendance</a>
+    </div>
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead><tr><th>Worker</th><th>Status</th><th>Check In</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let a of attendance">
+            <td class="bt-strong">{{ a.employeeName }}</td>
+            <td>
+              <span class="bt-badge" [ngClass]="{ green: a.status === 'Present', red: a.status === 'Absent', orange: a.status === 'Half Day', blue: a.status === 'On Leave' }">
+                {{ a.status }}
+              </span>
+            </td>
+            <td class="bt-muted">{{ a.checkInTime || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  </div>
+</div>

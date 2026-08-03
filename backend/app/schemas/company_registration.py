@@ -1,19 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field
+"""
+Deprecated.
 
+Company registration schemas have been moved to:
 
-class CompanyRegistrationRequest(BaseModel):
-    company_name: str = Field(..., min_length=2, max_length=150)
+app.schemas.auth
 
-    company_email: EmailStr
-
-    company_phone: str = Field(..., min_length=10, max_length=20)
-
-    address: str = Field(..., min_length=5)
-
-    admin_name: str = Field(..., min_length=2)
-
-    admin_email: EmailStr
-
-    admin_phone: str = Field(..., min_length=10, max_length=20)
-
-    password: str = Field(..., min_length=8)
+This file is intentionally left empty to avoid duplicate schema
+definitions and future inconsistencies.
+"""

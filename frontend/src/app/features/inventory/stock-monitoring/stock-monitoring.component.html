@@ -1,0 +1,71 @@
+<div class="bt-page">
+  <button class="bt-back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back
+  </button>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Stock Monitoring</h1>
+      <p class="bt-subtitle">Company-wide stock levels — spot low or out-of-stock materials before they cause delays.</p>
+    </div>
+    <div class="bt-actions">
+      <div class="bt-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+        <input type="text" placeholder="Search by name or ID..." [(ngModel)]="search" />
+      </div>
+      <select class="bt-filter-select" [(ngModel)]="categoryFilter">
+        <option *ngFor="let c of categories" [value]="c">{{ c === 'All' ? 'All Categories' : c }}</option>
+      </select>
+      <select class="bt-filter-select" [(ngModel)]="statusFilter">
+        <option *ngFor="let s of statuses" [value]="s">{{ s === 'All' ? 'All Statuses' : s }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Stock Levels</h3>
+        <span class="bt-panel-sub">{{ filtered.length }} of {{ allRecords.length }} materials</span>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr><th>Material ID</th><th>Name</th><th>Storage Location</th><th>Stock Level</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of filtered">
+            <td class="bt-muted">{{ m.materialId }}</td>
+            <td class="bt-strong">{{ m.materialName }}</td>
+            <td>{{ m.storageLocation }}</td>
+            <td>
+              <div class="bt-progress">
+                <div class="bt-progress-bar">
+                  <div
+                    class="bt-progress-fill"
+                    [style.width.%]="stockPercent(m)"
+                    [ngClass]="{ green: statusOf(m) === 'In Stock', orange: statusOf(m) === 'Low Stock', red: statusOf(m) === 'Out of Stock' }">
+                  </div>
+                </div>
+                <span class="bt-progress-value" style="min-width:80px;">{{ m.availableQuantity | number }} {{ m.unitOfMeasure }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="bt-badge" [ngClass]="{ green: statusOf(m) === 'In Stock', orange: statusOf(m) === 'Low Stock', red: statusOf(m) === 'Out of Stock' }">
+                {{ statusOf(m) }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="5" class="bt-empty">No materials match your filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -43,6 +43,31 @@ def create_access_token(
         algorithm=settings.ALGORITHM
     )
 
+from jose import JWTError, jwt
+from datetime import timedelta
+
+from datetime import timedelta
+
+def create_password_reset_token(user_id: int) -> str:
+    return create_access_token(
+        data={
+            "user_id": user_id,
+            "purpose": "password_reset",
+        },
+        expires_delta=timedelta(minutes=10),
+    )
+
+
+def decode_password_reset_token(token: str):
+    payload = decode_access_token(token)
+
+    if payload is None:
+        return None
+
+    if payload.get("purpose") != "password_reset":
+        return None
+
+    return payload
 
 def decode_access_token(token: str):
 

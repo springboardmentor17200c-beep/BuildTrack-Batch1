@@ -6,6 +6,7 @@ from sqlalchemy import (
     String,
     Text,
     TIMESTAMP,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import relationship
@@ -15,6 +16,9 @@ from app.db.database import Base
 
 class ProjectMilestone(Base):
     __tablename__ = "project_milestones"
+    __table_args__ = (
+        UniqueConstraint("project_id", "milestone_name", name="uq_project_milestone"),
+    )
 
     milestone_id = Column(Integer, primary_key=True, index=True)
 

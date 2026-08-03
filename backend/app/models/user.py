@@ -5,6 +5,7 @@ from sqlalchemy import (
     Integer,
     String,
     TIMESTAMP,
+    Text,
     func
 )
 from sqlalchemy.orm import relationship
@@ -20,7 +21,7 @@ class User(Base):
     company_id = Column(
         Integer,
         ForeignKey("companies.company_id"),
-        nullable=False
+        nullable=True
     )
 
     role_id = Column(
@@ -41,6 +42,23 @@ class User(Base):
 
     is_active = Column(Boolean, default=True)
 
+    # Registration Approval Workflow
+    registration_status = Column(
+        String(20),
+        nullable=False,
+        default="Pending"
+    )
+
+    approved_by = Column(
+        Integer,
+        ForeignKey("users.user_id"),
+        nullable=True
+    )
+
+    approved_at = Column(TIMESTAMP)
+
+    rejected_reason = Column(Text)
+
     last_login = Column(TIMESTAMP)
 
     created_at = Column(
@@ -54,18 +72,47 @@ class User(Base):
         onupdate=func.now()
     )
 
-    company = relationship("Company", back_populates="users")
+    # Relationships
 
-    role = relationship("Role", back_populates="users")
+    company = relationship(
+        "Company",
+        back_populates="users"
+    )
+
+    role = relationship(
+        "Role",
+        back_populates="users"
+    )
+
+    approved_by_user = relationship(
+        "User",
+        remote_side=[user_id],
+        foreign_keys=[approved_by]
+    )
+
+    employee_profile = relationship(
+        "EmployeeProfile",
+        back_populates="user",
+        uselist=False,
+    )
 
     managed_projects = relationship(
-    "Project",
-    foreign_keys="Project.manager_id",
-    back_populates="manager",
-)
+        "Project",
+        foreign_keys="Project.manager_id",
+        back_populates="manager",
+    )
 
-    client_projects = relationship(
-    "Project",
-    foreign_keys="Project.client_id",
-    back_populates="client",
-)
+    resource_allocations = relationship(
+        "ResourceAllocation",
+        back_populates="allocator",
+    )
+
+    inventory_transactions = relationship(
+        "InventoryTransaction",
+        back_populates="creator",
+    )
+
+    material_requests = relationship(
+        "MaterialRequest",
+        back_populates="requester",
+    )

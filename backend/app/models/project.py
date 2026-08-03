@@ -6,6 +6,7 @@ from sqlalchemy import (
     String,
     Text,
     TIMESTAMP,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import relationship
@@ -15,6 +16,14 @@ from app.db.database import Base
 
 class Project(Base):
     __tablename__ = "projects"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "company_id",
+            "project_name",
+            name="uq_company_project",
+        ),
+    )
 
     project_id = Column(Integer, primary_key=True, index=True)
 
@@ -32,7 +41,7 @@ class Project(Base):
 
     client_id = Column(
         Integer,
-        ForeignKey("users.user_id"),
+        ForeignKey("clients.client_id"),
         nullable=False,
     )
 
@@ -95,9 +104,9 @@ class Project(Base):
     )
 
     client = relationship(
-        "User",
-        foreign_keys=[client_id],
-        back_populates="client_projects",
+        "Client",
+        back_populates="project",
+        uselist=False,
     )
 
     category = relationship(
@@ -114,4 +123,24 @@ class Project(Base):
         "ProjectMilestone",
         back_populates="project",
         cascade="all, delete-orphan",
+    )
+
+    resource_allocations = relationship(
+        "ResourceAllocation",
+        back_populates="project",
+    )
+
+    employee_profiles = relationship(
+        "EmployeeProfile",
+        back_populates="project",
+    )
+
+    material_requests = relationship(
+        "MaterialRequest",
+        back_populates="project",
+    )
+
+    inventory_transactions = relationship(
+        "InventoryTransaction",
+        back_populates="project",
     )

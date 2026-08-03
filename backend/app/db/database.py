@@ -2,16 +2,20 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 import os
-
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./buildtrack.db")
+
+connect_args = {}
+
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+elif DATABASE_URL.startswith("postgresql"):
+    connect_args = {"options": "-csearch_path=buildtrack"}
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={
-        "options": "-csearch_path=buildtrack"
-    }
+    connect_args=connect_args,
 )
 
 SessionLocal = sessionmaker(

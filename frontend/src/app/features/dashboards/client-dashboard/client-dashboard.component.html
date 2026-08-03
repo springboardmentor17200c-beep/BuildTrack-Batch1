@@ -1,0 +1,82 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+<div class="bt-page">
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Welcome, {{ currentUser?.full_name || 'Client' }}</h1>
+      <p class="bt-subtitle">Track your project's progress and recent updates.</p>
+    </div>
+    <div class="bt-actions">
+      <span class="bt-badge blue">{{ currentUser?.role_name }}</span>
+      <a class="bt-filter-btn" [routerLink]="['/profile']">Profile</a>
+    </div>
+  </div>
+
+  <div class="bt-stats-row">
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ projects.length }}</span>
+        <span class="bt-stat-label">Your Projects</span>
+      </div>
+    </div>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon purple">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ budgetUsedPercent }}%</span>
+        <span class="bt-stat-label">Budget Utilized</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bt-panel" style="margin-bottom:20px;">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Project Progress</h3>
+        <span class="bt-panel-sub">Overall status and completion</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div *ngFor="let p of projects">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div>
+            <div class="bt-strong">{{ p.project }}</div>
+            <div class="bt-muted">Expected completion: {{ p.expectedEndDate }}</div>
+          </div>
+          <span class="bt-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span>
+        </div>
+        <div class="bt-progress">
+          <div class="bt-progress-bar" style="width:100%;height:8px;"><div class="bt-progress-fill blue" [style.width.%]="p.completionPercentage"></div></div>
+          <span class="bt-progress-value">{{ p.completionPercentage }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">Recent Updates</h3>
+        <span class="bt-panel-sub">Latest progress from your project team</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div *ngFor="let u of updates" style="display:flex;gap:12px;align-items:flex-start;">
+        <div class="bt-stat-icon green" style="width:34px;height:34px;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        </div>
+        <div>
+          <div class="bt-strong" style="font-size:13.5px;">{{ u.text }}</div>
+          <div class="bt-muted">{{ u.date }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>

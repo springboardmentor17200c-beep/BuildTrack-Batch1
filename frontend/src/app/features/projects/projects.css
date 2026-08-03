@@ -1,0 +1,497 @@
+/* ============================================================
+   BuildTrack — Project Management styles
+   EXACT same Liquid Glass material system as the Dashboard page
+   (same tokens, same blur/opacity values, same corporate palette,
+   same motion curves). This component is routed content only:
+   the sidebar, header and animated background (.bg-mesh) live in
+   the app shell and are NOT duplicated here — see the closing
+   note for why, and how to add them if you're routing this page
+   without a shared shell.
+============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ---------------------------------------------------------
+   1. DESIGN TOKENS — identical values to dashboard.css
+--------------------------------------------------------- */
+:host {
+  display: block;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  font-family: var(--font-ui);
+
+  /* Corporate palette — same as Dashboard */
+  --primary: #2563EB;
+  --primary-light: #3B82F6;
+  --emerald: #10B981;
+  --orange: #F59E0B;
+  --purple: #8B5CF6;
+  --red: #EF4444;
+
+  /* Text — slate scale, kept off-black */
+  --ink: #1E2A3A;
+  --ink-soft: #3D4A5C;
+  --ink-muted: #64748B;
+
+  /* Liquid glass material — identical recipe to the Dashboard */
+  --glass-fill: rgba(255, 255, 255, 0.14);
+  --glass-fill-strong: rgba(255, 255, 255, 0.22);
+  --glass-fill-soft: rgba(255, 255, 255, 0.09);
+  --glass-border: rgba(255, 255, 255, 0.32);
+  --glass-border-soft: rgba(255, 255, 255, 0.18);
+  --glass-blur: blur(30px) saturate(190%);
+
+  --glass-shadow:
+    0 8px 32px rgba(15, 30, 60, 0.16),
+    0 1.5px 1px rgba(255,255,255,0.5) inset,
+    0 -1px 1px rgba(15,30,60,0.06) inset;
+
+  --glass-shadow-hover:
+    0 22px 48px rgba(15, 30, 60, 0.24),
+    0 0 0 1px rgba(255,255,255,0.4) inset,
+    0 1.5px 1px rgba(255,255,255,0.6) inset;
+
+  --glow-primary: 0 0 24px rgba(37, 99, 235, 0.45);
+
+  --radius-xl: 28px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.projects-page * { box-sizing: border-box; }
+
+.projects-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  color: var(--ink);
+}
+
+.projects-page h1, .projects-page h2, .projects-page h3, .projects-page p {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   2. LIQUID GLASS PRIMITIVE — exact same recipe as the Dashboard:
+      transparent fill + heavy blur + glossy top sheen (::before)
+      + top-left light pool (::after) + layered inset/outer shadow.
+--------------------------------------------------------- */
+.glass {
+  position: relative;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  isolation: isolate;
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 26%, transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 90% at 8% 0%, rgba(255,255,255,0.30), transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass > * { position: relative; z-index: 2; }
+
+/* ---------------------------------------------------------
+   3. PAGE HEADER
+--------------------------------------------------------- */
+.page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-heading h1 {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.page-heading p {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--ink-muted);
+}
+
+.heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 280px;
+  padding: 10px 15px;
+  border-radius: 14px;
+  background: var(--glass-fill-soft);
+  border: 1px solid var(--glass-border-soft);
+  color: var(--ink-muted);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  transition: box-shadow .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease);
+}
+
+.search-bar:focus-within {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: rgba(255,255,255,0.30);
+  box-shadow: var(--glow-primary);
+}
+
+.search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  flex: 1;
+  font-family: inherit;
+  font-size: 13.6px;
+  color: var(--ink);
+}
+.search-bar input::placeholder { color: var(--ink-muted); }
+
+/* Filter dropdown */
+.filter-wrap { position: relative; }
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border-soft);
+  background: var(--glass-fill-soft);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 13.2px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease), background .3s var(--ease);
+}
+.filter-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 30px rgba(15,30,60,0.18); }
+
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 180px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.filter-option {
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.filter-option:hover { background: rgba(255,255,255,0.28); color: var(--primary); }
+.filter-option.active {
+  background: linear-gradient(135deg, rgba(37,99,235,0.22), rgba(59,130,246,0.10));
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.22) inset;
+}
+
+/* Add project button — glow ripple on click, same as Dashboard's qa-btn.primary */
+.qa-btn {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 13.2px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease), background .3s var(--ease);
+}
+
+.qa-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 60%);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity .5s var(--ease), transform .5s var(--ease);
+  pointer-events: none;
+}
+.qa-btn:active::after { opacity: 1; transform: scale(1.6); transition: 0s; }
+
+.qa-btn.primary {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  border-color: rgba(255,255,255,0.4);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(37,99,235,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
+}
+.qa-btn.primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 34px rgba(37,99,235,0.55), inset 0 1px 1px rgba(255,255,255,0.6);
+}
+
+/* ---------------------------------------------------------
+   4. KPI STAT CARDS — same float + spring hover as Dashboard
+--------------------------------------------------------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform .35s var(--ease-spring), box-shadow .35s var(--ease);
+}
+.stat-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: var(--glass-shadow-hover); }
+
+.stat-icon {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 6px 16px rgba(15,30,60,0.25);
+}
+.stat-icon svg { width: 22px; height: 22px; }
+
+.stat-body { display: flex; flex-direction: column; gap: 1px; }
+.stat-value { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.stat-title { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.stat-desc { font-size: 11.5px; color: var(--ink-muted); }
+
+/* ---------------------------------------------------------
+   5. PROJECTS TABLE CARD
+--------------------------------------------------------- */
+.table-card {
+  border-radius: var(--radius-xl);
+  padding-bottom: 10px;
+  transition: box-shadow .35s var(--ease), transform .35s var(--ease-spring);
+}
+.table-card:hover { box-shadow: var(--glass-shadow-hover); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px 10px;
+}
+.card-header h3 { font-size: 16px; font-weight: 700; color: var(--ink); }
+.card-header p { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+.table-scroll { overflow-x: auto; padding: 8px 12px 10px; }
+
+table { width: 100%; border-collapse: collapse; min-width: 780px; }
+
+thead th {
+  text-align: left;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+tbody td {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--glass-border-soft);
+  vertical-align: middle;
+}
+
+tbody tr { transition: background .25s var(--ease); }
+tbody tr:hover { background: rgba(255,255,255,0.22); }
+
+.cell-primary { display: flex; flex-direction: column; gap: 2px; }
+.project-name { font-weight: 700; color: var(--ink); }
+.project-site { font-size: 11.5px; color: var(--ink-muted); }
+
+.manager-cell { display: flex; align-items: center; gap: 8px; }
+.manager-cell img {
+  width: 26px; height: 26px; border-radius: 50%; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* Progress bar — glowing fill, same recipe as Dashboard's row-progress */
+.row-progress { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.row-progress-track {
+  flex: 1; height: 7px; border-radius: 6px;
+  background: rgba(255,255,255,0.30);
+  overflow: hidden;
+  border: 1px solid var(--glass-border-soft);
+}
+.row-progress-fill {
+  height: 100%; border-radius: 6px;
+  transition: width 1s var(--ease);
+}
+.fill-active { background: linear-gradient(90deg, var(--primary), var(--primary-light)); box-shadow: 0 0 8px rgba(37,99,235,0.5); }
+.fill-completed { background: linear-gradient(90deg, var(--emerald), #34D399); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+.fill-delayed { background: linear-gradient(90deg, var(--red), #F87171); box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+.fill-planning { background: linear-gradient(90deg, var(--orange), #FBBF24); box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+.row-progress span { font-size: 11.5px; font-weight: 700; color: var(--ink-muted); }
+
+/* Status badges — same soft-tint + hairline border style as Dashboard */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.status-active { background: rgba(37, 99, 235, 0.16); color: #1D4ED8; border-color: rgba(37,99,235,0.25); }
+.status-completed { background: rgba(16, 185, 129, 0.16); color: #0D9463; border-color: rgba(16,185,129,0.25); }
+.status-delayed { background: rgba(239, 68, 68, 0.14); color: #DC2626; border-color: rgba(239,68,68,0.22); }
+.status-planning { background: rgba(245, 158, 11, 0.16); color: #B45F06; border-color: rgba(245,158,11,0.25); }
+
+/* Row actions */
+.actions-col { text-align: right; }
+.row-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+
+.row-action-btn {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border-soft);
+  background: var(--glass-fill-soft);
+  color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .25s var(--ease), color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.row-action-btn:hover { background: rgba(37,99,235,0.16); color: var(--primary); transform: translateY(-2px); box-shadow: var(--glow-primary); }
+.row-action-btn.danger:hover { background: rgba(239,68,68,0.16); color: var(--red); box-shadow: 0 0 24px rgba(239,68,68,0.4); }
+
+/* Empty state */
+.empty-row td { border-top: none; }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 0;
+  color: var(--ink-muted);
+}
+.empty-state p { font-size: 13px; }
+
+/* ---------------------------------------------------------
+   6. RESPONSIVE — TABLET
+--------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .search-bar { width: 220px; }
+}
+
+/* ---------------------------------------------------------
+   7. RESPONSIVE — MOBILE (classic responsive-table pattern)
+--------------------------------------------------------- */
+@media (max-width: 768px) {
+  .page-heading { flex-direction: column; align-items: flex-start; }
+  .heading-actions { width: 100%; }
+  .search-bar { width: 100%; }
+  .stats-grid { grid-template-columns: 1fr; }
+
+  .table-scroll { overflow-x: visible; padding: 8px; }
+
+  table, thead, tbody, th, td, tr { display: block; width: 100%; }
+  thead { display: none; }
+
+  tbody tr {
+    margin-bottom: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border-soft);
+    background: var(--glass-fill-soft);
+    padding: 10px 4px;
+  }
+
+  tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: none;
+    padding: 8px 14px;
+    text-align: right;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink-muted);
+    text-align: left;
+  }
+
+  .cell-primary { flex-direction: row; align-items: center; }
+  .row-actions { justify-content: flex-end; }
+}
+
+/* ---------------------------------------------------------
+   8. PERFORMANCE — same containment strategy as the Dashboard
+--------------------------------------------------------- */
+.glass, .stat-card, .table-card {
+  will-change: transform;
+  contain: layout paint style;
+}

@@ -1,0 +1,109 @@
+<div class="bt-page">
+  <button class="bt-back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back
+  </button>
+
+  <div class="bt-topbar">
+    <div>
+      <h1 class="bt-title">Resource Allocation</h1>
+      <p class="bt-subtitle">Assign equipment and machinery to projects, and see who's responsible.</p>
+    </div>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="toggleForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        <span *ngIf="!showForm">New Allocation</span>
+        <span *ngIf="showForm">Cancel</span>
+      </button>
+    </div>
+  </div>
+
+  <form class="bt-form-card" *ngIf="showForm" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="bt-form-grid">
+      <label>
+        <span>Resource</span>
+        <select formControlName="resourceId">
+          <option value="" disabled selected>Select available resource</option>
+          <option *ngFor="let r of availableResources" [value]="r.resourceId">{{ r.resourceName }} ({{ r.category }})</option>
+        </select>
+      </label>
+      <label>
+        <span>Project</span>
+        <select formControlName="project">
+          <option value="" disabled selected>Select project</option>
+          <option *ngFor="let p of projectNames" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+      <label>
+        <span>Allocated By</span>
+        <input type="text" formControlName="allocatedBy" placeholder="e.g. Priya Menon" />
+      </label>
+      <label>
+        <span>Allocation Date</span>
+        <input type="date" formControlName="allocationDate" />
+      </label>
+      <label>
+        <span>Expected Return Date</span>
+        <input type="date" formControlName="expectedReturnDate" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Save Allocation</button>
+    </div>
+  </form>
+
+  <div class="bt-panel">
+    <div class="bt-panel-header">
+      <div>
+        <h3 class="bt-panel-title">All Allocations</h3>
+        <span class="bt-panel-sub">{{ allocations.length }} allocation{{ allocations.length === 1 ? '' : 's' }} (full history, nothing is deleted)</span>
+      </div>
+    </div>
+
+    <div class="bt-table-wrap">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th>Resource</th>
+            <th>Category</th>
+            <th>Project</th>
+            <th>Allocated By</th>
+            <th>Allocation Date</th>
+            <th>Expected Return</th>
+            <th>Actual Return</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of allocations">
+            <td class="bt-strong">{{ a.resourceName }}</td>
+            <td>{{ a.category }}</td>
+            <td>{{ a.project }}</td>
+            <td>{{ a.allocatedBy }}</td>
+            <td class="bt-muted">{{ a.allocationDate }}</td>
+            <td class="bt-muted">{{ a.expectedReturnDate }}</td>
+            <td class="bt-muted">{{ a.actualReturnDate || '—' }}</td>
+            <td><span class="bt-badge" [ngClass]="statusClass(a.allocationStatus)">{{ a.allocationStatus }}</span></td>
+            <td>
+              <div class="bt-row-actions">
+                <button
+                  *ngIf="a.allocationStatus === 'Allocated' || a.allocationStatus === 'Overdue'"
+                  class="bt-icon-btn"
+                  (click)="markReturned(a.allocationId)"
+                  title="Mark returned">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="allocations.length === 0">
+            <td colspan="9" class="bt-empty">No allocations yet. Click "New Allocation" to assign a resource.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
