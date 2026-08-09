@@ -11,8 +11,11 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from sqlalchemy import or_, func
 from app.db.database import get_db
 from app.models.user import User
+from app.models.role import Role
+from app.models.company import Company
 from app.schemas.auth import (
     RegisterRequest,
     ChangePasswordRequest,
@@ -26,6 +29,20 @@ router = APIRouter(
     tags=["Authentication"],
 )
 
+def build_user_response(user: User) -> UserResponse:
+    role_name = user.role.role_name if user.role else None
+    return UserResponse(
+        user_id=user.user_id,
+        full_name=user.full_name,
+        email=user.email,
+        phone_number=user.phone_number,
+        company_id=user.company_id,
+        role_id=user.role_id,
+        role=role_name,
+        is_active=user.is_active,
+        created_at=user.created_at,
+    )
+
 
 @router.post(
     "/register",
@@ -38,7 +55,7 @@ def register(
 ):
     existing_user = (
         db.query(User)
-        .filter(User.email == payload.email)
+        .filter(func.lower(User.email) == payload.email.lower())
         .first()
     )
 
@@ -48,20 +65,56 @@ def register(
             detail="Email already registered.",
         )
 
+    # Compute full_name
+    name = payload.full_name
+    if not name:
+        parts = [p for p in [payload.first_name, payload.last_name] if p]
+        name = " ".join(parts) if parts else (payload.username or payload.email.split("@")[0])
+
+    # Resolve role_id
+    role_id = payload.role_id
+    if not role_id and payload.role:
+        role_obj = db.query(Role).filter(Role.role_name == payload.role).first()
+        if not role_obj:
+            role_obj = Role(role_name=payload.role, description=f"{payload.role} role")
+            db.add(role_obj)
+            db.commit()
+            db.refresh(role_obj)
+        role_id = role_obj.role_id
+
+    # Resolve company_id
+    company_id = payload.company_id
+    if not company_id and payload.company_name:
+        company_obj = db.query(Company).filter(Company.company_name == payload.company_name).first()
+        if not company_obj:
+            ts = int(datetime.utcnow().timestamp())
+            code = f"CMP-{ts}"
+            company_obj = Company(
+                company_name=payload.company_name,
+                company_code=code,
+                company_email=f"contact_{ts}@{payload.company_name.lower().replace(' ', '')}.com",
+                company_phone=payload.phone_number or "0000000000",
+                address="N/A"
+            )
+            db.add(company_obj)
+            db.commit()
+            db.refresh(company_obj)
+        company_id = company_obj.company_id
+
     user = User(
-        full_name=payload.full_name,
+        full_name=name,
         email=payload.email,
         password_hash=hash_password(payload.password),
         phone_number=payload.phone_number,
-        company_id=payload.company_id,
-        role_id=payload.role_id,
+        company_id=company_id,
+        role_id=role_id,
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    return user
+    return build_user_response(user)
 
 
 @router.post(
@@ -72,9 +125,15 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
+    identifier = (form_data.username or "").strip().lower()
     user = (
         db.query(User)
-        .filter(User.email == form_data.username)
+        .filter(
+            or_(
+                func.lower(User.email) == identifier,
+                func.lower(User.full_name) == identifier,
+            )
+        )
         .first()
     )
 
@@ -126,7 +185,7 @@ def login(
 def get_me(
     current_user: User = Depends(get_current_user),
 ):
-    return current_user
+    return build_user_response(current_user)
 
 
 @router.put(

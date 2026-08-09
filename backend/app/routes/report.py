@@ -50,7 +50,7 @@ def generate_report(payload: CreateReportSchema, db: Session = Depends(get_db)):
     title = payload.title or f"{report_type.capitalize()} Report - {datetime.utcnow().strftime('%Y-%m-%d')}"
     
     new_db_report = DBReport(
-        generated_by=1, # Default admin user ID for generated reports
+        generated_by=None,
         report_type=report_type,
         file_name=title,
         file_path=f"/exports/{report_type}_{int(datetime.utcnow().timestamp())}.pdf"

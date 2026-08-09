@@ -7,7 +7,7 @@ class DBReport(Base):
     __tablename__ = "reports"
 
     report_id = Column(Integer, primary_key=True, index=True)
-    generated_by = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    generated_by = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=True)
     report_type = Column(String(50), nullable=False)
     file_name = Column(String(255), nullable=False)

@@ -16,32 +16,34 @@ const SESSION_KEY = 'buildtrack_current_user';
 const TOKEN_KEY = 'buildtrack_access_token';
 
 interface BackendUserProfile {
-  user_id: string;
-  username: string;
+  user_id: number | string;
+  full_name?: string;
+  username?: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
   phone_number: string;
-  role: RoleName;
+  role?: RoleName;
   company_name?: string;
   tax_id?: string;
   employee_id?: string;
   skills_or_trade?: string;
-  assigned_projects: string[];
+  assigned_projects?: string[];
   is_active: boolean;
   created_at?: string;
 }
 
 function toAppUser(u: BackendUserProfile): AppUser {
+  const computedFullName = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username || u.email;
   return {
-    userId: u.user_id,
-    username: u.username,
-    fullName: `${u.first_name} ${u.last_name}`.trim(),
+    userId: String(u.user_id),
+    username: u.username || u.email.split('@')[0],
+    fullName: computedFullName,
     email: u.email,
-    firstName: u.first_name,
-    lastName: u.last_name,
+    firstName: u.first_name || computedFullName.split(' ')[0],
+    lastName: u.last_name || computedFullName.split(' ').slice(1).join(' ') || '',
     phoneNumber: u.phone_number,
-    role: u.role,
+    role: (u.role || 'Administrator') as RoleName,
     companyName: u.company_name,
     taxId: u.tax_id,
     employeeId: u.employee_id,
@@ -116,7 +118,7 @@ export class AuthDataService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     return this.http
-      .post<{ access_token: string; token_type: string }>(`${this.apiUrl}/login`, body.toString(), { headers })
+      .post<{ access_token: string; token_type: string }>(`${this.apiUrl}/auth/login`, body.toString(), { headers })
       .pipe(
         tap(res => localStorage.setItem(TOKEN_KEY, res.access_token)),
         switchMap(() => this.fetchCurrentUser()),
@@ -124,9 +126,9 @@ export class AuthDataService {
       );
   }
 
-  /** GET /users/me — used right after login to know the role for dashboard routing. */
+  /** GET /auth/me — used right after login to know the role for dashboard routing. */
   fetchCurrentUser(): Observable<AppUser> {
-    return this.http.get<BackendUserProfile>(`${this.apiUrl}/users/me`, { headers: this.authHeaders() }).pipe(
+    return this.http.get<BackendUserProfile>(`${this.apiUrl}/auth/me`, { headers: this.authHeaders() }).pipe(
       map(toAppUser),
       tap(user => this.setSession(user)),
       catchError(this.handleError)
@@ -154,7 +156,7 @@ export class AuthDataService {
     };
 
     return this.http
-      .post<BackendUserProfile>(`${this.apiUrl}/register`, body)
+      .post<BackendUserProfile>(`${this.apiUrl}/auth/register`, body)
       .pipe(map(toAppUser), catchError(this.handleError));
   }
 

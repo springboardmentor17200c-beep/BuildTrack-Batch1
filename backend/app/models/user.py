@@ -20,13 +20,13 @@ class User(Base):
     company_id = Column(
         Integer,
         ForeignKey("companies.company_id"),
-        nullable=False
+        nullable=True
     )
 
     role_id = Column(
         Integer,
         ForeignKey("roles.role_id"),
-        nullable=False
+        nullable=True
     )
 
     full_name = Column(String(100), nullable=False)
