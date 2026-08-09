@@ -8,3 +8,5 @@ from .project import Project
 from .project_milestone import ProjectMilestone
 from .vendor import Vendor
 from .procurement_request import ProcurementRequest
+from .material import Material
+from .inventory import Inventory
