@@ -1,4 +1,18 @@
+ HEAD
 fastapi[standard]
 PyJWT
 pydantic[email]
 twilio>=7.0.0
+=======
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+alembic
+pydantic
+pydantic-settings
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+email-validator
+>>>>>>> 8d18d93c7d10a48be00b592cd455a3bd5032a0f4
