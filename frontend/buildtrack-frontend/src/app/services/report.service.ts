@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, delay, catchError, map } from 'rxjs';
 import { 
   Report, 
   ReportFilter, 
@@ -14,6 +15,8 @@ import {
   providedIn: 'root'
 })
 export class ReportService {
+  private apiUrl = 'http://localhost:8000/reports';
+
   private reports: Report[] = [
     {
       id: 'rep-001',
@@ -67,10 +70,12 @@ export class ReportService {
     }
   ];
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   getReports(): Observable<Report[]> {
-    return of([...this.reports]).pipe(delay(300));
+    return this.http.get<Report[]>(this.apiUrl).pipe(
+      catchError(() => of([...this.reports]).pipe(delay(300)))
+    );
   }
 
   getReportById(id: string): Observable<Report> {
@@ -81,19 +86,28 @@ export class ReportService {
   generateReport(type: string, filter: ReportFilter): Observable<Report> {
     const data = this.getReportDataByType(type, filter);
     const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
-    const newReport: Report = {
-      id: `rep-${Date.now()}`,
-      title: `${formattedType} Report - ${new Date().toLocaleDateString()}`,
-      type: type as any,
-      generatedDate: new Date(),
-      status: 'generated',
-      format: 'both',
-      description: `Auto-generated ${type} report with active filters`,
-      data: data
-    };
+    const title = `${formattedType} Report - ${new Date().toLocaleDateString()}`;
 
-    this.reports.unshift(newReport);
-    return of(newReport).pipe(delay(600));
+    return this.http.post<Report>(this.apiUrl, { type, title, filter }).pipe(
+      map(apiReport => ({
+        ...apiReport,
+        data: data
+      })),
+      catchError(() => {
+        const newReport: Report = {
+          id: `rep-${Date.now()}`,
+          title: title,
+          type: type as any,
+          generatedDate: new Date(),
+          status: 'generated',
+          format: 'both',
+          description: `Auto-generated ${type} report with active filters`,
+          data: data
+        };
+        this.reports.unshift(newReport);
+        return of(newReport).pipe(delay(400));
+      })
+    );
   }
 
   generateProgressReport(filter: ReportFilter): Observable<ProgressReportData> {

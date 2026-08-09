@@ -1,0 +1,28 @@
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Numeric
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from app.db.database import Base
+
+class ResourceCategory(Base):
+    __tablename__ = "resource_categories"
+
+    resource_category_id = Column(Integer, primary_key=True, index=True)
+    category_name = Column(String(50), unique=True, nullable=False)
+    description = Column(String)
+
+class Resource(Base):
+    __tablename__ = "resources"
+
+    resource_id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=False)
+    resource_category_id = Column(Integer, ForeignKey("resource_categories.resource_category_id"), nullable=False)
+    resource_name = Column(String(100), nullable=False)
+    manufacturer = Column(String(100))
+    model_number = Column(String(100))
+    serial_number = Column(String(100), unique=True)
+    purchase_date = Column(Date)
+    current_status = Column(String(30), default="Available", nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    category = relationship("ResourceCategory")
