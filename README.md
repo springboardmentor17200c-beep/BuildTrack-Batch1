@@ -193,7 +193,7 @@ DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:YOUR_PORT/buildtrack_
 
 **Example for PostgreSQL 18 on Windows:**
 ```env
-DATABASE_URL=postgresql://postgres:Ajaz@2004@localhost:5433/buildtrack_db
+
 ```
 
 #### Step 5 — Start the Backend
