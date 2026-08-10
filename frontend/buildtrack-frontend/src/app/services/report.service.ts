@@ -74,6 +74,10 @@ export class ReportService {
 
   getReports(): Observable<Report[]> {
     return this.http.get<Report[]>(this.apiUrl).pipe(
+      map(apiReports => apiReports.map(r => ({
+        ...r,
+        data: this.getReportDataByType(r.type, {})
+      }))),
       catchError(() => of([...this.reports]).pipe(delay(300)))
     );
   }

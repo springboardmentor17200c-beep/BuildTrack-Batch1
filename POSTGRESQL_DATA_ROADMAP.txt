@@ -1,0 +1,105 @@
+================================================================================
+          BUILDTRACK PLATFORM — POSTGRESQL DATA ROADMAP & INSPECTION GUIDE
+================================================================================
+
+This document provides complete instructions for viewing, inspecting, and managing
+all real data stored inside your PostgreSQL 18 database.
+
+--------------------------------------------------------------------------------
+1. DATABASE CONNECTION DETAILS
+--------------------------------------------------------------------------------
+Database Engine  : PostgreSQL 18
+Host             : localhost
+Port             : 5433  (PostgreSQL 18 default on Windows)
+Database Name    : buildtrack_db
+Schema Name      : buildtrack
+Database User    : postgres
+Password         : Ajaz@2004
+Connection URL   : postgresql://postgres:Ajaz@2004@localhost:5433/buildtrack_db
+
+
+--------------------------------------------------------------------------------
+2. WHY TABLES CAN SEEM HIDDEN IN PGADMIN 4 (SCHEMA SCOPE)
+--------------------------------------------------------------------------------
+BuildTrack uses a dedicated database schema named "buildtrack" rather than the 
+default "public" schema to organize its 16 tables.
+
+When opening pgAdmin 4:
+  DO NOT check under:  Schemas -> public -> Tables  (This will show 0 tables!)
+  EXACT PATH TO USE :  Servers -> PostgreSQL 18 -> Databases -> buildtrack_db
+                       -> Schemas -> buildtrack -> Tables (All 16 tables live here!)
+
+
+--------------------------------------------------------------------------------
+3. ALL 16 TABLES & WHAT DATA THEY STORE
+--------------------------------------------------------------------------------
+1.  buildtrack.users              : User accounts (full_name, email, password_hash, phone, role)
+2.  buildtrack.roles              : Access roles (Administrator, Site Engineer, PM, Contractor, etc.)
+3.  buildtrack.companies          : Registered construction companies (company_name, company_code)
+4.  buildtrack.reports            : Generated reports (report_type, file_name, file_path, generated_at)
+5.  buildtrack.projects           : Construction projects (project_name, location, status)
+6.  buildtrack.project_milestones : Milestones, deadlines, and completion percentages
+7.  buildtrack.resources          : Equipment fleet (excavators, cranes, trucks, utilization)
+8.  buildtrack.inventory          : Material stock counts & warehouse inventory levels
+9.  buildtrack.materials          : Master catalog of construction materials (cement, steel, etc.)
+10. buildtrack.employee_profiles  : Workforce employee records, skills, and emergency contact
+11. buildtrack.attendance         : Daily worker site check-ins and shift logs
+12. buildtrack.resource_categories: Resource taxonomy (Heavy Equipment, Tools, Vehicles)
+13. buildtrack.material_categories: Material taxonomy (Raw Materials, Electrical, Plumbing)
+14. buildtrack.workforce_categories: Staff taxonomy (Civil, Finishing, Electrical, Management)
+15. buildtrack.project_categories : Project types (Commercial, Residential, Infrastructure)
+16. buildtrack.project_statuses   : Project state lookup (Planning, In Progress, Completed, On Hold)
+
+
+--------------------------------------------------------------------------------
+4. SQL ROADMAP COMMANDS (COPY & PASTE INTO PGADMIN / PSQL)
+--------------------------------------------------------------------------------
+In pgAdmin Query Tool or psql command line, execute step 1 first to set the search path:
+
+-- Step 1: Set Search Path
+SET search_path TO buildtrack;
+
+-- Step 2: View User Accounts
+SELECT user_id, full_name, email, phone_number, created_at FROM users;
+
+-- Step 3: View Generated Reports
+SELECT report_id, file_name, report_type, file_path, generated_at FROM reports;
+
+-- Step 4: View Registered Companies
+SELECT company_id, company_name, company_code, company_email FROM companies;
+
+-- Step 5: View System Roles
+SELECT role_id, role_name, description FROM roles;
+
+-- Step 6: Query Across Multiple Tables (Users with Role Names)
+SELECT u.user_id, u.full_name, u.email, r.role_name, c.company_name
+FROM users u
+LEFT JOIN roles r ON u.role_id = r.role_id
+LEFT JOIN companies c ON u.company_id = c.company_id;
+
+
+--------------------------------------------------------------------------------
+5. 1-CLICK TERMINAL INSPECTION COMMAND (NO PGADMIN NEEDED)
+--------------------------------------------------------------------------------
+Run this command from your "backend" folder to dump database contents instantly:
+
+powershell -Command "cd d:\Desktop\BuildTrack\BuildTrack-Batch1\backend; python -c \"from app.db.database import SessionLocal; from app.models.user import User; from app.models.report import DBReport; from app.models.company import Company; db = SessionLocal(); print('=== USERS ==='); [print(u.user_id, u.full_name, u.email) for u in db.query(User).all()]; print('\n=== REPORTS ==='); [print(r.report_id, r.file_name, r.report_type) for r in db.query(DBReport).all()]; print('\n=== COMPANIES ==='); [print(c.company_id, c.company_name) for c in db.query(Company).all()]; db.close()\""
+
+
+--------------------------------------------------------------------------------
+6. END-TO-END DATA PERSISTENCE FLOW
+--------------------------------------------------------------------------------
+1. Registration : User submits form at http://localhost:4200/register
+                  -> FastAPI POST /auth/register
+                  -> Auto-resolves Role & Company in PostgreSQL
+                  -> Inserts record into "buildtrack.users" table.
+
+2. Login        : User logs in at http://localhost:4200/login
+                  -> FastAPI POST /auth/login
+                  -> Verifies bcrypt password hash against "buildtrack.users"
+                  -> Issues JWT bearer token.
+
+3. Reports      : User generates report at http://localhost:4200/analytics/reports
+                  -> FastAPI POST /reports
+                  -> Inserts report metadata into "buildtrack.reports" table.
+================================================================================

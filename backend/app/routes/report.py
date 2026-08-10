@@ -69,3 +69,17 @@ def generate_report(payload: CreateReportSchema, db: Session = Depends(get_db)):
         description=f"Auto-generated {report_type} report from database",
         data={}
     )
+
+@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_report(report_id: str, db: Session = Depends(get_db)):
+    raw_id = report_id.replace("rep-", "")
+    if not raw_id.isdigit():
+        raise HTTPException(status_code=400, detail="Invalid report ID format")
+    
+    r = db.query(DBReport).filter(DBReport.report_id == int(raw_id)).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    db.delete(r)
+    db.commit()
+    return None
