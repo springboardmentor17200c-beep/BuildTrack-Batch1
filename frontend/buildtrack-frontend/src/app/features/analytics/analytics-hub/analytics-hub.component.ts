@@ -64,6 +64,15 @@ export class AnalyticsHubComponent implements OnInit {
       stat: '4',
       statLabel: 'Active vendors',
     },
+    {
+      title: 'Reports & Documentation',
+      description: 'Generate, view, and export PDF/Excel reports for progress, budget, resources, and workforce.',
+      icon: 'report',
+      route: 'reports',
+      accent: 'blue',
+      stat: '5',
+      statLabel: 'Reports available',
+    },
   ];
 
   constructor(private router: Router, private data: AnalyticsDataService, private location: Location) {}
