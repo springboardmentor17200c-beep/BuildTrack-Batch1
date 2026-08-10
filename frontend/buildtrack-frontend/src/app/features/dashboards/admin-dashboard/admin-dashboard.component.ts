@@ -88,6 +88,7 @@ export class AdminDashboardComponent implements OnInit {
       Contractor: 'green',
       Worker: 'gray',
      'Client / Owner': 'blue',
+      Vendor: 'purple',
     }[role];
   }
 }

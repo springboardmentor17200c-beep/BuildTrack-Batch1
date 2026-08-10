@@ -7,7 +7,8 @@ export type RoleName =
   | 'Site Engineer'
   | 'Contractor'
   | 'Worker'
-  | 'Client / Owner';
+  | 'Client / Owner'
+  | 'Vendor';
 
   export interface AppUser {
     userId: string;
@@ -19,6 +20,7 @@ export type RoleName =
     phoneNumber: string;
     role: RoleName;
     companyName?: string;
+    companyId?: number;
     taxId?: string;
     employeeId?: string;
     skillsOrTrade?: string;
@@ -67,6 +69,7 @@ export const MODULE_ACCESS: Record<string, RoleName[]> = {
   workforce: ['Administrator', 'Project Manager', 'Site Engineer', 'Contractor'],
   analytics: ['Administrator', 'Project Manager'],
   projects: ['Administrator', 'Project Manager', 'Site Engineer', 'Contractor'],
+  procurement: ['Administrator', 'Project Manager', 'Site Engineer', 'Vendor'],
   'dashboard-admin': ['Administrator'],
   'dashboard-pm': ['Project Manager'],
   'dashboard-site-engineer': ['Site Engineer'],
@@ -82,4 +85,5 @@ export const DASHBOARD_ROUTE_BY_ROLE: Record<RoleName, string> = {
   Contractor: '/dashboard/contractor',
   Worker: '/dashboard/site-engineer',
   'Client / Owner': '/dashboard/client',
+  Vendor: '/procurement/vendor-dashboard',
 };

@@ -1,0 +1,123 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+    <div class="bt-page">
+      <button class="bt-back-btn" [routerLink]="isVendorRole ? ['/'] : ['/procurement/vendors']">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+        Back
+      </button>
+
+      <div class="bt-auth-error" *ngIf="error">{{ error }}</div>
+
+      <ng-container *ngIf="!loading && vendor">
+        <div class="bt-topbar">
+          <div>
+            <h1 class="bt-title">Welcome, {{ vendor.vendorName }}</h1>
+            <p class="bt-subtitle">Your personalized Vendor Dashboard.</p>
+          </div>
+        </div>
+
+        <div class="bt-stats-row" style="margin-bottom: 24px;">
+          <div class="bt-stat-card">
+            <div class="bt-stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+            <div class="bt-stat-text"><span class="bt-stat-value">{{ purchaseOrders.length }}</span><span class="bt-stat-label">Total Purchase Orders</span></div>
+          </div>
+          <div class="bt-stat-card">
+            <div class="bt-stat-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+            <div class="bt-stat-text"><span class="bt-stat-value">{{ pendingDeliveriesCount }}</span><span class="bt-stat-label">Pending Deliveries</span></div>
+          </div>
+          <div class="bt-stat-card">
+            <div class="bt-stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+            <div class="bt-stat-text"><span class="bt-stat-value">₹{{ totalPoValue | number }}</span><span class="bt-stat-label">Total PO Value</span></div>
+          </div>
+          <div class="bt-stat-card">
+            <div class="bt-stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
+            <div class="bt-stat-text"><span class="bt-stat-value">₹{{ totalPaymentsReceived | number }}</span><span class="bt-stat-label">Payments Received</span></div>
+          </div>
+        </div>
+
+        <div class="bt-panel" style="margin-bottom: 24px;">
+          <div class="bt-panel-header">
+            <div>
+              <h3 class="bt-panel-title">Active Purchase Orders</h3>
+            </div>
+          </div>
+          <div class="bt-table-wrap">
+            <table class="bt-table">
+              <thead><tr><th>PO Number</th><th>Materials</th><th>Total Amount</th><th>Expected Delivery</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let po of purchaseOrders">
+                  <td class="bt-strong">{{ po.poNumber }}</td>
+                  <td>{{ po.materials.join(', ') }}</td>
+                  <td>₹{{ po.totalAmount | number }}</td>
+                  <td class="bt-muted">{{ po.expectedDeliveryDate | date:'mediumDate' }}</td>
+                  <td><span class="bt-badge" [ngClass]="poStatusClass(po.status)">{{ po.status }}</span></td>
+                  <td>
+                    <div style="display: flex; gap: 8px;">
+                      <button *ngIf="po.status === 'Sent' && isVendorRole" class="bt-filter-btn" (click)="acceptOrder(po.id)">
+                        Accept Order
+                      </button>
+                      <button *ngIf="po.status === 'Sent' && isVendorRole" class="bt-btn-secondary" style="color: var(--bt-red); border-color: var(--bt-red);" (click)="rejectOrder(po.id)">
+                        Reject
+                      </button>
+                      <button *ngIf="po.status === 'Accepted' && isVendorRole" class="bt-add-btn" (click)="openInvoiceForm(po)">
+                        Create Invoice
+                      </button>
+                      <span *ngIf="po.status !== 'Sent' && po.status !== 'Accepted'" class="bt-muted">-</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="purchaseOrders.length === 0">
+                  <td colspan="6" class="bt-empty">You have no purchase orders yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="bt-panel" *ngIf="selectedPoForInvoice" style="margin-bottom: 24px;">
+          <div class="bt-panel-header">
+            <h3 class="bt-panel-title">Submit Invoice</h3>
+            <button class="bt-filter-btn" (click)="selectedPoForInvoice = null">Cancel</button>
+          </div>
+          <form [formGroup]="invoiceForm" (ngSubmit)="submitInvoice()" style="padding: 16px;">
+            <div class="bt-form-grid">
+              <label><span>Invoice Amount (₹)</span><input type="number" min="0.01" step="0.01" formControlName="amount" /></label>
+              <label><span>GST %</span><input type="number" min="0" step="0.1" formControlName="gst" /></label>
+              <label><span>Invoice Date</span><input type="date" formControlName="date" /></label>
+            </div>
+            <div class="bt-form-actions" style="margin-top: 16px;">
+              <button type="submit" class="bt-add-btn">Submit Invoice</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="bt-panel">
+          <div class="bt-panel-header">
+            <div>
+              <h3 class="bt-panel-title">Recent Invoices</h3>
+            </div>
+          </div>
+          <div class="bt-table-wrap">
+            <table class="bt-table">
+              <thead><tr><th>Invoice No</th><th>Date</th><th>Amount (incl. GST)</th><th>Payment Status</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let inv of invoices">
+                  <td class="bt-strong">{{ inv.invoiceNo }}</td>
+                  <td class="bt-muted">{{ inv.date | date:'mediumDate' }}</td>
+                  <td>₹{{ inv.amount | number }}</td>
+                  <td><span class="bt-badge" [ngClass]="inv.paymentStatus === 'Paid' ? 'green' : 'orange'">{{ inv.paymentStatus }}</span></td>
+                </tr>
+                <tr *ngIf="invoices.length === 0">
+                  <td colspan="4" class="bt-empty">No invoices submitted yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="bt-empty" *ngIf="loading">Loading dashboard...</div>
+    </div>
+  </div>
+</div>

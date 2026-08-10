@@ -33,6 +33,7 @@ export class AppSidebarComponent implements OnInit {
     { label: 'nav.inventory', route: '/inventory', icon: 'inventory', moduleKey: 'inventory' },
     { label: 'nav.workforce', route: '/workforce', icon: 'workforce', moduleKey: 'workforce' },
     { label: 'nav.analytics', route: '/analytics', icon: 'analytics', moduleKey: 'analytics' },
+    { label: 'nav.procurement', route: '/procurement', icon: 'procurement', moduleKey: 'procurement' },
     { label: 'nav.profile', route: '/profile', icon: 'profile', moduleKey: null },
   ];
 

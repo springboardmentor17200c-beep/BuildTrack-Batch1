@@ -1,0 +1,179 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+    <div class="bt-page">
+      <button class="bt-back-btn" [routerLink]="['/procurement/hub']">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+        Back
+      </button>
+
+      <div class="bt-topbar">
+        <div>
+          <h1 class="bt-title">Purchase Order Workflow</h1>
+          <p class="bt-subtitle">Select Vendor → Generate PO → Send → Receive → Verify QC → Invoice → Verify → Pay → Complete.</p>
+        </div>
+      </div>
+
+      <div class="bt-auth-error" *ngIf="error">{{ error }}</div>
+
+      <!-- Step 1: Procurement Vendor Selection (Admin) -->
+      <div class="bt-form-card" *ngIf="canManagePo" style="margin-bottom: 20px;">
+        <h3 class="bt-panel-title" style="margin-bottom: 12px;">Procurement: Assign Vendor</h3>
+        <form [formGroup]="selectVendorForm" (ngSubmit)="selectVendor()">
+          <div class="bt-form-grid">
+            <label>
+              <span>PM Approved Request</span>
+              <select formControlName="requestId">
+                <option value="" disabled selected>Select an approved request</option>
+                <option *ngFor="let r of pmApprovedRequests" [value]="r.id">
+                  Req #{{ r.id.substring(0, 8) }} — {{ r.material }} (Qty: {{ r.quantity }})
+                </option>
+              </select>
+            </label>
+            <label>
+              <span>Assign Vendor</span>
+              <select formControlName="vendorId">
+                <option value="" disabled selected>Select vendor</option>
+                <option *ngFor="let v of vendors" [value]="v.id">{{ v.vendorName }}</option>
+              </select>
+            </label>
+          </div>
+          <div class="bt-form-actions">
+            <button type="submit" class="bt-add-btn">Select Vendor</button>
+          </div>
+        </form>
+        <p class="bt-muted" style="margin-top: 10px;" *ngIf="pmApprovedRequests.length === 0">
+          No PM Approved requests available for vendor assignment.
+        </p>
+      </div>
+
+      <!-- Step 2: PO Generation (Admin) -->
+      <div class="bt-form-card" *ngIf="canManagePo">
+        <h3 class="bt-panel-title" style="margin-bottom: 12px;">Generate Purchase Order</h3>
+        <form [formGroup]="createPoForm" (ngSubmit)="createPo()">
+          <div class="bt-form-grid">
+            <label>
+              <span>Request with Vendor Selected</span>
+              <select formControlName="requestId">
+                <option value="" disabled selected>Select a request</option>
+                <option *ngFor="let r of vendorSelectedRequests" [value]="r.id">
+                  Req #{{ r.id.substring(0, 8) }} — {{ vendorName(r.vendorId!) }}
+                </option>
+              </select>
+            </label>
+            <label><span>Unit Price (₹)</span><input type="number" min="0" step="0.01" formControlName="unitPrice" /></label>
+            <label><span>Expected Delivery</span><input type="date" formControlName="expectedDeliveryDate" /></label>
+          </div>
+          <div class="bt-form-actions">
+            <button type="submit" class="bt-add-btn">Generate PO</button>
+          </div>
+        </form>
+        <p class="bt-muted" style="margin-top: 10px;" *ngIf="vendorSelectedRequests.length === 0">
+          No requests available for PO generation. Select a vendor first.
+        </p>
+      </div>
+
+      <div class="bt-panel" style="margin-bottom: 20px;" *ngIf="!loading">
+        <div class="bt-panel-header">
+          <div>
+            <h3 class="bt-panel-title">Purchase Orders</h3>
+            <span class="bt-panel-sub">{{ purchaseOrders.length }} total — select one to view its workflow</span>
+          </div>
+        </div>
+        <div class="bt-table-wrap">
+          <table class="bt-table">
+            <thead><tr><th>PO Number</th><th>Vendor</th><th>Total Amount</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr *ngFor="let po of purchaseOrders" [class.bt-strong]="po.id === selectedPoId">
+                <td>{{ po.poNumber }}</td>
+                <td>{{ vendorName(po.vendorId) }}</td>
+                <td>₹{{ po.totalAmount | number }}</td>
+                <td><span class="bt-badge" [ngClass]="poStatusClass(po.status)">{{ po.status }}</span></td>
+                <td>
+                  <button class="bt-filter-btn" (click)="selectPo(po.id)">
+                    {{ po.id === selectedPoId ? 'Viewing' : 'View' }}
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="purchaseOrders.length === 0">
+                <td colspan="5" class="bt-empty">No purchase orders yet — generate one above.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Workflow detail for the selected PO -->
+      <ng-container *ngIf="selectedPo as po">
+        <div class="bt-panel" style="margin-bottom: 20px;">
+          <div class="bt-panel-header">
+            <div>
+              <h3 class="bt-panel-title">{{ po.poNumber }} — {{ vendorName(po.vendorId) }}</h3>
+              <span class="bt-panel-sub">Status: <span class="bt-badge" [ngClass]="poStatusClass(po.status)">{{ po.status }}</span></span>
+            </div>
+          </div>
+
+          <!-- Step: Send PO -->
+          <div *ngIf="po.status === 'Created' && canManagePo" class="bt-form-actions" style="justify-content: flex-start;">
+            <button class="bt-add-btn" (click)="sendPo()">Send PO to Vendor</button>
+          </div>
+
+          <!-- Step: Vendor Acceptance & Invoice Waiting -->
+          <div *ngIf="po.status === 'Sent' || po.status === 'Accepted'" style="margin-top: 16px;">
+            <p class="bt-muted" *ngIf="po.status === 'Sent'">Waiting for Vendor to Accept the Purchase Order from their Dashboard before proceeding.</p>
+            <p class="bt-muted" *ngIf="po.status === 'Accepted'">Waiting for Vendor to generate and submit an Invoice from their Dashboard.</p>
+          </div>
+
+          <!-- Step: Receive materials + QC -->
+          <div *ngIf="po.status === 'Invoiced' && canReceive">
+            <h4 style="margin: 16px 0 10px;">Receive Materials (Ordered: {{ po.quantity }})</h4>
+            <form [formGroup]="receiptForm" (ngSubmit)="submitDelivery()">
+              <div class="bt-form-grid">
+                <label><span>Material Name</span><input type="text" formControlName="material" placeholder="e.g. Cement" /></label>
+                <label><span>Accepted Quantity</span><input type="number" min="0" formControlName="acceptedQuantity" /></label>
+                <label><span>Rejected Quantity (Damaged)</span><input type="number" min="0" formControlName="rejectedQuantity" /></label>
+                <label><span>Delivery Date</span><input type="date" formControlName="deliveryDate" /></label>
+              </div>
+              <div class="bt-form-actions">
+                <button type="submit" class="bt-add-btn">Log Delivery</button>
+              </div>
+            </form>
+          </div>
+          <p class="bt-muted" *ngIf="po.status === 'Invoiced' && !canReceive">
+            Waiting for materials to be received and verified by an Administrator or Site Engineer.
+          </p>
+
+          <!-- Step: Invoice upload -->
+
+
+          <!-- Step 5b: View Invoice & Process Payment -->
+          <div *ngIf="selectedInvoice">
+            <h3>Invoice Received</h3>
+            <div class="bt-summary-grid" style="margin-bottom: 24px;">
+              <div><strong>Invoice No:</strong> {{ selectedInvoice.invoiceNo }}</div>
+              <div><strong>Date:</strong> {{ selectedInvoice.date | date }}</div>
+              <div><strong>Amount:</strong> {{ selectedInvoice.amount | currency:'INR' }}</div>
+              <div><strong>GST:</strong> {{ selectedInvoice.gst }}%</div>
+              <div>
+                <strong>Status:</strong> 
+                <span class="bt-badge" [ngClass]="selectedInvoice.paymentStatus === 'Paid' ? 'green' : 'orange'">
+                  {{ selectedInvoice.paymentStatus }}
+                </span>
+              </div>
+              <div *ngIf="selectedInvoice.paymentDate"><strong>Paid On:</strong> {{ selectedInvoice.paymentDate | date }}</div>
+              <div *ngIf="selectedInvoice.paymentRef"><strong>Ref:</strong> {{ selectedInvoice.paymentRef }}</div>
+            </div>
+
+            <div class="bt-flex" style="gap: 16px; margin-top: 16px;">
+              <button class="bt-add-btn" (click)="payInvoice()" *ngIf="selectedInvoice.paymentStatus !== 'Paid' && canManagePo">Process Payment</button>
+              <button class="bt-add-btn" (click)="generateInvoicePdf()" *ngIf="selectedInvoice.paymentStatus === 'Paid'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Invoice PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

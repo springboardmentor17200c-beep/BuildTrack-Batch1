@@ -61,6 +61,7 @@ export class AuthDataService {
     'Contractor',
     'Worker',
     'Client / Owner',
+    'Vendor'
   ];
 
   private apiUrl = environment.apiUrl;

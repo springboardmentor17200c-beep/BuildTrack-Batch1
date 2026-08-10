@@ -1,0 +1,108 @@
+<div class="bt-shell">
+  <app-sidebar></app-sidebar>
+  <div class="bt-main">
+    <div class="bt-page">
+      <button class="bt-back-btn" [routerLink]="['/procurement/hub']">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+        Back
+      </button>
+
+      <div class="bt-topbar">
+        <div>
+          <h1 class="bt-title">Material Requests</h1>
+          <p class="bt-subtitle">Submit and review requests for construction materials.</p>
+        </div>
+        <div class="bt-actions" *ngIf="canCreateRequest">
+          <button class="bt-add-btn" (click)="showForm = !showForm">{{ showForm ? 'Cancel' : '+ New Request' }}</button>
+        </div>
+      </div>
+
+      <div class="bt-auth-error" *ngIf="loadError">{{ loadError }}</div>
+
+      <div class="bt-form-card" *ngIf="showForm">
+        <div class="bt-auth-error" *ngIf="formError">{{ formError }}</div>
+        
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="bt-form-grid">
+            <label>
+              <span>Project</span>
+              <select formControlName="projectId">
+                <option value="" disabled selected>Select a project</option>
+                <option *ngFor="let p of projects" [value]="p.projectId">{{ p.projectName }}</option>
+              </select>
+            </label>
+            <label><span>Material Name</span><input type="text" formControlName="material" placeholder="e.g. TMT Steel Bars" /></label>
+            <label><span>Quantity</span><input type="number" min="1" formControlName="quantity" /></label>
+            <label><span>Required Date</span><input type="date" formControlName="requiredDate" /></label>
+            <label>
+              <span>Priority</span>
+              <select formControlName="priority">
+                <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
+              </select>
+            </label>
+          </div>
+          <div class="bt-form-actions">
+            <button type="submit" class="bt-add-btn">Submit Request</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bt-panel">
+        <div class="bt-panel-header">
+          <div>
+            <h3 class="bt-panel-title">All Requests</h3>
+            <span class="bt-panel-sub">{{ requests.length }} requests</span>
+          </div>
+        </div>
+
+        <div class="bt-empty" *ngIf="loading">Loading requests…</div>
+
+        <div class="bt-table-wrap" *ngIf="!loading">
+          <table class="bt-table">
+            <thead><tr><th>Project</th><th>Material</th><th>Qty</th><th>Req. Date</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <ng-container *ngFor="let r of requests">
+                <tr [class.bt-strong]="selectedRequestId === r.id">
+                  <td class="bt-strong">{{ getProjectName(r.projectId) }}</td>
+                  <td>{{ r.material }}</td>
+                  <td>{{ r.quantity }} <span *ngIf="r.receivedQuantity > 0" class="bt-muted">({{ r.receivedQuantity }} rcvd)</span></td>
+                  <td class="bt-muted">{{ r.requiredDate | date:'mediumDate' }}</td>
+                  <td><span class="bt-badge" [ngClass]="r.priority === 'Urgent' || r.priority === 'High' ? 'red' : 'gray'">{{ r.priority }}</span></td>
+                  <td>
+                    <span class="bt-badge" [ngClass]="statusClass(r.status)">{{ r.status }}</span>
+                    <div *ngIf="canManageStatus && (r.status === 'Pending PM Approval' || r.status === 'Pending')" style="margin-top: 8px; display: flex; gap: 8px;">
+                      <button class="bt-add-btn" style="padding: 4px 8px; font-size: 12px; height: auto;" (click)="updateStatus(r, 'PM Approved')">Approve</button>
+                      <button class="bt-back-btn" style="padding: 4px 8px; font-size: 12px; height: auto; border: 1px solid var(--bt-red); color: var(--bt-red);" (click)="updateStatus(r, 'Rejected by PM')">Reject</button>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="bt-filter-btn" (click)="selectRequest(r.id)">
+                      {{ selectedRequestId === r.id ? 'Hide' : 'Details' }}
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="selectedRequestId === r.id">
+                  <td colspan="7" style="background: var(--bt-surface); padding: 20px;">
+                    <h4 style="margin-bottom: 12px;">Request Timeline</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--bt-border); margin-left: 10px;">
+                      <li *ngFor="let t of r.timeline" style="margin-bottom: 15px; position: relative; padding-left: 20px;">
+                        <div style="position: absolute; left: -6px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--bt-primary);"></div>
+                        <div class="bt-strong">{{ t.action }}</div>
+                        <div class="bt-muted" style="font-size: 12px;">{{ t.timestamp | date:'medium' }}</div>
+                        <div *ngIf="t.notes" style="margin-top: 4px; font-style: italic;">"{{ t.notes }}"</div>
+                      </li>
+                      <li *ngIf="r.timeline.length === 0" class="bt-muted">No timeline events recorded yet.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </ng-container>
+              <tr *ngIf="requests.length === 0">
+                <td colspan="7" class="bt-empty">No material requests yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
