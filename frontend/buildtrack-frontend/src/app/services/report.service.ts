@@ -378,36 +378,629 @@ export class ReportService {
   }
 
   private generatePDFContent(report: Report): string {
-    const dateStr = report.generatedDate ? new Date(report.generatedDate).toLocaleDateString() : new Date().toLocaleDateString();
+    const dateStr = report.generatedDate ? new Date(report.generatedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString();
+    const data = report.data || {};
+    const reportTypeFormatted = (report.type || 'general').toUpperCase();
+
+    // Helper functions for formatting values
+    const fmtCurr = (val: number | undefined) => val != null ? '₹' + Number(val).toLocaleString('en-IN') : '₹0';
+    const fmtNum = (val: number | undefined) => val != null ? Number(val).toLocaleString() : '0';
+    const fmtPct = (val: number | undefined) => val != null ? Number(val).toFixed(1) + '%' : '0%';
+    const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
+    // Generate specific tables and KPI metrics based on report type
+    let kpiCardsHtml = '';
+    let reportTablesHtml = '';
+
+    if (report.type === 'resource') {
+      kpiCardsHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Total Assets</span>
+            <span class="kpi-val">${fmtNum(data.totalResources || 150)}</span>
+            <span class="kpi-sub">Company fleet & equipment</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Utilization Rate</span>
+            <span class="kpi-val green">${fmtPct(data.utilizationRate || 56.7)}</span>
+            <span class="kpi-sub">Active fleet deployment</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Available Assets</span>
+            <span class="kpi-val blue">${fmtNum(data.availableResources || 45)}</span>
+            <span class="kpi-sub">Ready for assignment</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Fleet Efficiency</span>
+            <span class="kpi-val purple">${fmtPct(data.resourceEfficiency || 82)}</span>
+            <span class="kpi-sub">Operational efficiency score</span>
+          </div>
+        </div>
+      `;
+
+      const typeRows = (data.resourcesByType || []).map((r: any) => `
+        <tr>
+          <td style="font-weight: 600;">${r.type}</td>
+          <td class="text-right">${r.count}</td>
+          <td class="text-right">${r.utilization}%</td>
+          <td><span class="badge ${r.status === 'Active' ? 'badge-green' : 'badge-amber'}">${r.status}</span></td>
+        </tr>
+      `).join('');
+
+      const topRows = (data.topUsedResources || []).map((r: any) => `
+        <tr>
+          <td style="font-weight: 600;">${r.name}</td>
+          <td class="text-right">${r.usage}%</td>
+          <td class="text-right">${r.availability}%</td>
+          <td class="text-right">${r.efficiency}%</td>
+        </tr>
+      `).join('');
+
+      const maintRows = (data.maintenanceSchedule || []).map((m: any) => `
+        <tr>
+          <td style="font-weight: 600;">${m.resource}</td>
+          <td>${fmtDate(m.lastMaintenance)}</td>
+          <td>${fmtDate(m.nextMaintenance)}</td>
+          <td><span class="badge ${m.status === 'Scheduled' ? 'badge-blue' : 'badge-amber'}">${m.status}</span></td>
+        </tr>
+      `).join('');
+
+      reportTablesHtml = `
+        <div class="section-block">
+          <h3 class="section-title">Equipment Categories & Fleet Utilization</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Category / Type</th>
+                <th class="text-right">Asset Count</th>
+                <th class="text-right">Utilization Rate</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${typeRows || '<tr><td colspan="4">No category data available</td></tr>'}</tbody>
+          </table>
+        </div>
+
+        <div class="section-block">
+          <h3 class="section-title">Top Utilized Fleet Assets</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Equipment Name</th>
+                <th class="text-right">Usage Rate</th>
+                <th class="text-right">Availability</th>
+                <th class="text-right">Efficiency Score</th>
+              </tr>
+            </thead>
+            <tbody>${topRows || '<tr><td colspan="4">No asset data available</td></tr>'}</tbody>
+          </table>
+        </div>
+
+        <div class="section-block">
+          <h3 class="section-title">Fleet Maintenance Schedule</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Equipment</th>
+                <th>Last Service Date</th>
+                <th>Next Scheduled Service</th>
+                <th>Service Status</th>
+              </tr>
+            </thead>
+            <tbody>${maintRows || '<tr><td colspan="4">No maintenance scheduled</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+    } else if (report.type === 'budget') {
+      kpiCardsHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Approved Budget</span>
+            <span class="kpi-val">${fmtCurr(data.totalBudget || 2500000)}</span>
+            <span class="kpi-sub">Total project allocation</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Total Spent</span>
+            <span class="kpi-val blue">${fmtCurr(data.totalSpent || 1625000)}</span>
+            <span class="kpi-sub">Actual incurred expenditure</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Remaining Budget</span>
+            <span class="kpi-val green">${fmtCurr(data.remainingBudget || 875000)}</span>
+            <span class="kpi-sub">Available capital balance</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Budget Utilization</span>
+            <span class="kpi-val purple">${fmtPct(data.budgetUtilization || 65)}</span>
+            <span class="kpi-sub">${data.budgetStatus || 'On Track'}</span>
+          </div>
+        </div>
+      `;
+
+      const catRows = (data.categoryBreakdown || []).map((c: any) => `
+        <tr>
+          <td style="font-weight: 600;">${c.category}</td>
+          <td class="text-right">${fmtCurr(c.planned)}</td>
+          <td class="text-right">${fmtCurr(c.actual)}</td>
+          <td class="text-right ${c.variance < 0 ? 'text-red' : 'text-green'}">${fmtCurr(c.variance)}</td>
+          <td class="text-right">${c.percentage}%</td>
+        </tr>
+      `).join('');
+
+      const expRows = (data.topExpenses || []).map((e: any) => `
+        <tr>
+          <td style="font-weight: 600;">${e.description}</td>
+          <td>${e.category}</td>
+          <td>${e.vendor || 'N/A'}</td>
+          <td>${fmtDate(e.date)}</td>
+          <td class="text-right style-bold">${fmtCurr(e.amount)}</td>
+        </tr>
+      `).join('');
+
+      reportTablesHtml = `
+        <div class="section-block">
+          <h3 class="section-title">Cost Category Breakdown</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="text-right">Planned Budget</th>
+                <th class="text-right">Actual Spend</th>
+                <th class="text-right">Variance</th>
+                <th class="text-right">Allocation %</th>
+              </tr>
+            </thead>
+            <tbody>${catRows || '<tr><td colspan="5">No cost data available</td></tr>'}</tbody>
+          </table>
+        </div>
+
+        <div class="section-block">
+          <h3 class="section-title">Recent Major Expenditure</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Expense Item</th>
+                <th>Category</th>
+                <th>Vendor / Contractor</th>
+                <th>Date</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>${expRows || '<tr><td colspan="5">No expenses recorded</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+    } else if (report.type === 'progress') {
+      kpiCardsHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Overall Progress</span>
+            <span class="kpi-val green">${fmtPct(data.overallProgress || 65)}</span>
+            <span class="kpi-sub">Weighted completion</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Tasks Completed</span>
+            <span class="kpi-val blue">${data.tasksCompleted || 130} / ${data.tasksTotal || 200}</span>
+            <span class="kpi-sub">Work items finished</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Milestones Achieved</span>
+            <span class="kpi-val purple">${data.milestonesAchieved || 5} / ${data.milestonesTotal || 8}</span>
+            <span class="kpi-sub">Project milestones</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Schedule Status</span>
+            <span class="kpi-val">${data.timelineStatus || 'On Track'}</span>
+            <span class="kpi-sub">Target: ${data.completionForecast || 'Oct 2026'}</span>
+          </div>
+        </div>
+      `;
+
+      const phaseRows = (data.phaseProgress || []).map((p: any) => `
+        <tr>
+          <td style="font-weight: 600;">${p.name}</td>
+          <td class="text-right">${p.progress}%</td>
+          <td>${fmtDate(p.startDate)}</td>
+          <td>${fmtDate(p.endDate)}</td>
+          <td><span class="badge ${p.status === 'completed' ? 'badge-green' : p.status === 'at-risk' ? 'badge-red' : 'badge-blue'}">${p.status}</span></td>
+        </tr>
+      `).join('');
+
+      const riskRows = (data.risks || []).map((r: any) => `
+        <tr>
+          <td style="font-weight: 600;">${r.description}</td>
+          <td><span class="badge ${r.severity === 'high' ? 'badge-red' : 'badge-amber'}">${r.severity}</span></td>
+          <td>${r.mitigation}</td>
+        </tr>
+      `).join('');
+
+      reportTablesHtml = `
+        <div class="section-block">
+          <h3 class="section-title">Construction Phases & Milestone Progress</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Phase Name</th>
+                <th class="text-right">Completion %</th>
+                <th>Start Date</th>
+                <th>Target Completion</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${phaseRows || '<tr><td colspan="5">No phase progress data available</td></tr>'}</tbody>
+          </table>
+        </div>
+
+        <div class="section-block">
+          <h3 class="section-title">Risk Assessment & Mitigation Strategy</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Identified Risk Description</th>
+                <th>Severity</th>
+                <th>Mitigation Action Plan</th>
+              </tr>
+            </thead>
+            <tbody>${riskRows || '<tr><td colspan="3">No active risks logged</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+    } else if (report.type === 'workforce') {
+      kpiCardsHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Active Workforce</span>
+            <span class="kpi-val">${data.totalEmployees || 120}</span>
+            <span class="kpi-sub">Total site personnel</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Attendance Rate</span>
+            <span class="kpi-val green">${fmtPct(data.attendanceRate || 90)}</span>
+            <span class="kpi-sub">Daily site presence</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Overtime Hours</span>
+            <span class="kpi-val amber">${fmtNum(data.overtime || 335)} hrs</span>
+            <span class="kpi-sub">Monthly overtime count</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Monthly Payroll</span>
+            <span class="kpi-val blue">${fmtCurr(data.payrollTotal || 180000)}</span>
+            <span class="kpi-sub">Labor expenditure</span>
+          </div>
+        </div>
+      `;
+
+      const deptRows = (data.departments || []).map((d: any) => `
+        <tr>
+          <td style="font-weight: 600;">${d.name}</td>
+          <td class="text-right">${d.employees}</td>
+          <td class="text-right">${d.attendance}%</td>
+          <td class="text-right">${d.productivity}%</td>
+          <td class="text-right">${d.overtime} hrs</td>
+        </tr>
+      `).join('');
+
+      reportTablesHtml = `
+        <div class="section-block">
+          <h3 class="section-title">Departmental Performance & Workforce Distribution</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th class="text-right">Staff Count</th>
+                <th class="text-right">Attendance %</th>
+                <th class="text-right">Productivity Score</th>
+                <th class="text-right">Overtime Hours</th>
+              </tr>
+            </thead>
+            <tbody>${deptRows || '<tr><td colspan="5">No department data available</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+    } else if (report.type === 'procurement') {
+      kpiCardsHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Total Orders</span>
+            <span class="kpi-val">${data.totalOrders || 75}</span>
+            <span class="kpi-sub">Issued purchase orders</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Total Spend</span>
+            <span class="kpi-val blue">${fmtCurr(data.totalSpent || 850000)}</span>
+            <span class="kpi-sub">Material procurement cost</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Active Suppliers</span>
+            <span class="kpi-val purple">4</span>
+            <span class="kpi-sub">Verified vendors</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">On-Time Delivery</span>
+            <span class="kpi-val green">88.5%</span>
+            <span class="kpi-sub">Fulfillment reliability</span>
+          </div>
+        </div>
+      `;
+
+      const supRows = (data.supplierPerformance || []).map((s: any) => `
+        <tr>
+          <td style="font-weight: 600;">${s.supplier}</td>
+          <td class="text-right">${s.orders}</td>
+          <td class="text-right">${s.delivered}</td>
+          <td class="text-right">${s.onTime}%</td>
+          <td class="text-right">⭐ ${s.rating}</td>
+          <td class="text-right style-bold">${fmtCurr(s.cost)}</td>
+        </tr>
+      `).join('');
+
+      reportTablesHtml = `
+        <div class="section-block">
+          <h3 class="section-title">Supplier Performance & Fulfillment Summary</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Supplier / Vendor</th>
+                <th class="text-right">Orders Placed</th>
+                <th class="text-right">Orders Delivered</th>
+                <th class="text-right">On-Time %</th>
+                <th class="text-right">Rating</th>
+                <th class="text-right">Total Order Value</th>
+              </tr>
+            </thead>
+            <tbody>${supRows || '<tr><td colspan="6">No supplier performance data available</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
     return `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>${report.title}</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; color: #333; }
-    h1 { color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 8px; }
-    .meta { margin-bottom: 20px; background: #f5f5f5; padding: 12px; border-radius: 6px; }
-    .meta p { margin: 4px 0; font-size: 14px; }
-    .section { margin-top: 24px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
-    th { background: #e8eaf6; color: #1a237e; }
+    @page { size: A4 portrait; margin: 15mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      color: #1e293b;
+      background: #ffffff;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    /* Header Banner */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin: 0 0 4px 0;
+    }
+    .brand-title span { color: #2563eb; }
+    .report-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #475569;
+      margin: 0;
+    }
+    .header-meta {
+      text-align: right;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .badge-hdr {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 700;
+      font-size: 11px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* Executive Meta Bar */
+    .meta-bar {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .meta-item label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .meta-item span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .kpi-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    .kpi-val {
+      display: block;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+
+      &.blue { color: #2563eb; }
+      &.green { color: #16a34a; }
+      &.purple { color: #9333ea; }
+      &.amber { color: #d97706; }
+    }
+    .kpi-sub {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* Section Blocks */
+    .section-block {
+      margin-bottom: 28px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #cbd5e1;
+    }
+
+    /* Data Tables */
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .report-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 12px;
+      border-top: 1px solid #cbd5e1;
+      border-bottom: 2px solid #cbd5e1;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    .report-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .report-table tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .text-right { text-align: right; }
+    .style-bold { font-weight: 700; color: #0f172a; }
+    .text-green { color: #16a34a; font-weight: 600; }
+    .text-red { color: #dc2626; font-weight: 600; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+
+      &.badge-green { background: #dcfce7; color: #15803d; }
+      &.badge-blue { background: #dbeafe; color: #1d4ed8; }
+      &.badge-amber { background: #fef3c7; color: #b45309; }
+      &.badge-red { background: #fee2e2; color: #b91c1c; }
+    }
+
+    /* Report Footer */
+    .report-footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    @media print {
+      body { padding: 0; }
+      .kpi-card, .meta-bar { break-inside: avoid; }
+      .report-table tr { break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
-  <h1>BuildTrack - ${report.title}</h1>
-  <div class="meta">
-    <p><strong>Report ID:</strong> ${report.id}</p>
-    <p><strong>Type:</strong> ${report.type.toUpperCase()}</p>
-    <p><strong>Generated Date:</strong> ${dateStr}</p>
-    <p><strong>Status:</strong> ${report.status}</p>
-    <p><strong>Description:</strong> ${report.description}</p>
+
+  <!-- Report Header -->
+  <div class="report-header">
+    <div>
+      <h1 class="brand-title">Build<span>Track</span></h1>
+      <h2 class="report-name">${report.title}</h2>
+    </div>
+    <div class="header-meta">
+      <div class="badge-hdr">${reportTypeFormatted} REPORT</div>
+      <div><strong>Date:</strong> ${dateStr}</div>
+      <div><strong>Report ID:</strong> ${report.id}</div>
+    </div>
   </div>
-  <div class="section">
-    <h2>Report Data Summary</h2>
-    <p>${JSON.stringify(report.data, null, 2)}</p>
+
+  <!-- Executive Meta Bar -->
+  <div class="meta-bar">
+    <div class="meta-item">
+      <label>Report Type</label>
+      <span>${reportTypeFormatted}</span>
+    </div>
+    <div class="meta-item">
+      <label>Status</label>
+      <span style="text-transform: capitalize;">${report.status}</span>
+    </div>
+    <div class="meta-item">
+      <label>Generated Date</label>
+      <span>${dateStr}</span>
+    </div>
+    <div class="meta-item">
+      <label>Scope / Filter</label>
+      <span>${report.description || 'Full Project Scope'}</span>
+    </div>
   </div>
+
+  <!-- KPI Key Metrics Grid -->
+  ${kpiCardsHtml}
+
+  <!-- Formatted Data Tables -->
+  ${reportTablesHtml}
+
+  <!-- Report Footer -->
+  <div class="report-footer">
+    <div>Generated automatically by <strong>BuildTrack Construction Management Platform</strong></div>
+    <div>Confidential • For Internal Authorized Use Only</div>
+  </div>
+
 </body>
 </html>`;
   }

@@ -1,46 +1,32 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router, RouterModule } from '@angular/router';
 import { ReportService } from '../../../services/report.service';
-import { Report, ReportFilter } from '../../../models/report.model';
+import { Report } from '../../../models/report.model';
 
 @Component({
   selector: 'app-reports-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatTabsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    MatTableModule,
-    MatDialogModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatSelectModule,
-    MatProgressSpinnerModule
-  ],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="reports-dashboard">
+    <div class="bt-page">
+      <button class="bt-back-btn" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
+        </svg>
+        Back to Analytics
+      </button>
+
       <div class="dashboard-header">
         <div class="header-left">
           <h1>Reports & Documentation</h1>
-          <p class="subtitle">Generate, manage, and export project reports</p>
+          <p class="subtitle">Generate, manage, and export project reports in PDF or Excel/CSV format</p>
         </div>
         <div class="header-actions">
           <button class="btn btn-primary" (click)="generateNewReport()">
-            <mat-icon>add</mat-icon> Generate Report
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Generate New Report
           </button>
         </div>
       </div>
@@ -50,7 +36,7 @@ import { Report, ReportFilter } from '../../../models/report.model';
         <div class="filter-row">
           <div class="filter-item">
             <label>Report Type</label>
-            <select [(ngModel)]="selectedReportType" (change)="applyFilters()">
+            <select [(ngModel)]="selectedReportType" (change)="applyFilters()" class="form-control">
               <option value="all">All Reports</option>
               <option value="progress">Progress Reports</option>
               <option value="resource">Resource Reports</option>
@@ -61,67 +47,57 @@ import { Report, ReportFilter } from '../../../models/report.model';
           </div>
           <div class="filter-item">
             <label>Status</label>
-            <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+            <select [(ngModel)]="selectedStatus" (change)="applyFilters()" class="form-control">
               <option value="all">All Status</option>
               <option value="generated">Generated</option>
               <option value="draft">Draft</option>
               <option value="scheduled">Scheduled</option>
-              <option value="archived">Archived</option>
             </select>
           </div>
           <div class="filter-item">
             <label>Date Range</label>
             <div class="date-range">
-              <input type="date" [(ngModel)]="startDate" (change)="applyFilters()">
+              <input type="date" [(ngModel)]="startDate" (change)="applyFilters()" class="form-control">
               <span>to</span>
-              <input type="date" [(ngModel)]="endDate" (change)="applyFilters()">
+              <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" class="form-control">
             </div>
           </div>
-          <div class="filter-item">
+          <div class="filter-item filter-actions-item">
             <button class="btn btn-outline" (click)="clearFilters()">
-              <mat-icon>clear</mat-icon> Clear
+              Clear Filters
             </button>
           </div>
         </div>
       </div>
 
       <!-- Reports Grid -->
-      <div class="reports-grid" *ngIf="!isLoading">
+      <div class="reports-grid" *ngIf="!isLoading && filteredReports.length > 0">
         <div class="report-card" *ngFor="let report of filteredReports">
           <div class="report-header">
-            <div class="report-type-badge" [class]="report.type">
-              {{ report.type }}
-            </div>
-            <div class="report-status-badge" [class]="report.status">
-              {{ report.status }}
-            </div>
+            <span class="type-badge" [ngClass]="report.type">{{ report.type | uppercase }}</span>
+            <span class="status-badge" [ngClass]="report.status">{{ report.status }}</span>
           </div>
           <div class="report-body">
             <h3>{{ report.title }}</h3>
             <p class="report-description">{{ report.description }}</p>
             <div class="report-meta">
               <span class="meta-item">
-                <mat-icon>event</mat-icon>
-                {{ report.generatedDate | date:'mediumDate' }}
+                📅 {{ report.generatedDate | date:'mediumDate' }}
               </span>
               <span class="meta-item">
-                <mat-icon>description</mat-icon>
-                {{ report.format }}
+                📄 {{ report.format | uppercase }}
               </span>
             </div>
           </div>
           <div class="report-actions">
-            <button class="btn btn-sm btn-outline" (click)="viewReport(report)">
-              <mat-icon>visibility</mat-icon> View
+            <button class="btn btn-sm btn-outline" (click)="exportPDF(report)" title="Export HTML/PDF">
+              📥 Export PDF
             </button>
-            <button class="btn btn-sm btn-outline" (click)="exportPDF(report)">
-              <mat-icon>picture_as_pdf</mat-icon> PDF
-            </button>
-            <button class="btn btn-sm btn-outline" (click)="exportExcel(report)">
-              <mat-icon>table_chart</mat-icon> Excel
+            <button class="btn btn-sm btn-outline" (click)="exportExcel(report)" title="Export CSV/Excel">
+              📊 Export CSV
             </button>
             <button class="btn btn-sm btn-danger" (click)="deleteReport(report.id)">
-              <mat-icon>delete</mat-icon>
+              🗑️ Delete
             </button>
           </div>
         </div>
@@ -135,7 +111,6 @@ import { Report, ReportFilter } from '../../../models/report.model';
 
       <!-- Empty State -->
       <div *ngIf="!isLoading && filteredReports.length === 0" class="empty-state">
-        <mat-icon>description</mat-icon>
         <h3>No Reports Found</h3>
         <p>Generate a new report to get started</p>
         <button class="btn btn-primary" (click)="generateNewReport()">
@@ -145,10 +120,28 @@ import { Report, ReportFilter } from '../../../models/report.model';
     </div>
   `,
   styles: [`
-    .reports-dashboard {
+    .bt-page {
       padding: 24px;
-      background: #f8f9fa;
-      min-height: 100vh;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .bt-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 16px;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .bt-back-btn:hover {
+      color: #1e293b;
+      background: #f1f5f9;
     }
     .dashboard-header {
       background: white;
@@ -158,17 +151,18 @@ import { Report, ReportFilter } from '../../../models/report.model';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
     }
     .header-left h1 {
       margin: 0 0 4px 0;
-      font-size: 28px;
-      font-weight: 600;
-      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
     }
     .subtitle {
       margin: 0;
-      color: #666;
+      color: #64748b;
       font-size: 14px;
     }
     .header-actions {
@@ -177,232 +171,175 @@ import { Report, ReportFilter } from '../../../models/report.model';
     }
     .btn {
       padding: 8px 16px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: none;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       transition: all 0.2s;
     }
     .btn-primary {
-      background: #3f51b5;
+      background: #2563eb;
       color: white;
     }
     .btn-primary:hover {
-      background: #303f9f;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+      background: #1d4ed8;
     }
     .btn-outline {
-      background: transparent;
-      color: #555;
-      border: 1px solid #ddd;
+      background: white;
+      color: #334155;
+      border: 1px solid #cbd5e1;
     }
     .btn-outline:hover {
-      background: #f5f5f5;
-      border-color: #bbb;
+      background: #f8fafc;
+      border-color: #94a3b8;
     }
     .btn-danger {
-      background: transparent;
-      color: #f44336;
-      border: 1px solid #f44336;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
     }
     .btn-danger:hover {
-      background: #ffebee;
+      background: #fee2e2;
     }
     .btn-sm {
-      padding: 4px 12px;
-      font-size: 12px;
-    }
-    .mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      padding: 6px 12px;
+      font-size: 13px;
     }
     .filter-section {
       background: white;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
     }
     .filter-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 16px;
       align-items: flex-end;
     }
     .filter-item {
       flex: 1;
-      min-width: 150px;
+      min-width: 160px;
+    }
+    .filter-actions-item {
+      flex: 0 0 auto;
     }
     .filter-item label {
       display: block;
       font-size: 13px;
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
     }
-    .filter-item select,
-    .filter-item input {
+    .form-control {
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
       font-size: 14px;
+      color: #1e293b;
+      background-color: white;
+      box-sizing: border-box;
     }
     .date-range {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .date-range input {
-      flex: 1;
-    }
     .reports-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 20px;
     }
     .report-card {
       background: white;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .report-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .report-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #f0f0f0;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      margin-bottom: 12px;
     }
-    .report-type-badge {
-      padding: 4px 12px;
-      border-radius: 12px;
+    .type-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+
+      &.progress { background: #dbeafe; color: #1e40af; }
+      &.budget { background: #dcfce7; color: #166534; }
+      &.resource { background: #f3e8ff; color: #6b21a8; }
+      &.workforce { background: #ffedd5; color: #9a3412; }
+      &.procurement { background: #e0e7ff; color: #3730a3; }
+    }
+    .status-badge {
       font-size: 12px;
       font-weight: 500;
-      text-transform: uppercase;
-    }
-    .report-type-badge.progress { background: #e3f2fd; color: #1976d2; }
-    .report-type-badge.resource { background: #e8f5e9; color: #388e3c; }
-    .report-type-badge.budget { background: #fff3e0; color: #f57c00; }
-    .report-type-badge.workforce { background: #f3e5f5; color: #7b1fa2; }
-    .report-type-badge.procurement { background: #fce4ec; color: #c62828; }
-    .report-status-badge {
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-    }
-    .report-status-badge.generated { background: #e8f5e9; color: #388e3c; }
-    .report-status-badge.draft { background: #fff3e0; color: #f57c00; }
-    .report-status-badge.scheduled { background: #e3f2fd; color: #1976d2; }
-    .report-status-badge.archived { background: #f5f5f5; color: #757575; }
-    .report-body {
-      padding: 20px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #475569;
     }
     .report-body h3 {
       margin: 0 0 8px 0;
       font-size: 16px;
-      color: #1a1a1a;
+      font-weight: 600;
+      color: #0f172a;
     }
     .report-description {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      color: #666;
+      margin: 0 0 16px 0;
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.4;
     }
     .report-meta {
       display: flex;
       gap: 16px;
-    }
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
       font-size: 12px;
-      color: #999;
-    }
-    .meta-item .mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
+      color: #64748b;
+      margin-bottom: 16px;
     }
     .report-actions {
-      padding: 12px 20px;
-      border-top: 1px solid #f0f0f0;
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
-    }
-    .loading-state {
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      margin: 0 auto 20px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3f51b5;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      border-top: 1px solid #f1f5f9;
+      padding-top: 16px;
     }
     .empty-state {
       text-align: center;
-      padding: 60px 20px;
+      padding: 48px;
       background: white;
       border-radius: 12px;
+      border: 1px dashed #cbd5e1;
     }
-    .empty-state .mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-      color: #ccc;
+    .loading-state {
+      text-align: center;
+      padding: 48px;
     }
-    .empty-state h3 {
-      margin: 16px 0 8px 0;
-      color: #333;
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
     }
-    .empty-state p {
-      color: #666;
-      margin-bottom: 20px;
-    }
-    @media (max-width: 768px) {
-      .reports-grid {
-        grid-template-columns: 1fr;
-      }
-      .filter-row {
-        flex-direction: column;
-      }
-      .filter-item {
-        min-width: 100%;
-      }
-      .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-      .header-actions {
-        width: 100%;
-      }
-      .header-actions .btn {
-        flex: 1;
-        justify-content: center;
-      }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   `]
 })
@@ -416,7 +353,11 @@ export class ReportsDashboardComponent implements OnInit {
   startDate = '';
   endDate = '';
 
-  constructor(private reportService: ReportService) {}
+  constructor(
+    private reportService: ReportService,
+    private router: Router,
+    private location: Location
+  ) {}
 
   ngOnInit() {
     this.loadReports();
@@ -441,17 +382,14 @@ export class ReportsDashboardComponent implements OnInit {
     this.filteredReports = this.reports.filter(report => {
       let matches = true;
 
-      // Filter by type
       if (this.selectedReportType !== 'all' && report.type !== this.selectedReportType) {
         matches = false;
       }
 
-      // Filter by status
       if (this.selectedStatus !== 'all' && report.status !== this.selectedStatus) {
         matches = false;
       }
 
-      // Filter by date
       if (this.startDate && this.endDate) {
         const reportDate = new Date(report.generatedDate);
         const start = new Date(this.startDate);
@@ -474,14 +412,7 @@ export class ReportsDashboardComponent implements OnInit {
   }
 
   generateNewReport() {
-    // Open report generation dialog
-    console.log('Generate new report');
-    // You can implement a dialog here
-  }
-
-  viewReport(report: Report) {
-    console.log('View report:', report);
-    // Implement report view
+    this.router.navigate(['/analytics/reports/generate']);
   }
 
   exportPDF(report: Report) {
@@ -498,7 +429,7 @@ export class ReportsDashboardComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error exporting PDF:', err);
-        alert('Failed to export PDF. Please try again.');
+        alert('Failed to export PDF.');
       }
     });
   }
@@ -517,7 +448,7 @@ export class ReportsDashboardComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error exporting Excel:', err);
-        alert('Failed to export Excel. Please try again.');
+        alert('Failed to export Excel.');
       }
     });
   }
@@ -530,9 +461,13 @@ export class ReportsDashboardComponent implements OnInit {
         },
         error: (err: any) => {
           console.error('Error deleting report:', err);
-          alert('Failed to delete report. Please try again.');
+          alert('Failed to delete report.');
         }
       });
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/analytics']);
   }
 }
