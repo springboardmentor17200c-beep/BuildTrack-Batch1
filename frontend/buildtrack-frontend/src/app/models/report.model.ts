@@ -22,7 +22,7 @@ export type ReportStatus = 'draft' | 'generated' | 'scheduled' | 'archived';
 export type ReportFormat = 'pdf' | 'excel' | 'both';
 
 export interface ReportFilter {
-  dateRange: {
+  dateRange?: {
     start: Date;
     end: Date;
   };

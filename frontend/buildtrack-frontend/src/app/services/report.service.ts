@@ -76,7 +76,7 @@ export class ReportService {
     return this.http.get<Report[]>(this.apiUrl).pipe(
       map(apiReports => apiReports.map(r => ({
         ...r,
-        data: this.getReportDataByType(r.type, {})
+        data: this.getReportDataByType(r.type, { dateRange: { start: new Date(), end: new Date() } })
       }))),
       catchError(() => of([...this.reports]).pipe(delay(300)))
     );

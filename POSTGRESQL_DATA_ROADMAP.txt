@@ -81,9 +81,11 @@ LEFT JOIN companies c ON u.company_id = c.company_id;
 --------------------------------------------------------------------------------
 5. 1-CLICK TERMINAL INSPECTION COMMAND (NO PGADMIN NEEDED)
 --------------------------------------------------------------------------------
-Run this command from your "backend" folder to dump database contents instantly:
+First navigate into your backend directory:
+  cd d:\Desktop\BuildTrack\BuildTrack-Batch1\backend
 
-powershell -Command "cd d:\Desktop\BuildTrack\BuildTrack-Batch1\backend; python -c \"from app.db.database import SessionLocal; from app.models.user import User; from app.models.report import DBReport; from app.models.company import Company; db = SessionLocal(); print('=== USERS ==='); [print(u.user_id, u.full_name, u.email) for u in db.query(User).all()]; print('\n=== REPORTS ==='); [print(r.report_id, r.file_name, r.report_type) for r in db.query(DBReport).all()]; print('\n=== COMPANIES ==='); [print(c.company_id, c.company_name) for c in db.query(Company).all()]; db.close()\""
+Then execute:
+  python -c "from app.db.database import SessionLocal; from app.models.user import User; from app.models.report import DBReport; from app.models.company import Company; db = SessionLocal(); print('=== USERS ==='); [print(u.user_id, u.full_name, u.email) for u in db.query(User).all()]; print('\n=== REPORTS ==='); [print(r.report_id, r.file_name, r.report_type) for r in db.query(DBReport).all()]; print('\n=== COMPANIES ==='); [print(c.company_id, c.company_name) for c in db.query(Company).all()]; db.close()"
 
 
 --------------------------------------------------------------------------------
