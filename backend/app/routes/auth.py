@@ -1,4 +1,3 @@
-import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -12,106 +11,51 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from sqlalchemy import or_, func
 from app.db.database import get_db
 from app.models.user import User
-from app.models.company import Company
 from app.models.role import Role
-from app.models.otp_verification import OtpVerification
+from app.models.company import Company
 from app.schemas.auth import (
     RegisterRequest,
     ChangePasswordRequest,
     Token,
-    RegistrationRequest,
-    UserProfileResponse,
-    ForgotPasswordRequest,
-    VerifyOtpRequest,
-    ResetPasswordRequest,
-    SuccessResponse,
-    OtpVerificationResponse,
-    ResetPasswordResponse,
 )
 from app.schemas.user import UserResponse, UserUpdate
 
+
 router = APIRouter(
-    prefix="",
+    prefix="/auth",
     tags=["Authentication"],
 )
 
-
-def send_otp_via_email(email: str, otp_code: str) -> None:
-    api_key = settings.SENDGRID_API_KEY
-    from_email = settings.MAIL_FROM_EMAIL
-
-    if api_key and from_email:
-        try:
-            from sendgrid import SendGridAPIClient
-            from sendgrid.helpers.mail import Mail
-
-            message = Mail(
-                from_email=from_email,
-                to_emails=email,
-                subject="[BuildTrack] Your OTP",
-                plain_text_content=f"Your OTP is {otp_code}",
-            )
-            sg = SendGridAPIClient(api_key)
-            resp = sg.send(message)
-            print(f"[SendGrid] Sent OTP to {email}: status={resp.status_code}")
-            return
-        except Exception as exc:
-            print("[SendGrid] Email send failed.")
-            print(f"[SendGrid] Error type: {type(exc).__name__}")
-            print(f"[SendGrid] Error details: {exc}")
-            print("[SendGrid] Falling back to console output.")
-    else:
-        print("[SendGrid] Missing SendGrid configuration in environment variables.")
-        print("Expected: SENDGRID_API_KEY and MAIL_FROM_EMAIL")
-
-    # Fallback / simulation
-    print(f"[Email simulation] To {email}: Your OTP is {otp_code}")
-
-
-def build_user_profile_response(user: User) -> dict:
-    names = user.full_name.split(" ", 1)
-    first_name = names[0]
-    last_name = names[1] if len(names) > 1 else ""
-    
-    role_name = user.role.role_name if user.role else "Client"
-    # Ensure role name matches the frontend expected values:
-    if role_name == "Client":
-        role_name = "Client / Owner"
-        
-    company_name = user.company.company_name if user.company else None
-    
-    return {
-        "user_id": user.user_id,
-        "username": user.email, # Use email as username
-        "email": user.email,
-        "first_name": first_name,
-        "last_name": last_name,
-        "phone_number": user.phone_number,
-        "role": role_name,
-        "company_name": company_name,
-        "tax_id": None,
-        "employee_id": None,
-        "skills_or_trade": None,
-        "assigned_projects": [],
-        "is_active": user.is_active,
-        "created_at": user.created_at,
-    }
+def build_user_response(user: User) -> UserResponse:
+    role_name = user.role.role_name if user.role else None
+    return UserResponse(
+        user_id=user.user_id,
+        full_name=user.full_name,
+        email=user.email,
+        phone_number=user.phone_number,
+        company_id=user.company_id,
+        role_id=user.role_id,
+        role=role_name,
+        is_active=user.is_active,
+        created_at=user.created_at,
+    )
 
 
 @router.post(
     "/register",
-    response_model=UserProfileResponse,
+    response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def register(
-    payload: RegistrationRequest,
+    payload: RegisterRequest,
     db: Session = Depends(get_db),
 ):
     existing_user = (
         db.query(User)
-        .filter(User.email == payload.email)
+        .filter(func.lower(User.email) == payload.email.lower())
         .first()
     )
 
@@ -121,60 +65,44 @@ def register(
             detail="Email already registered.",
         )
 
-    # 1. Resolve Role
-    role_map = {
-        "Administrator": "Administrator",
-        "Project Manager": "Project Manager",
-        "Site Engineer": "Site Engineer",
-        "Worker": "Worker",
-        "Client / Owner": "Client",
-        "Contractor": "Client"
-    }
-    mapped_role_name = role_map.get(payload.role, payload.role)
-    db_role = db.query(Role).filter(Role.role_name == mapped_role_name).first()
-    if not db_role:
-        db_role = db.query(Role).first()
-    role_id = db_role.role_id if db_role else 1
+    # Compute full_name
+    name = payload.full_name
+    if not name:
+        parts = [p for p in [payload.first_name, payload.last_name] if p]
+        name = " ".join(parts) if parts else (payload.username or payload.email.split("@")[0])
 
-    # 2. Resolve Company
-    company_id = None
-    if payload.company_name:
-        company = db.query(Company).filter(Company.company_name == payload.company_name).first()
-        if not company:
-            import uuid
-            company_code = f"COM-{str(uuid.uuid4())[:8].upper()}"
-            company = Company(
+    # Resolve role_id
+    role_id = payload.role_id
+    if not role_id and payload.role:
+        role_obj = db.query(Role).filter(Role.role_name == payload.role).first()
+        if not role_obj:
+            role_obj = Role(role_name=payload.role, description=f"{payload.role} role")
+            db.add(role_obj)
+            db.commit()
+            db.refresh(role_obj)
+        role_id = role_obj.role_id
+
+    # Resolve company_id
+    company_id = payload.company_id
+    if not company_id and payload.company_name:
+        company_obj = db.query(Company).filter(Company.company_name == payload.company_name).first()
+        if not company_obj:
+            ts = int(datetime.utcnow().timestamp())
+            code = f"CMP-{ts}"
+            company_obj = Company(
                 company_name=payload.company_name,
-                company_code=company_code,
-                company_email=f"info-{str(uuid.uuid4())[:8]}@buildtrack.local",
-                company_phone=payload.phone_number,
-                address="Default Address",
+                company_code=code,
+                company_email=f"contact_{ts}@{payload.company_name.lower().replace(' ', '')}.com",
+                company_phone=payload.phone_number or "0000000000",
+                address="N/A"
             )
-            db.add(company)
+            db.add(company_obj)
             db.commit()
-            db.refresh(company)
-        company_id = company.company_id
-    else:
-        first_company = db.query(Company).first()
-        if first_company:
-            company_id = first_company.company_id
-        else:
-            company = Company(
-                company_name="Default Company",
-                company_code="DEF001",
-                company_email="default@buildtrack.local",
-                company_phone="0000000000",
-                address="Default Address",
-            )
-            db.add(company)
-            db.commit()
-            db.refresh(company)
-            company_id = company.company_id
+            db.refresh(company_obj)
+        company_id = company_obj.company_id
 
-    # 3. Create User
-    full_name = f"{payload.first_name} {payload.last_name}".strip()
     user = User(
-        full_name=full_name,
+        full_name=name,
         email=payload.email,
         password_hash=hash_password(payload.password),
         phone_number=payload.phone_number,
@@ -186,7 +114,7 @@ def register(
     db.commit()
     db.refresh(user)
 
-    return build_user_profile_response(user)
+    return build_user_response(user)
 
 
 @router.post(
@@ -197,9 +125,15 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
+    identifier = (form_data.username or "").strip().lower()
     user = (
         db.query(User)
-        .filter(User.email == form_data.username)
+        .filter(
+            or_(
+                func.lower(User.email) == identifier,
+                func.lower(User.full_name) == identifier,
+            )
+        )
         .first()
     )
 
@@ -245,18 +179,18 @@ def login(
 
 
 @router.get(
-    "/users/me",
-    response_model=UserProfileResponse,
+    "/me",
+    response_model=UserResponse,
 )
 def get_me(
     current_user: User = Depends(get_current_user),
 ):
-    return build_user_profile_response(current_user)
+    return build_user_response(current_user)
 
 
 @router.put(
-    "/users/me",
-    response_model=UserProfileResponse,
+    "/me",
+    response_model=UserResponse,
 )
 def update_profile(
     payload: UserUpdate,
@@ -275,7 +209,7 @@ def update_profile(
     db.commit()
     db.refresh(current_user)
 
-    return build_user_profile_response(current_user)
+    return current_user
 
 
 @router.put("/change-password")
@@ -302,152 +236,3 @@ def change_password(
     return {
         "message": "Password updated successfully."
     }
-
-
-@router.post(
-    "/forgot-password",
-    response_model=SuccessResponse,
-    status_code=status.HTTP_200_OK,
-)
-def forgot_password(
-    payload: ForgotPasswordRequest,
-    db: Session = Depends(get_db),
-):
-    user = db.query(User).filter(User.email == payload.email).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with that email not found",
-        )
-
-    otp_code = "".join(secrets.choice("0123456789") for _ in range(6))
-    expires_at = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.OTP_EXPIRATION_MINUTES
-    )
-
-    otp_record = (
-        db.query(OtpVerification)
-        .filter(OtpVerification.email == payload.email)
-        .first()
-    )
-
-    if otp_record:
-        otp_record.otp_code = otp_code
-        otp_record.expires_at = expires_at
-        otp_record.verification_token = None
-        otp_record.token_expires_at = None
-    else:
-        otp_record = OtpVerification(
-            email=payload.email,
-            otp_code=otp_code,
-            expires_at=expires_at,
-        )
-        db.add(otp_record)
-
-    db.commit()
-    send_otp_via_email(payload.email, otp_code)
-
-    return {"message": "OTP sent to the provided email address."}
-
-
-@router.post(
-    "/verify-otp",
-    response_model=OtpVerificationResponse,
-    status_code=status.HTTP_200_OK,
-)
-def verify_otp(
-    payload: VerifyOtpRequest,
-    db: Session = Depends(get_db),
-):
-    record = (
-        db.query(OtpVerification)
-        .filter(OtpVerification.email == payload.email)
-        .first()
-    )
-
-    if not record:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="OTP not found for this email",
-        )
-
-    expires_at = (
-        record.expires_at.replace(tzinfo=timezone.utc)
-        if record.expires_at.tzinfo is None
-        else record.expires_at
-    )
-
-    if datetime.now(timezone.utc) > expires_at:
-        db.delete(record)
-        db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="OTP has expired",
-        )
-
-    if record.otp_code != payload.otp_code:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid OTP code",
-        )
-
-    verification_token = secrets.token_urlsafe(32)
-    record.verification_token = verification_token
-    record.token_expires_at = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.OTP_EXPIRATION_MINUTES
-    )
-    db.commit()
-
-    return {"verification_token": verification_token}
-
-
-@router.post(
-    "/reset-password",
-    response_model=ResetPasswordResponse,
-    status_code=status.HTTP_200_OK,
-)
-def reset_password(
-    payload: ResetPasswordRequest,
-    db: Session = Depends(get_db),
-):
-    record = (
-        db.query(OtpVerification)
-        .filter(
-            OtpVerification.email == payload.email,
-            OtpVerification.verification_token == payload.verification_token
-        )
-        .first()
-    )
-
-    if not record:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid verification token",
-        )
-
-    token_expires_at = (
-        record.token_expires_at.replace(tzinfo=timezone.utc)
-        if record.token_expires_at.tzinfo is None
-        else record.token_expires_at
-    )
-
-    if datetime.now(timezone.utc) > token_expires_at:
-        db.delete(record)
-        db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Verification token has expired",
-        )
-
-    user = db.query(User).filter(User.email == payload.email).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with that email not found",
-        )
-
-    user.password_hash = hash_password(payload.new_password)
-    db.delete(record)
-    db.commit()
-
-    return {"message": "Password has been reset successfully."}

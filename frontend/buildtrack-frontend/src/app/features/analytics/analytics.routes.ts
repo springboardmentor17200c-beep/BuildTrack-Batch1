@@ -4,15 +4,20 @@ import { BudgetAnalyticsComponent } from './budget-analytics/budget-analytics.co
 import { ProgressAnalyticsComponent } from './progress-analytics/progress-analytics.component';
 import { ResourceAnalyticsComponent } from './resource-analytics/resource-analytics.component';
 import { ProcurementAnalyticsComponent } from './procurement-analytics/procurement-analytics.component';
+import { ReportsDashboardComponent } from '../../models/components/analytics/report-dashboard.component';
+import { ReportGeneratorComponent } from '../../models/components/analytics/report-generator.component';
 
 // Mount these under your main app routes, e.g.:
 //   { path: 'analytics', children: ANALYTICS_ROUTES }
 // Result: /analytics, /analytics/budget, /analytics/progress,
-//         /analytics/resources, /analytics/procurement
+//         /analytics/resources, /analytics/procurement,
+//         /analytics/reports, /analytics/reports/generate
 export const ANALYTICS_ROUTES: Routes = [
   { path: '', component: AnalyticsHubComponent },
   { path: 'budget', component: BudgetAnalyticsComponent },
   { path: 'progress', component: ProgressAnalyticsComponent },
   { path: 'resources', component: ResourceAnalyticsComponent },
   { path: 'procurement', component: ProcurementAnalyticsComponent },
+  { path: 'reports', component: ReportsDashboardComponent },
+  { path: 'reports/generate', component: ReportGeneratorComponent },
 ];

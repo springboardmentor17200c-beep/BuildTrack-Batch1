@@ -8,8 +8,9 @@ class UserResponse(BaseModel):
     full_name: str
     email: EmailStr
     phone_number: str
-    company_id: int | None
-    role_id: int
+    company_id: int | None = None
+    role_id: int | None = None
+    role: str | None = None
     is_active: bool
     created_at: datetime
 

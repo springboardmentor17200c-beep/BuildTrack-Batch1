@@ -1,66 +1,35 @@
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Integer,
-    Numeric,
-    String,
-    Text,
-    TIMESTAMP,
-    func,
-)
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
-
+from datetime import datetime
 from app.db.database import Base
 
+class MaterialCategory(Base):
+    __tablename__ = "material_categories"
+
+    material_category_id = Column(Integer, primary_key=True, index=True)
+    category_name = Column(String(50), unique=True, nullable=False)
+    description = Column(String)
+
+class Material(Base):
+    __tablename__ = "materials"
+
+    material_id = Column(Integer, primary_key=True, index=True)
+    material_category_id = Column(Integer, ForeignKey("material_categories.material_category_id"), nullable=False)
+    material_name = Column(String(150), unique=True, nullable=False)
+    unit_of_measure = Column(String(20), nullable=False)
+    description = Column(String)
+
+    category = relationship("MaterialCategory")
 
 class Inventory(Base):
     __tablename__ = "inventory"
 
     inventory_id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.material_id"), nullable=False)
+    available_quantity = Column(Numeric(12, 2), default=0, nullable=False)
+    minimum_stock_level = Column(Numeric(12, 2))
+    storage_location = Column(String(150))
+    last_updated = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    project_id = Column(
-        Integer,
-        ForeignKey("projects.project_id"),
-        nullable=False,
-    )
-
-    material_id = Column(
-        Integer,
-        ForeignKey("materials.material_id"),
-        nullable=False,
-    )
-
-    quantity_available = Column(
-        Numeric(10, 2),
-        nullable=False,
-        default=0,
-    )
-
-    minimum_quantity = Column(
-        Numeric(10, 2),
-        nullable=False,
-        default=0,
-    )
-
-    location_note = Column(Text)
-
-    created_at = Column(
-        TIMESTAMP,
-        server_default=func.now(),
-    )
-
-    updated_at = Column(
-        TIMESTAMP,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-
-    project = relationship(
-        "Project",
-        back_populates="inventory_items",
-    )
-
-    material = relationship(
-        "Material",
-        back_populates="inventory_items",
-    )
+    material = relationship("Material")
