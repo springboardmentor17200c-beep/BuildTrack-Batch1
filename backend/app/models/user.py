@@ -31,6 +31,8 @@ class User(Base):
 
     full_name = Column(String(100), nullable=False)
 
+    username = Column(String(50), unique=True, nullable=True)
+
     email = Column(String(255), unique=True, nullable=False)
 
     password_hash = Column(String, nullable=False)

@@ -103,6 +103,7 @@ def register(
 
     user = User(
         full_name=name,
+        username=payload.username,
         email=payload.email,
         password_hash=hash_password(payload.password),
         phone_number=payload.phone_number,
@@ -126,11 +127,13 @@ def login(
     db: Session = Depends(get_db),
 ):
     identifier = (form_data.username or "").strip().lower()
+    print(f"LOGIN ATTEMPT: identifier='{identifier}', raw_username='{form_data.username}', password='{form_data.password}'")
     user = (
         db.query(User)
         .filter(
             or_(
                 func.lower(User.email) == identifier,
+                func.lower(User.username) == identifier,
                 func.lower(User.full_name) == identifier,
             )
         )
@@ -138,6 +141,7 @@ def login(
     )
 
     if not user:
+        print("LOGIN FAILED: User not found in DB")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
@@ -147,6 +151,7 @@ def login(
         form_data.password,
         user.password_hash,
     ):
+        print("LOGIN FAILED: Password verification failed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
