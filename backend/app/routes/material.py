@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.permissions import require_roles
 from app.db.database import get_db
 from app.models.company import Company
-from app.models.material import Material
+from app.models.inventory import Material
 from app.schemas.material import MaterialCreate, MaterialResponse, MaterialUpdate
 
 router = APIRouter(

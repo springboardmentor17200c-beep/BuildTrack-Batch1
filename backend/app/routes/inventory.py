@@ -3,8 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.permissions import require_roles
 from app.db.database import get_db
-from app.models.inventory import Inventory
-from app.models.material import Material
+from app.models.inventory import Inventory, Material
 from app.models.project import Project
 from app.schemas.inventory import InventoryCreate, InventoryResponse, InventoryUpdate
 
