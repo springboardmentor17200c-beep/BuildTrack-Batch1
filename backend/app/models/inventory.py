@@ -24,6 +24,7 @@ class Material(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     category = relationship("MaterialCategory")
+    company = relationship("Company", back_populates="materials")
     inventory_items = relationship("Inventory", back_populates="material", cascade="all, delete-orphan")
 
 class Inventory(Base):
