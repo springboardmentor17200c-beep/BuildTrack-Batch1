@@ -24,6 +24,7 @@ def get_vendors(
             "Administrator",
             "Project Manager",
             "Site Engineer",
+            "Vendor",
         )
     ),
 ):
@@ -43,6 +44,7 @@ def get_vendor(
             "Administrator",
             "Project Manager",
             "Site Engineer",
+            "Vendor",
         )
     ),
 ):
