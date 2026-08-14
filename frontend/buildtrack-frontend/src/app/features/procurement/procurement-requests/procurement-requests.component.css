@@ -12,3 +12,43 @@
 .bt-badge-select.red { background: rgba(239, 68, 68, 0.14); color: #DC2626; }
 .bt-badge-select.blue { background: rgba(59, 130, 246, 0.16); color: #1D4ED8; }
 .bt-badge-select.purple { background: rgba(139, 92, 246, 0.16); color: #6D28D9; }
+
+/* ── Delete button ─────────────────────────── */
+.pr-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  padding: 5px 7px;
+  cursor: pointer;
+  color: #ef4444;
+  opacity: 0.55;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.pr-delete-btn:hover {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  transform: scale(1.1);
+}
+.pr-delete-btn:active {
+  transform: scale(0.95);
+}
+
+/* ── Row exit animation ─────────────────────── */
+@keyframes rowDelete {
+  0%   { transform: translateX(0);     opacity: 1; max-height: 60px; }
+  50%  { transform: translateX(-60px); opacity: 0; max-height: 60px; }
+  100% { transform: translateX(-60px); opacity: 0; max-height: 0;   }
+}
+.pr-row--deleting {
+  animation: rowDelete 0.4s ease-in forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pr-row--deleting td {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
