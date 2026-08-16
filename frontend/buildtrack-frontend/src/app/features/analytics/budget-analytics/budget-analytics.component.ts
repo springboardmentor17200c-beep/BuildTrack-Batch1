@@ -4,11 +4,13 @@ import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Expense, ExpenseCategory, ProjectBudget } from '../models/analytics.model';
 import { AnalyticsDataService } from '../analytics-data.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
   selector: 'app-budget-analytics',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BaseChartDirective],
   templateUrl: './budget-analytics.component.html',
   styleUrls: ['./budget-analytics.component.css'],
 })
@@ -20,6 +22,19 @@ export class BudgetAnalyticsComponent implements OnInit {
   totalSpent = 0;
   totalRemaining = 0;
   usedPercent = 0;
+
+  // Chart configuration
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'right' },
+    }
+  };
+  public pieChartData: ChartData<'pie', number[], string | string[]> = {
+    labels: [],
+    datasets: [ { data: [] } ]
+  };
+  public pieChartType: ChartType = 'pie';
 
   constructor(private data: AnalyticsDataService, private location: Location) {}
 
@@ -38,6 +53,15 @@ export class BudgetAnalyticsComponent implements OnInit {
     const byCategory = this.data.expensesByCategory();
     const max = byCategory.length ? byCategory[0].amount : 1;
     this.categoryBreakdown = byCategory.map(c => ({ ...c, percent: Math.round((c.amount / max) * 100) }));
+
+    // Update chart
+    this.pieChartData = {
+      labels: byCategory.map(c => c.category),
+      datasets: [{
+        data: byCategory.map(c => c.amount),
+        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b']
+      }]
+    };
   }
 
   spentFor(project: string): number {

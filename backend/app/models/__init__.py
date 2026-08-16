@@ -12,3 +12,4 @@ from .inventory import MaterialCategory, Material, Inventory
 from .resource import ResourceCategory, Resource
 from .workforce import WorkforceCategory, EmployeeProfile, Attendance
 from .report import DBReport
+from .notification import Notification

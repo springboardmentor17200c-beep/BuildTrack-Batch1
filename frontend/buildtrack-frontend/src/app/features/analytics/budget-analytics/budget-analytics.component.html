@@ -59,21 +59,32 @@
         <span class="bt-panel-sub">Across all projects</span>
       </div>
     </div>
-    <div class="bt-table-wrap">
-      <table class="bt-table">
-        <thead><tr><th>Category</th><th>Amount</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let c of categoryBreakdown">
-            <td class="bt-strong">{{ c.category }}</td>
-            <td>
-              <div class="bt-progress">
-                <div class="bt-progress-bar" style="width:180px;"><div class="bt-progress-fill blue" [style.width.%]="c.percent"></div></div>
-                <span class="bt-progress-value" style="min-width:110px;">₹{{ c.amount | number }}</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    
+    <div style="display: flex; flex-direction: row; gap: 24px; padding: 16px;">
+      <div class="bt-table-wrap" style="flex: 1; min-width: 0;">
+        <table class="bt-table">
+          <thead><tr><th>Category</th><th>Amount</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of categoryBreakdown">
+              <td class="bt-strong">{{ c.category }}</td>
+              <td>
+                <div class="bt-progress">
+                  <div class="bt-progress-bar" style="width:180px;"><div class="bt-progress-fill blue" [style.width.%]="c.percent"></div></div>
+                  <span class="bt-progress-value" style="min-width:110px;">₹{{ c.amount | number }}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
+        <canvas baseChart
+          [data]="pieChartData"
+          [options]="pieChartOptions"
+          [type]="pieChartType">
+        </canvas>
+      </div>
     </div>
   </div>
 

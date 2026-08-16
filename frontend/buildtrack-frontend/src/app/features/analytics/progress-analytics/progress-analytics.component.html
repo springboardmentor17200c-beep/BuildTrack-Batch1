@@ -68,22 +68,32 @@
         <span class="bt-panel-sub">Average completion per project category</span>
       </div>
     </div>
-    <div class="bt-table-wrap">
-      <table class="bt-table">
-        <thead><tr><th>Category</th><th>Projects</th><th>Avg. Progress</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let c of categorySummaries">
-            <td class="bt-strong">{{ c.category }}</td>
-            <td class="bt-muted">{{ c.count }}</td>
-            <td>
-              <div class="bt-progress">
-                <div class="bt-progress-bar" style="width:160px;"><div class="bt-progress-fill" [ngClass]="progressColor(c.avgProgress)" [style.width.%]="c.avgProgress"></div></div>
-                <span class="bt-progress-value">{{ c.avgProgress }}%</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div style="display: flex; flex-direction: row; gap: 24px; padding: 16px;">
+      <div class="bt-table-wrap" style="flex: 1; min-width: 0;">
+        <table class="bt-table">
+          <thead><tr><th>Category</th><th>Projects</th><th>Avg. Progress</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of categorySummaries">
+              <td class="bt-strong">{{ c.category }}</td>
+              <td class="bt-muted">{{ c.count }}</td>
+              <td>
+                <div class="bt-progress">
+                  <div class="bt-progress-bar" style="width:160px;"><div class="bt-progress-fill" [ngClass]="progressColor(c.avgProgress)" [style.width.%]="c.avgProgress"></div></div>
+                  <span class="bt-progress-value">{{ c.avgProgress }}%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
+        <canvas baseChart
+          [data]="pieChartData"
+          [options]="pieChartOptions"
+          [type]="pieChartType">
+        </canvas>
+      </div>
     </div>
   </div>
 

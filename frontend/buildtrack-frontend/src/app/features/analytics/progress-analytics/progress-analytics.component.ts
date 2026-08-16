@@ -4,6 +4,8 @@ import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProjectProgressSummary } from '../models/analytics.model';
 import { AnalyticsDataService } from '../analytics-data.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 interface CategorySummary {
   category: string;
@@ -14,7 +16,7 @@ interface CategorySummary {
 @Component({
   selector: 'app-progress-analytics',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BaseChartDirective],
   templateUrl: './progress-analytics.component.html',
   styleUrls: ['./progress-analytics.component.css'],
 })
@@ -27,6 +29,19 @@ export class ProgressAnalyticsComponent implements OnInit {
   onHoldCount = 0;
   completedCount = 0;
   avgProgress = 0;
+
+  // Chart configuration
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'right' },
+    }
+  };
+  public pieChartData: ChartData<'pie', number[], string | string[]> = {
+    labels: [],
+    datasets: [ { data: [] } ]
+  };
+  public pieChartType: ChartType = 'pie';
 
   constructor(private data: AnalyticsDataService, private location: Location) {}
 
@@ -55,6 +70,15 @@ export class ProgressAnalyticsComponent implements OnInit {
         count: items.length,
       };
     });
+
+    // Update chart
+    this.pieChartData = {
+      labels: ['In Progress', 'On Hold', 'Completed'],
+      datasets: [{
+        data: [this.inProgressCount, this.onHoldCount, this.completedCount],
+        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981']
+      }]
+    };
   }
 
   statusClass(status: ProjectProgressSummary['status']) {

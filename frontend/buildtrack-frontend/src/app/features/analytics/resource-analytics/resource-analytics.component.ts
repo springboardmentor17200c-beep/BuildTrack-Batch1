@@ -4,6 +4,8 @@ import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory } from '../../resource-management/models/resource.model';
 import { ResourceDataService } from '../../resource-management/resource-data.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 // NOTE: this page deliberately reuses ResourceDataService rather than
 // duplicating resource data — Resource Analytics is just a different lens
@@ -20,7 +22,7 @@ interface CategorySummary {
 @Component({
   selector: 'app-resource-analytics',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BaseChartDirective],
   templateUrl: './resource-analytics.component.html',
   styleUrls: ['./resource-analytics.component.css'],
 })
@@ -33,6 +35,19 @@ export class ResourceAnalyticsComponent implements OnInit {
   availableCount = 0;
   maintenanceCount = 0;
   avgUtilization = 0;
+
+  // Chart configuration
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'right' },
+    }
+  };
+  public pieChartData: ChartData<'doughnut', number[], string | string[]> = {
+    labels: [],
+    datasets: [ { data: [] } ]
+  };
+  public pieChartType: ChartType = 'doughnut';
 
   constructor(private resourceData: ResourceDataService, private location: Location) {}
 
@@ -70,6 +85,15 @@ export class ResourceAnalyticsComponent implements OnInit {
         };
       })
       .sort((a, b) => b.avgUtilization - a.avgUtilization);
+
+    // Update fleet status chart
+    this.pieChartData = {
+      labels: ['Allocated', 'Available', 'Under Maintenance'],
+      datasets: [{
+        data: [this.inUseCount, this.availableCount, this.maintenanceCount],
+        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+      }]
+    };
   }
 
   statusClass(status: Resource['currentStatus']) {
