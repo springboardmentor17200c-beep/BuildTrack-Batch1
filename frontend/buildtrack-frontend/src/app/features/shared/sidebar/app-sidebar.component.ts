@@ -7,6 +7,7 @@ import { ThemeService } from '../theme.service';
 import { LanguageService } from '../language.service';
 import { LangCode } from '../translations';
 import { TranslatePipe } from '../translate.pipe';
+import { NotificationDropdownComponent } from '../notification/notification-dropdown.component';
 
 interface NavItem {
   label: string;
@@ -18,7 +19,7 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, NotificationDropdownComponent],
   templateUrl: './app-sidebar.component.html',
   styleUrls: ['./app-sidebar.component.css'],
 })
@@ -33,6 +34,7 @@ export class AppSidebarComponent implements OnInit {
     { label: 'nav.inventory', route: '/inventory', icon: 'inventory', moduleKey: 'inventory' },
     { label: 'nav.workforce', route: '/workforce', icon: 'workforce', moduleKey: 'workforce' },
     { label: 'nav.analytics', route: '/analytics', icon: 'analytics', moduleKey: 'analytics' },
+    { label: 'nav.procurement', route: '/procurement', icon: 'procurement', moduleKey: 'procurement' },
     { label: 'nav.profile', route: '/profile', icon: 'profile', moduleKey: null },
   ];
 
@@ -68,6 +70,6 @@ export class AppSidebarComponent implements OnInit {
 
   logout() {
     this.auth.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 }

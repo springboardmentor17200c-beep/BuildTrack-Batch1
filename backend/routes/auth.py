@@ -177,6 +177,23 @@ def register(payload: RegistrationRequest):
         created_at=new_user.get("created_at"),
     )
 
+    if payload.role.value == "Vendor":
+        from routes.procurement import db_vendors, generate_id
+        v_id = generate_id()
+        vendor_name = payload.company_name or f"{payload.first_name} {payload.last_name}".strip()
+        new_vendor = {
+            "id": v_id,
+            "vendorName": vendor_name,
+            "contactPerson": f"{payload.first_name} {payload.last_name}".strip(),
+            "email": str(payload.email),
+            "phone": payload.phone_number,
+            "address": "",
+            "suppliedMaterials": [],
+            "rating": 0,
+            "isActive": True
+        }
+        db_vendors[v_id] = new_vendor
+
     return response
 
 

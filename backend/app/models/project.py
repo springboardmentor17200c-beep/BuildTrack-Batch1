@@ -115,3 +115,9 @@ class Project(Base):
         back_populates="project",
         cascade="all, delete-orphan",
     )
+
+    procurement_requests = relationship(
+        "ProcurementRequest",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )

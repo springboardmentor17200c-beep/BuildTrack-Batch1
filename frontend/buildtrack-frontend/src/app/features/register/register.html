@@ -1,7 +1,3 @@
-Here's the translated version, matching your exact structure (including the max-width:480px card and the two-column first/last name grid):
-
-powershell
-@'
 <div class="bt-auth-page">
   <div class="bt-auth-card" style="max-width:480px;">
     <a class="bt-auth-logo" [routerLink]="['/']" style="text-decoration:none;">
@@ -21,16 +17,10 @@ powershell
         <input type="text" formControlName="username" placeholder="e.g. priya.menon" />
       </label>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <label class="bt-auth-field">
-          <span>{{ 'auth.firstName' | translate }}</span>
-          <input type="text" formControlName="firstName" placeholder="Priya" />
-        </label>
-        <label class="bt-auth-field">
-          <span>{{ 'auth.lastName' | translate }}</span>
-          <input type="text" formControlName="lastName" placeholder="Menon" />
-        </label>
-      </div>
+      <label class="bt-auth-field">
+        <span>Full Name</span>
+        <input type="text" formControlName="name" placeholder="Full Name" />
+      </label>
 
       <label class="bt-auth-field">
         <span>{{ 'auth.email' | translate }}</span>
@@ -38,8 +28,8 @@ powershell
       </label>
 
       <label class="bt-auth-field">
-        <span>{{ 'auth.phoneNumber' | translate }}</span>
-        <input type="text" formControlName="phoneNumber" placeholder="+91 98765 43210" />
+        <span>Phone Number (10 digits)</span>
+        <input type="text" formControlName="phoneNumber" placeholder="9876543210" />
       </label>
 
       <label class="bt-auth-field">
@@ -50,36 +40,9 @@ powershell
         </select>
       </label>
 
-      <ng-container *ngIf="showCompanyFields">
-        <label class="bt-auth-field">
-          <span>{{ 'auth.companyName' | translate }}</span>
-          <input type="text" formControlName="companyName" placeholder="e.g. Suresh Electricals" />
-        </label>
-        <label class="bt-auth-field">
-          <span>{{ 'auth.taxId' | translate }}</span>
-          <input type="text" formControlName="taxId" placeholder="GSTIN / Tax ID" />
-        </label>
-      </ng-container>
-
-      <ng-container *ngIf="showEmployeeFields">
-        <label class="bt-auth-field">
-          <span>{{ 'auth.employeeId' | translate }}</span>
-          <input type="text" formControlName="employeeId" placeholder="e.g. EMP-1042" />
-        </label>
-        <label class="bt-auth-field">
-          <span>{{ 'auth.skillsOrTrade' | translate }}</span>
-          <input type="text" formControlName="skillsOrTrade" placeholder="e.g. Electrician, Mason" />
-        </label>
-      </ng-container>
-
       <label class="bt-auth-field">
         <span>{{ 'auth.password' | translate }}</span>
         <input type="password" formControlName="password" placeholder="At least 6 characters" autocomplete="new-password" />
-      </label>
-
-      <label class="bt-auth-field">
-        <span>{{ 'auth.confirmPassword' | translate }}</span>
-        <input type="password" formControlName="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password" />
       </label>
 
       <button type="submit" class="bt-auth-submit" [disabled]="submitting">

@@ -31,6 +31,8 @@ class User(Base):
 
     full_name = Column(String(100), nullable=False)
 
+    username = Column(String(50), unique=True, nullable=True)
+
     email = Column(String(255), unique=True, nullable=False)
 
     password_hash = Column(String, nullable=False)
@@ -69,3 +71,9 @@ class User(Base):
     foreign_keys="Project.client_id",
     back_populates="client",
 )
+
+    procurement_requests = relationship(
+        "ProcurementRequest",
+        foreign_keys="ProcurementRequest.requested_by",
+        back_populates="requester",
+    )

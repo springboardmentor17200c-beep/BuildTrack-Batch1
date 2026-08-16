@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric, Boolean, Text, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.database import Base
@@ -14,12 +14,18 @@ class Material(Base):
     __tablename__ = "materials"
 
     material_id = Column(Integer, primary_key=True, index=True)
-    material_category_id = Column(Integer, ForeignKey("material_categories.material_category_id"), nullable=False)
-    material_name = Column(String(150), unique=True, nullable=False)
-    unit_of_measure = Column(String(20), nullable=False)
-    description = Column(String)
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=True)
+    material_category_id = Column(Integer, ForeignKey("material_categories.material_category_id"), nullable=True)
+    material_name = Column(String(150), nullable=False)
+    unit = Column(String(50), nullable=False)
+    description = Column(Text)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     category = relationship("MaterialCategory")
+    company = relationship("Company", back_populates="materials")
+    inventory_items = relationship("Inventory", back_populates="material", cascade="all, delete-orphan")
 
 class Inventory(Base):
     __tablename__ = "inventory"
@@ -32,4 +38,4 @@ class Inventory(Base):
     storage_location = Column(String(150))
     last_updated = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    material = relationship("Material")
+    material = relationship("Material", back_populates="inventory_items")

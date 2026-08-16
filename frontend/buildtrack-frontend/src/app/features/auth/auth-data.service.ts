@@ -63,6 +63,7 @@ export class AuthDataService {
     'Contractor',
     'Worker',
     'Client / Owner',
+    'Vendor'
   ];
 
   private apiUrl = environment.apiUrl;
@@ -77,24 +78,36 @@ export class AuthDataService {
   }
 
   get token(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        return localStorage.getItem(TOKEN_KEY);
+      } catch {}
+    }
+    return null;
   }
 
   private loadSession(): AppUser | null {
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      return raw ? (JSON.parse(raw) as AppUser) : null;
-    } catch {
-      return null;
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        return raw ? (JSON.parse(raw) as AppUser) : null;
+      } catch {
+        return null;
+      }
     }
+    return null;
   }
 
   private setSession(user: AppUser | null) {
     this.currentUser$$.next(user);
-    if (user) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(SESSION_KEY);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        if (user) {
+          localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      } catch {}
     }
   }
 
@@ -120,7 +133,13 @@ export class AuthDataService {
     return this.http
       .post<{ access_token: string; token_type: string }>(`${this.apiUrl}/auth/login`, body.toString(), { headers })
       .pipe(
-        tap(res => localStorage.setItem(TOKEN_KEY, res.access_token)),
+        tap(res => {
+          if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+            try {
+              localStorage.setItem(TOKEN_KEY, res.access_token);
+            } catch {}
+          }
+        }),
         switchMap(() => this.fetchCurrentUser()),
         catchError(this.handleError)
       );
@@ -137,7 +156,11 @@ export class AuthDataService {
 
   logout() {
     this.setSession(null);
-    localStorage.removeItem(TOKEN_KEY);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(TOKEN_KEY);
+      } catch {}
+    }
   }
 
   register(payload: RegisterPayload): Observable<AppUser> {

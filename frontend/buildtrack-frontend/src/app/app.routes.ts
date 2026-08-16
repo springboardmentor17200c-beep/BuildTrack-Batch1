@@ -1,3 +1,4 @@
+
 import { Routes } from '@angular/router';
 
 // Auth screens (public)
@@ -21,6 +22,7 @@ import { RESOURCE_MANAGEMENT_ROUTES } from './features/resource-management/resou
 import { INVENTORY_ROUTES } from './features/inventory/inventory.routes';
 import { WORKFORCE_ROUTES } from './features/workforce/workforce.routes';
 import { ANALYTICS_ROUTES } from './features/analytics/analytics.routes';
+import { PROCUREMENT_ROUTES } from './features/procurement/procurement.routes';
 import { DASHBOARD_ROUTES } from './features/dashboards/dashboards.routes';
 
 export const routes: Routes = [
@@ -36,9 +38,7 @@ export const routes: Routes = [
   { path: 'projects', children: PROJECTS_ROUTES, canActivate: [roleGuard('projects')] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
 
-  // Dashboard: bare /dashboard never renders anything itself — the guard
-  // always redirects (to /login, to the right role dashboard, or to
-  // /unauthorized), then the 5 actual role dashboards live under /dashboard/*
+  // Dashboard
   { path: 'dashboard', pathMatch: 'full', canActivate: [dashboardRedirectGuard], children: [] },
   { path: 'dashboard', children: DASHBOARD_ROUTES },
 
@@ -47,6 +47,7 @@ export const routes: Routes = [
   { path: 'inventory', children: INVENTORY_ROUTES, canActivate: [roleGuard('inventory')] },
   { path: 'workforce', children: WORKFORCE_ROUTES, canActivate: [roleGuard('workforce')] },
   { path: 'analytics', children: ANALYTICS_ROUTES, canActivate: [roleGuard('analytics')] },
+  { path: 'procurement', children: PROCUREMENT_ROUTES, canActivate: [roleGuard('procurement')] },
 
   { path: '**', redirectTo: 'landing' },
 ];

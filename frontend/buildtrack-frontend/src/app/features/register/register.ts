@@ -6,11 +6,7 @@ import { AuthDataService } from '../auth/auth-data.service';
 import { RoleName } from '../auth/models/auth.model';
 import { TranslatePipe } from '../shared/translate.pipe';
 
-function passwordsMatch(control: AbstractControl): ValidationErrors | null {
-  const password = control.get('password')?.value;
-  const confirmPassword = control.get('confirmPassword')?.value;
-  return password && confirmPassword && password !== confirmPassword ? { mismatch: true } : null;
-}
+
 
 @Component({
   selector: 'app-register',
@@ -30,20 +26,13 @@ export class Register {
     this.roles = this.auth.roles;
     this.form = this.fb.group(
       {
+        name: ['', Validators.required],
         username: ['', [Validators.required, Validators.minLength(3)]],
-        firstName: ['', Validators.required],
-        lastName: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        phoneNumber: ['', Validators.required],
+        phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
         role: ['', Validators.required],
-        companyName: [''],
-        taxId: [''],
-        employeeId: [''],
-        skillsOrTrade: [''],
-        password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', Validators.required],
-      },
-      { validators: passwordsMatch }
+        password: ['', [Validators.required, Validators.minLength(6)]]
+      }
     );
   }
 
@@ -51,19 +40,12 @@ export class Register {
     return this.form.get('role')?.value || '';
   }
 
-  get showCompanyFields(): boolean {
-    return this.selectedRole === 'Contractor' || this.selectedRole === 'Client / Owner';
-  }
-
-  get showEmployeeFields(): boolean {
-    return this.selectedRole === 'Worker' || this.selectedRole === 'Site Engineer';
-  }
-
   submit() {
     this.error = '';
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      if (this.form.errors?.['mismatch']) this.error = 'Passwords do not match.';
+      this.error = 'Please fill out all required fields correctly.';
+      alert('Please fill out all required fields correctly.');
       return;
     }
 
@@ -74,14 +56,14 @@ export class Register {
         username: v.username,
         email: v.email,
         password: v.password,
-        firstName: v.firstName,
-        lastName: v.lastName,
+        firstName: v.name,
+        lastName: '', // simplified frontend only provides full name
         phoneNumber: v.phoneNumber,
         role: v.role,
-        companyName: v.companyName,
-        taxId: v.taxId,
-        employeeId: v.employeeId,
-        skillsOrTrade: v.skillsOrTrade,
+        companyName: '',
+        taxId: '',
+        employeeId: '',
+        skillsOrTrade: '',
       })
       .subscribe({
         next: () => {

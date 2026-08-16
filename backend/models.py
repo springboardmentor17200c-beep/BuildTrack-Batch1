@@ -11,6 +11,7 @@ class RoleEnum(str, Enum):
     Contractor = "Contractor"
     Worker = "Worker"
     Client_Owner = "Client / Owner"
+    Vendor = "Vendor"
 
 
 class RegistrationRequest(BaseModel):

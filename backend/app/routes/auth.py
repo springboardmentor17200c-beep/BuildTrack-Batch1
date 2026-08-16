@@ -100,9 +100,14 @@ def register(
             db.commit()
             db.refresh(company_obj)
         company_id = company_obj.company_id
+        
+    if not company_id:
+        # Default to the primary company if none provided
+        company_id = 1
 
     user = User(
         full_name=name,
+        username=payload.username,
         email=payload.email,
         password_hash=hash_password(payload.password),
         phone_number=payload.phone_number,
@@ -113,6 +118,22 @@ def register(
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    if payload.role == "Vendor":
+        from app.models.vendor import Vendor as VendorModel
+        duplicate_vendor = db.query(VendorModel).filter(VendorModel.email == user.email).first()
+        if not duplicate_vendor:
+            new_vendor = VendorModel(
+                company_id=company_id,
+                vendor_name=name,
+                contact_person=name,
+                email=user.email,
+                phone_number=user.phone_number or "0000000000",
+                address="Registered via Auth",
+                is_active=True
+            )
+            db.add(new_vendor)
+            db.commit()
 
     return build_user_response(user)
 
@@ -126,11 +147,13 @@ def login(
     db: Session = Depends(get_db),
 ):
     identifier = (form_data.username or "").strip().lower()
+    print(f"LOGIN ATTEMPT: identifier='{identifier}', raw_username='{form_data.username}', password='{form_data.password}'")
     user = (
         db.query(User)
         .filter(
             or_(
                 func.lower(User.email) == identifier,
+                func.lower(User.username) == identifier,
                 func.lower(User.full_name) == identifier,
             )
         )
@@ -138,6 +161,7 @@ def login(
     )
 
     if not user:
+        print("LOGIN FAILED: User not found in DB")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
@@ -147,6 +171,7 @@ def login(
         form_data.password,
         user.password_hash,
     ):
+        print("LOGIN FAILED: Password verification failed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",

@@ -1694,3 +1694,22 @@ html, body {
   body.bt-dark .bt-landing-auth-name { color: #f3f4f6; }
   body.bt-dark .bt-landing-stat { border-right-color: #2a2f3d; }
   body.bt-dark .bt-landing-footer { border-top-color: #2a2f3d; }
+
+  /* ==========================================================================
+   Fix: underlined text on button-styled links.
+   bt-add-btn, bt-filter-btn, bt-back-btn, bt-option-card, bt-icon-btn are
+   used as real <a> tags in several places (landing page CTAs, "Profile"
+   nav link, "View All" links, "New Request", back buttons, option cards).
+   Browsers underline anchors by default — this was never overridden
+   globally, only inside .bt-landing. Fixing it here catches every
+   instance across the whole app, not just the landing page.
+   ========================================================================== */
+
+a.bt-add-btn,
+a.bt-filter-btn,
+a.bt-back-btn,
+a.bt-option-card,
+a.bt-icon-btn,
+a.bt-sidebar-logout {
+  text-decoration: none;
+}

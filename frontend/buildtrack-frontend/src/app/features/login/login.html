@@ -12,8 +12,8 @@
 
     <form class="bt-auth-form" [formGroup]="form" (ngSubmit)="submit()">
       <label class="bt-auth-field">
-        <span>{{ 'auth.username' | translate }}</span>
-        <input type="text" formControlName="username" placeholder="Your username" autocomplete="username" />
+        <span>Email or Full Name</span>
+        <input type="text" formControlName="username" placeholder="e.g. you@company.com" autocomplete="username" />
       </label>
 
       <label class="bt-auth-field">

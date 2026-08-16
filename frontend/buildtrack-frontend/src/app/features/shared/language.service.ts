@@ -17,9 +17,11 @@ export class LanguageService {
 
   setLanguage(code: LangCode): void {
     this.lang$$.next(code);
-    try {
-      localStorage.setItem(LANG_KEY, code);
-    } catch {}
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(LANG_KEY, code);
+      } catch {}
+    }
   }
 
   t(key: string): string {
@@ -28,10 +30,12 @@ export class LanguageService {
   }
 
   private loadPreference(): LangCode {
-    try {
-      const stored = localStorage.getItem(LANG_KEY) as LangCode | null;
-      if (stored && TRANSLATIONS[stored]) return stored;
-    } catch {}
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(LANG_KEY) as LangCode | null;
+        if (stored && TRANSLATIONS[stored]) return stored;
+      } catch {}
+    }
     return 'en';
   }
 }
