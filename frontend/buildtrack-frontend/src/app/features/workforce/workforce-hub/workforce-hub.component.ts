@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { WorkforceDataService } from '../workforce-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface WorkforceOption {
   title: string;
@@ -64,9 +66,16 @@ export class WorkforceHubComponent implements OnInit {
       this.totalWorkers = employees.length;
       this.activeCount = employees.filter(e => e.employmentStatus === 'Active').length;
       this.onLeaveCount = employees.filter(e => e.employmentStatus === 'On Leave').length;
+      
+      this.options[0].stat = employees.length.toString();
     });
     this.data.attendance$.subscribe(records => {
       this.presentTodayCount = records.filter(r => r.status === 'Present').length;
+      
+      this.options[1].stat = this.presentTodayCount.toString();
+    });
+    this.data.shifts$.subscribe(shifts => {
+      this.options[2].stat = shifts.length.toString();
     });
   }
 

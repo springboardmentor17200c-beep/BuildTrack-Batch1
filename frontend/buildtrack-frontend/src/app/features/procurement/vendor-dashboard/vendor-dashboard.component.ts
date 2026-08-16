@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { ProcurementDataService } from '../procurement-data.service';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,7 +10,7 @@ import { Vendor, PurchaseOrder, Invoice, MaterialDelivery } from '../models/proc
 @Component({
   selector: 'app-vendor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './vendor-dashboard.component.html',
   styleUrls: ['./vendor-dashboard.component.css']
 })
@@ -29,6 +29,7 @@ export class VendorDashboardComponent implements OnInit {
 
   invoiceForm: FormGroup;
   selectedPoForInvoice: string | null = null;
+  invoicePreview: { unitPrice: number; gst: number; subtotal: number; gstAmount: number; total: number } | null = null;
 
   get isVendorRole(): boolean {
     return this.auth.currentUser?.role === 'Vendor';
@@ -47,8 +48,8 @@ export class VendorDashboardComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.invoiceForm = this.fb.group({
-      amount: [0, [Validators.required, Validators.min(0.01)]],
-      gst: [0, Validators.required],
+      unitPrice: [0, [Validators.required, Validators.min(0.01)]],
+      gst: [0, [Validators.required, Validators.min(0)]],
       date: ['', Validators.required]
     });
   }
@@ -147,11 +148,29 @@ export class VendorDashboardComponent implements OnInit {
 
   openInvoiceForm(po: PurchaseOrder) {
     this.selectedPoForInvoice = po.id;
+    this.invoicePreview = null;
     this.invoiceForm.patchValue({
-      amount: po.totalAmount,
+      unitPrice: po.unitPrice || 0,
+      gst: 0,
       date: new Date().toISOString().split('T')[0]
     });
     this.cdr.detectChanges();
+  }
+
+  getPoForInvoice(): PurchaseOrder | undefined {
+    return this.purchaseOrders.find(p => p.id === this.selectedPoForInvoice);
+  }
+
+  onPriceChange() {
+    const po = this.getPoForInvoice();
+    if (!po) return;
+    const unitPrice = +this.invoiceForm.value.unitPrice || 0;
+    const gst = +this.invoiceForm.value.gst || 0;
+    if (unitPrice <= 0) { this.invoicePreview = null; return; }
+    const subtotal = +(unitPrice * po.quantity).toFixed(2);
+    const gstAmount = +(subtotal * gst / 100).toFixed(2);
+    const total = +(subtotal + gstAmount).toFixed(2);
+    this.invoicePreview = { unitPrice, gst, subtotal, gstAmount, total };
   }
 
   submitInvoice() {
@@ -161,13 +180,19 @@ export class VendorDashboardComponent implements OnInit {
       this.cdr.detectChanges();
       return;
     }
+    if (!this.invoicePreview) {
+      this.error = "Please enter a valid unit price to calculate the total.";
+      return;
+    }
     this.error = '';
     const v = this.invoiceForm.value;
+
     this.data.createInvoice({ 
       vendorId: this.vendor.id,
       purchaseOrderId: this.selectedPoForInvoice, 
-      amount: v.amount,
-      gst: v.gst,
+      unitPrice: this.invoicePreview.unitPrice,
+      amount: this.invoicePreview.total,   // unitPrice × qty + GST
+      gst: this.invoicePreview.gst,
       date: v.date
     }).subscribe({
       next: () => {

@@ -6,6 +6,10 @@ import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { InventoryDataService } from '../inventory-data.service';
 import { MaterialAllocation, InventoryRecord } from '../models/inventory.model';
+import { ProjectsDataService } from '../../projects/projects-data.service';
+import { Project } from '../../projects/models/projects.model';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-material-allocation',
@@ -17,17 +21,14 @@ import { MaterialAllocation, InventoryRecord } from '../models/inventory.model';
 export class MaterialAllocationComponent implements OnInit, OnDestroy {
   allocations: MaterialAllocation[] = [];
   inventoryRecords: InventoryRecord[] = [];
+  projects: Project[] = [];
   showForm = false;
   form: FormGroup;
   private subscriptions = new Subscription();
 
-  projects = [
-    { id: 'Skyline Residency Tower', name: 'Skyline Residency Tower' },
-    { id: 'Riverside Business Park', name: 'Riverside Business Park' }
-  ];
-
   constructor(
     private data: InventoryDataService,
+    private projectsData: ProjectsDataService,
     private fb: FormBuilder,
     private location: Location
   ) {
@@ -47,6 +48,10 @@ export class MaterialAllocationComponent implements OnInit, OnDestroy {
     );
     this.subscriptions.add(
       this.data.inventory$.subscribe(inv => (this.inventoryRecords = inv))
+    );
+    // Load real projects from the projects service
+    this.subscriptions.add(
+      this.projectsData.projects$.subscribe(p => (this.projects = p))
     );
   }
 
@@ -73,9 +78,9 @@ export class MaterialAllocationComponent implements OnInit, OnDestroy {
 
     const { materialId, projectId, quantity, allocatedBy, issuedTo, remarks } = this.form.value;
     const material = this.inventoryRecords.find(inv => inv.materialId === materialId);
-
     if (!material) return;
 
+    const project = this.projects.find(p => p.projectId === projectId);
     const available = this.getAvailableQuantity(materialId);
     if (quantity > available) {
       alert(`Insufficient stock. Available: ${available} ${material.unitOfMeasure}`);
@@ -86,11 +91,11 @@ export class MaterialAllocationComponent implements OnInit, OnDestroy {
       materialId: material.materialId,
       materialName: material.materialName,
       projectId: projectId,
-      projectName: projectId,
+      projectName: project?.projectName ?? projectId,
       allocatedQuantity: quantity,
-      allocatedBy: allocatedBy,
-      issuedTo: issuedTo,
-      remarks: remarks
+      allocatedBy,
+      issuedTo,
+      remarks
     });
 
     this.form.reset();
@@ -106,7 +111,6 @@ export class MaterialAllocationComponent implements OnInit, OnDestroy {
   returnAllocation(allocationId: string) {
     const allocation = this.allocations.find(a => a.allocationId === allocationId);
     if (!allocation) return;
-    
     const remaining = allocation.allocatedQuantity - (allocation.returnedQuantity || 0);
     const quantity = prompt(`Enter quantity to return (Max: ${remaining}):`);
     if (quantity) {
@@ -121,15 +125,11 @@ export class MaterialAllocationComponent implements OnInit, OnDestroy {
 
   getStatusBadge(status: string): string {
     const map: Record<string, string> = {
-      'Reserved': 'orange',
-      'Issued': 'green',
-      'Returned': 'blue',
-      'PartiallyReturned': 'orange'
+      'Reserved': 'orange', 'Issued': 'green',
+      'Returned': 'blue', 'PartiallyReturned': 'orange'
     };
     return map[status] || 'gray';
   }
 
-  goBack(): void {
-    this.location.back();
-  }
+  goBack(): void { this.location.back(); }
 }

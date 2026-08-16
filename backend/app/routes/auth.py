@@ -261,3 +261,11 @@ def change_password(
     return {
         "message": "Password updated successfully."
     }
+
+@router.get('/users', summary='List all users (admin only)')
+def list_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    users = db.query(User).all()
+    return [build_user_response(u) for u in users]

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { ProcurementDataService } from '../procurement-data.service';
 
 @Component({
   selector: 'app-procurement-hub',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './procurement-hub.component.html',
   styleUrls: ['./procurement-hub.component.css'],
 })

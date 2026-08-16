@@ -47,3 +47,18 @@ class ProjectResponse(BaseModel):
     actual_end_date: Optional[date]
     created_at: datetime
     updated_at: Optional[datetime]
+
+
+class ProjectEnrichedResponse(BaseModel):
+    """Flat response with denormalized names — used by the frontend dashboard."""
+    project_id: int
+    project_name: str
+    description: Optional[str]
+    location: str
+    category: str           # category_name from project_categories
+    status: str             # status_name from project_statuses
+    manager: str            # full_name from users (manager)
+    client: str             # full_name from users (client)
+    start_date: date
+    expected_end_date: date
+    actual_end_date: Optional[date]

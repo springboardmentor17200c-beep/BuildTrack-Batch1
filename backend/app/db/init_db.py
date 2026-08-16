@@ -1,4 +1,6 @@
 from sqlalchemy import text, create_engine
+from app.models.workforce import WorkforceCategory
+from app.models.notification import Notification
 from app.db.database import Base, engine, DATABASE_URL
 import app.models
 

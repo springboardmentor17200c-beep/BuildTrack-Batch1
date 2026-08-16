@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
 import { AttendanceRecord, AttendanceStatus, Employee } from '../models/workforce.model';
 import { WorkforceDataService } from '../workforce-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-attendance-tracking',

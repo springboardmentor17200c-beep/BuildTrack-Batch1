@@ -6,6 +6,8 @@ import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { InventoryDataService } from '../inventory-data.service';
 import { InventoryRecord, Material } from '../models/inventory.model';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-stock-management',
@@ -89,24 +91,23 @@ export class StockManagementComponent implements OnInit, OnDestroy {
       category,
       unitOfMeasure,
       description
-    });
-
-    // Find the newly added material
-    setTimeout(() => {
-      const newMaterial = this.materials.find(m => m.materialName === materialName);
-      if (newMaterial) {
-        // Add inventory record
+    }).subscribe({
+      next: (response) => {
+        // Add inventory record using the newly created real material ID from the backend
         this.data.addInventoryRecord({
-          materialId: newMaterial.materialId,
-          materialName: newMaterial.materialName,
-          category: newMaterial.category,
-          unitOfMeasure: newMaterial.unitOfMeasure,
+          materialId: `MAT-${response.material_id}`,
+          materialName: response.material_name,
+          category: response.category ?? category,
+          unitOfMeasure: response.unit,
           availableQuantity: quantity,
           minimumStockLevel: minimumStockLevel,
           storageLocation: storageLocation
         });
+      },
+      error: (err) => {
+        console.error('Failed to create material:', err);
       }
-    }, 100);
+    });
 
     this.addForm.reset();
     this.showAddForm = false;

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ResourceDataService } from '../resource-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface ResourceOption {
   title: string;
@@ -83,6 +85,21 @@ export class ResourceHubComponent implements OnInit {
       this.inUseCount = resources.filter(r => r.currentStatus === 'Allocated').length;
       this.availableCount = resources.filter(r => r.currentStatus === 'Available').length;
       this.maintenanceCount = resources.filter(r => r.currentStatus === 'Under Maintenance').length;
+
+      this.options[1].stat = this.totalAssets.toString();
+      
+      const utilizations = resources.map(r => this.data.getUtilization(r.resourceId));
+      const avg = utilizations.length
+        ? Math.round(utilizations.reduce((s, v) => s + v, 0) / utilizations.length)
+        : 0;
+      this.options[2].stat = `${avg}%`;
+
+      const uniqueCategories = new Set(resources.map(r => r.category));
+      this.options[4].stat = uniqueCategories.size.toString();
+    });
+
+    this.data.allocations$.subscribe(allocations => {
+      this.options[0].stat = allocations.length.toString();
     });
   }
 

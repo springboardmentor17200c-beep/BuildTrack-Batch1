@@ -32,3 +32,15 @@ class ProjectMilestoneResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+class ProjectMilestoneEnrichedResponse(BaseModel):
+    """Flat response with denormalized project_name — used by the frontend."""
+    milestone_id: int
+    project_id: int
+    project_name: str
+    milestone_name: str
+    description: Optional[str]
+    due_date: date
+    completion_date: Optional[date]
+    status: str

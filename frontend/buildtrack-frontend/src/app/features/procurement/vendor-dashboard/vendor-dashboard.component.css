@@ -1,1 +1,83 @@
 /* vendor-dashboard.component.css */
+
+/* ── Order summary banner ─────────────────────────── */
+.vd-order-summary {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.vd-order-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.vd-order-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bt-muted);
+}
+.vd-order-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bt-text);
+}
+.vd-qty {
+  font-size: 24px;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+/* ── Live calculation breakdown ────────────────────── */
+.vd-calc {
+  margin-top: 16px;
+  border: 1px solid var(--bt-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.vd-calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--bt-muted);
+  border-bottom: 1px solid var(--bt-border);
+}
+.vd-calc-row:last-child {
+  border-bottom: none;
+}
+.vd-calc-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bt-text);
+  background: rgba(16, 185, 129, 0.08);
+  border-top: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+.vd-calc-total span:last-child {
+  font-size: 16px;
+  color: #10b981;
+}
+
+/* dark mode overrides */
+body.bt-dark .vd-calc {
+  background: #1b1e29;
+  border-color: #2a2f3d;
+}
+body.bt-dark .vd-calc-row {
+  border-bottom-color: #2a2f3d;
+}
+body.bt-dark .vd-order-summary {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+}

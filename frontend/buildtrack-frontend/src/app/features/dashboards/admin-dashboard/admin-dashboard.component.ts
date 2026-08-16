@@ -1,94 +1,158 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser, RoleName } from '../../auth/models/auth.model';
 import { AnalyticsDataService } from '../../analytics/analytics-data.service';
-import { ProjectProgressSummary } from '../../analytics/models/analytics.model';
-import { ResourceDataService } from '../../resource-management/resource-data.service';
+import { ProjectsDataService } from '../../projects/projects-data.service';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { environment } from '../../../../environments/environment';
+import { Subscription, catchError, of } from 'rxjs';
 
-interface RoleCount {
-  role: RoleName;
-  count: number;
-}
+const TOKEN_KEY = 'buildtrack_access_token';
 
-interface ActivityItem {
-  icon: 'user' | 'project' | 'budget' | 'resource';
-  text: string;
-  time: string;
-}
+interface RoleCount { role: string; count: number; }
+interface ActivityItem { icon: 'user' | 'project' | 'budget' | 'resource'; text: string; time: string; }
+interface ApiUser { user_id: number; full_name?: string; role?: string; created_at?: string; }
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css'],
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   currentUser: AppUser | null = null;
-  users: AppUser[] = [];
   roleCounts: RoleCount[] = [];
-  projects: ProjectProgressSummary[] = [];
 
   totalUsers = 0;
   activeProjects = 0;
-  avgUtilization = 0;
+  completedProjects = 0;
+  totalProcurement = 0;
   budgetUsedPercent = 0;
 
-  activity: ActivityItem[] = [
-    { icon: 'project', text: 'Skyline Residency Tower progress updated to 78%', time: '2 hours ago' },
-    { icon: 'budget', text: 'Riverside Business Park expense recorded — ₹1.85L material cost', time: '5 hours ago' },
-    { icon: 'user', text: 'New user registered — Site Engineer role', time: '1 day ago' },
-    { icon: 'resource', text: 'CAT 320 Excavator marked under maintenance', time: '1 day ago' },
-  ];
+  projects: any[] = [];
+  activity: ActivityItem[] = [];
+
+  private subs = new Subscription();
 
   constructor(
     private auth: AuthDataService,
     private analytics: AnalyticsDataService,
-    private resourceData: ResourceDataService
+    private projectsData: ProjectsDataService,
+    private http: HttpClient,
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.auth.currentUser;
-    this.users = this.auth.getAllUsers();
-    this.totalUsers = this.users.length;
 
-    const roles = Array.from(new Set(this.users.map(u => u.role)));
-    this.roleCounts = roles.map(role => ({ role, count: this.users.filter(u => u.role === role).length }));
+    // Load real users from backend
+    const token = localStorage.getItem(TOKEN_KEY) ?? '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    this.analytics.progress$.subscribe(rows => {
-      this.projects = rows;
-      this.activeProjects = rows.filter(p => p.status === 'In Progress').length;
-    });
+    this.http.get<ApiUser[]>(`${environment.apiUrl}/auth/users`, { headers })
+      .pipe(catchError(() => of([] as ApiUser[])))
+      .subscribe(users => {
+        this.totalUsers = users.length;
+        // Group by role
+        const roleMap: Record<string, number> = {};
+        users.forEach(u => {
+          const role = u.role || 'Unknown';
+          roleMap[role] = (roleMap[role] || 0) + 1;
+        });
+        this.roleCounts = Object.entries(roleMap)
+          .map(([role, count]) => ({ role, count }))
+          .sort((a, b) => b.count - a.count);
 
-    const approved = this.analytics.totalApprovedBudget();
-    const spent = this.analytics.totalSpent();
-    this.budgetUsedPercent = approved ? Math.round((spent / approved) * 100) : 0;
+        // Build activity from recent users (last 3 registered)
+        const recent = [...users]
+          .filter(u => u.created_at)
+          .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
+          .slice(0, 2);
+        recent.forEach(u => {
+          this.activity.push({
+            icon: 'user',
+            text: `New user registered — ${u.full_name || 'User'} (${u.role || 'Member'})`,
+            time: this.timeAgo(u.created_at!),
+          });
+        });
+      });
 
-    this.resourceData.resources$.subscribe(resources => {
-      const utilizations = resources.map(r => this.resourceData.getUtilization(r.resourceId));
-      this.avgUtilization = utilizations.length
-        ? Math.round(utilizations.reduce((s, v) => s + v, 0) / utilizations.length)
-        : 0;
-    });
+    // Real projects from projects service
+    this.subs.add(
+      this.projectsData.projects$.subscribe(projs => {
+        this.projects = projs;
+        this.activeProjects = projs.filter(p => p.status === 'In Progress').length;
+        this.completedProjects = projs.filter(p => p.status === 'Completed').length;
+
+        // Build project activity items (most recently updated/started)
+        const recent = [...projs]
+          .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+          .slice(0, 2);
+        recent.forEach(p => {
+          this.activity.unshift({
+            icon: 'project',
+            text: `${p.projectName} — status: ${p.status}`,
+            time: this.timeAgo(p.startDate),
+          });
+        });
+      })
+    );
+
+    // Analytics progress for chart
+    this.subs.add(
+      this.analytics.progress$.subscribe(rows => {
+        if (rows.length === 0) return;
+        this.projects = rows.map(r => ({
+          projectName: r.project,
+          status: r.status,
+          completionPercentage: r.completionPercentage,
+        }));
+        this.activeProjects = rows.filter(r => r.status === 'In Progress').length;
+      })
+    );
+
+    // Procurement stats
+    this.subs.add(
+      this.analytics.purchaseOrders$.subscribe(pos => {
+        this.totalProcurement = pos.reduce((s, po) => s + po.totalAmount, 0);
+        // Build procurement activity
+        pos.slice(0, 1).forEach(po => {
+          this.activity.push({
+            icon: 'budget',
+            text: `PO ${po.purchaseOrderId} — ${po.vendor} • ₹${(po.totalAmount / 100000).toFixed(1)}L (${po.orderStatus})`,
+            time: this.timeAgo(po.orderDate),
+          });
+        });
+      })
+    );
   }
 
-  statusClass(status: ProjectProgressSummary['status']) {
-    return { Planning: 'gray', 'In Progress': 'blue', 'On Hold': 'orange', Completed: 'green' }[status];
+  ngOnDestroy(): void { this.subs.unsubscribe(); }
+
+  private timeAgo(dateStr: string): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return 'Today';
+    if (days === 1) return '1 day ago';
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    return months === 1 ? '1 month ago' : `${months} months ago`;
   }
 
-  roleClass(role: RoleName) {
-    return {
-      Administrator: 'purple',
-      'Project Manager': 'blue',
-      'Site Engineer': 'orange',
-      Contractor: 'green',
-      Worker: 'gray',
-     'Client / Owner': 'blue',
-      Vendor: 'purple',
-    }[role];
+  statusClass(status: string) {
+    return ({ Planning: 'gray', 'In Progress': 'blue', 'On Hold': 'orange', Completed: 'green', Active: 'green' } as any)[status] || 'gray';
+  }
+
+  roleClass(role: string) {
+    return ({
+      Administrator: 'purple', 'Project Manager': 'blue',
+      'Site Engineer': 'orange', Contractor: 'green',
+      Worker: 'gray', 'Client / Owner': 'blue', Vendor: 'purple',
+    } as any)[role] || 'gray';
   }
 }

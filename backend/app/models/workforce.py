@@ -27,6 +27,7 @@ class EmployeeProfile(Base):
 
     user = relationship("User")
     category = relationship("WorkforceCategory")
+    project = relationship("Project")
 
 class Attendance(Base):
     __tablename__ = "attendance"
@@ -42,3 +43,18 @@ class Attendance(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     employee = relationship("EmployeeProfile")
+
+class Shift(Base):
+    __tablename__ = "shifts"
+
+    shift_id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employee_profiles.employee_id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
+    shift_type = Column(String(20), nullable=False)   # Morning | Evening | Night
+    shift_date = Column(Date, nullable=False)
+    start_time = Column(String(20), nullable=False)   # stored as "08:00 AM"
+    end_time = Column(String(20), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    employee = relationship("EmployeeProfile")
+    project = relationship("Project")

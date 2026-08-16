@@ -87,8 +87,8 @@ class PurchaseOrderBase(BaseModel):
     requestId: str
     materials: List[str]
     quantity: int
-    unitPrice: float
-    totalAmount: float
+    unitPrice: float = 0.0        # Set by Vendor when creating invoice
+    totalAmount: float = 0.0      # Computed from unitPrice × quantity at invoice time
     expectedDeliveryDate: str
 
 class PurchaseOrderCreate(PurchaseOrderBase):
@@ -125,7 +125,8 @@ class InventoryItem(BaseModel):
 class InvoiceBase(BaseModel):
     vendorId: str
     purchaseOrderId: str
-    amount: float
+    unitPrice: float          # Vendor enters price per unit
+    amount: float             # Total = unitPrice × quantity (+ GST handled on frontend)
     gst: float
     date: str
     paymentDate: Optional[str] = None

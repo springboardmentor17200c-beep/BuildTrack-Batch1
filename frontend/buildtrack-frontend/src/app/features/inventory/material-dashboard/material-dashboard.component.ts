@@ -4,6 +4,8 @@ import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, MaterialCategory } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface CategorySummary {
   category: MaterialCategory;

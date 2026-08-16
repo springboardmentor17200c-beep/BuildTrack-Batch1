@@ -7,16 +7,13 @@ import { MaterialAllocationComponent } from './material-allocation/material-allo
 import { StockManagementComponent } from './stock-management/stock-management.component';
 
 export const INVENTORY_ROUTES: Routes = [
-  {
-    path: '',
-    component: InventoryHubComponent,
-    children: [
-      { path: 'dashboard', component: MaterialDashboardComponent },
-      { path: 'requests', component: MaterialRequestsComponent },
-      { path: 'stock', component: StockMonitoringComponent },
-      { path: 'allocation', component: MaterialAllocationComponent },
-      { path: 'management', component: StockManagementComponent },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-    ]
-  }
+  // Hub is the landing page (no children — sub-pages are siblings)
+  { path: '', component: InventoryHubComponent },
+
+  // Sub-pages are full independent routes, NOT children of the hub
+  { path: 'dashboard',  component: MaterialDashboardComponent },
+  { path: 'requests',   component: MaterialRequestsComponent },
+  { path: 'stock',      component: StockMonitoringComponent },
+  { path: 'allocation', component: MaterialAllocationComponent },
+  { path: 'management', component: StockManagementComponent },
 ];

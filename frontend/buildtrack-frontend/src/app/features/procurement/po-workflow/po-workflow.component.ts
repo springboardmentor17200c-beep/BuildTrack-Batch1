@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { ProcurementDataService } from '../procurement-data.service';
 import { AuthDataService } from '../../auth/auth-data.service';
 import {
@@ -18,7 +18,7 @@ import autoTable from 'jspdf-autotable';
 @Component({
   selector: 'app-po-workflow',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './po-workflow.component.html',
   styleUrls: ['./po-workflow.component.css'],
 })
@@ -79,7 +79,6 @@ export class PoWorkflowComponent implements OnInit {
 
     this.createPoForm = this.fb.group({
       requestId: ['', Validators.required],
-      unitPrice: [0, [Validators.required, Validators.min(0.01)]],
       expectedDeliveryDate: ['', Validators.required]
     });
 
@@ -190,19 +189,17 @@ export class PoWorkflowComponent implements OnInit {
     const req = this.approvedRequests.find(r => r.id === v.requestId);
     if (!req || !req.vendorId) return;
 
-    const totalAmount = req.quantity * v.unitPrice;
-    
     this.data.createPurchaseOrder({ 
       requestId: req.id, 
       vendorId: req.vendorId, 
       materials: [req.material],
       quantity: req.quantity,
-      unitPrice: v.unitPrice,
-      totalAmount: totalAmount,
+      unitPrice: 0,         // Vendor sets price when creating invoice
+      totalAmount: 0,       // Calculated by vendor at invoice time
       expectedDeliveryDate: v.expectedDeliveryDate
     }).subscribe({
       next: po => {
-        this.createPoForm.reset({ unitPrice: 0 });
+        this.createPoForm.reset();
         this.loadAll();
         this.selectedPoId = po.id;
       },
@@ -255,13 +252,12 @@ export class PoWorkflowComponent implements OnInit {
     this.data.createInvoice({ 
       vendorId: po.vendorId,
       purchaseOrderId: po.id, 
+      unitPrice: po.unitPrice,  // Already set by vendor on their dashboard
       amount: v.amount,
       gst: v.gst,
       date: v.date
     }).subscribe({
       next: () => {
-        // Form is reset, but if they want to create another invoice they can.
-        // Usually it's just one invoice per PO. We can keep the amount for convenience if we don't reset it.
         this.loadAll();
       },
       error: err => (this.error = err.message),
@@ -342,7 +338,7 @@ export class PoWorkflowComponent implements OnInit {
 
     // Materials Table
     const tableData = [
-      [req?.material || 'Material', po.quantity.toString(), `₹${po.unitPrice.toFixed(2)}`, `₹${po.totalAmount.toFixed(2)}`]
+      [req?.material || 'Material', po.quantity.toString(), `₹${(inv.unitPrice || 0).toFixed(2)}`, `₹${inv.amount.toFixed(2)}`]
     ];
 
     autoTable(doc, {

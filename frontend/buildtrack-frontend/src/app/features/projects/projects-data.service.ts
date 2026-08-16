@@ -1,133 +1,231 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, of, forkJoin } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { MilestoneStatus, Project, ProjectMilestone, ProjectStatus } from './models/projects.model';
+import { environment } from '../../../environments/environment';
 
-// NOTE: mock/in-memory data for now. When the FastAPI endpoints are ready,
-// replace the arrays below with HttpClient calls against:
-//   GET /api/projects
-//   GET /api/projects/:id
-//   POST /api/projects
-//   PATCH /api/projects/:id
-//   GET /api/projects/:id/milestones
-//   POST /api/projects/:id/milestones
-// These project names intentionally match AnalyticsDataService's mock
-// project-progress data, so figures stay consistent across modules.
+const TOKEN_KEY = 'buildtrack_access_token';
+
+/** Shape returned by GET /projects/enriched */
+interface ApiProject {
+  project_id: number;
+  project_name: string;
+  description: string | null;
+  location: string;
+  category: string;
+  status: string;
+  manager: string;
+  client: string;
+  start_date: string;
+  expected_end_date: string;
+  actual_end_date: string | null;
+}
+
+/** Shape returned by GET /milestones/enriched */
+interface ApiMilestone {
+  milestone_id: number;
+  project_id: number;
+  project_name: string;
+  milestone_name: string;
+  description: string | null;
+  due_date: string;
+  completion_date: string | null;
+  status: string;
+}
+
+export interface ProjectCategory { category_id: number; category_name: string; }
+export interface ProjectStatusOption { status_id: number; status_name: string; }
+
+function mapProject(a: ApiProject): Project {
+  return {
+    projectId: `P-${a.project_id}`,
+    projectName: a.project_name,
+    description: a.description ?? '',
+    location: a.location,
+    category: a.category as any,
+    status: a.status as ProjectStatus,
+    manager: a.manager,
+    client: a.client,
+    startDate: a.start_date,
+    expectedEndDate: a.expected_end_date,
+    actualEndDate: a.actual_end_date,
+  };
+}
+
+function mapMilestone(a: ApiMilestone): ProjectMilestone {
+  return {
+    milestoneId: `M-${a.milestone_id}`,
+    projectId: `P-${a.project_id}`,
+    projectName: a.project_name,
+    milestoneName: a.milestone_name,
+    description: a.description ?? '',
+    dueDate: a.due_date,
+    completionDate: a.completion_date,
+    status: a.status as MilestoneStatus,
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsDataService {
-  private projects: Project[] = [
-    {
-      projectId: 'P-1',
-      projectName: 'Skyline Residency Tower',
-      description: '32-storey residential tower with podium parking and rooftop amenities.',
-      location: 'Whitefield, Bengaluru',
-      category: 'Residential',
-      status: 'In Progress',
-      manager: 'Priya Menon',
-      client: 'L&T Realty',
-      startDate: '2025-11-01',
-      expectedEndDate: '2026-10-12',
-      actualEndDate: null,
-    },
-    {
-      projectId: 'P-2',
-      projectName: 'Riverside Business Park',
-      description: 'Grade-A commercial office park with 4 towers and a central plaza.',
-      location: 'Gachibowli, Hyderabad',
-      category: 'Commercial',
-      status: 'In Progress',
-      manager: 'Karthik Iyer',
-      client: 'NCC Limited',
-      startDate: '2026-02-15',
-      expectedEndDate: '2027-03-30',
-      actualEndDate: null,
-    },
-    {
-      projectId: 'P-3',
-      projectName: 'Greenfield Metro Extension',
-      description: 'Elevated metro corridor extension, 6.2 km with 5 stations.',
-      location: 'Patna Sector 4',
-      category: 'Infrastructure',
-      status: 'Completed',
-      manager: 'Ananya Sharma',
-      client: 'Bihar State Infra Corp',
-      startDate: '2024-06-01',
-      expectedEndDate: '2026-01-05',
-      actualEndDate: '2026-01-02',
-    },
-    {
-      projectId: 'P-4',
-      projectName: 'Harborview Logistics Hub',
-      description: 'Warehousing and logistics hub with cold storage facility.',
-      location: 'Vizag Port Area',
-      category: 'Industrial',
-      status: 'On Hold',
-      manager: 'Rohan Desai',
-      client: 'Adani Ports',
-      startDate: '2025-09-01',
-      expectedEndDate: '2026-08-18',
-      actualEndDate: null,
-    },
-  ];
+  private readonly projectsUrl   = `${environment.apiUrl}/projects/enriched`;
+  private readonly milestonesUrl = `${environment.apiUrl}/milestones/enriched`;
+  private readonly projectsBase  = `${environment.apiUrl}/projects`;
+  private readonly milestonesBase = `${environment.apiUrl}/milestones`;
 
-  private milestones: ProjectMilestone[] = [
-    { milestoneId: 'M-1', projectId: 'P-1', projectName: 'Skyline Residency Tower', milestoneName: 'Foundation Complete', description: 'Raft foundation and basement waterproofing.', dueDate: '2026-02-01', completionDate: '2026-01-28', status: 'Completed' },
-    { milestoneId: 'M-2', projectId: 'P-1', projectName: 'Skyline Residency Tower', milestoneName: 'Structure Topped Out', description: 'All 32 floors of RCC structure complete.', dueDate: '2026-07-15', completionDate: null, status: 'In Progress' },
-    { milestoneId: 'M-3', projectId: 'P-1', projectName: 'Skyline Residency Tower', milestoneName: 'MEP Rough-in Complete', description: 'Electrical, plumbing and HVAC rough-in for all floors.', dueDate: '2026-09-01', completionDate: null, status: 'Pending' },
-    { milestoneId: 'M-4', projectId: 'P-2', projectName: 'Riverside Business Park', milestoneName: 'Site Grading Complete', description: 'Earthwork and site leveling across all 4 tower footprints.', dueDate: '2026-04-01', completionDate: '2026-03-30', status: 'Completed' },
-    { milestoneId: 'M-5', projectId: 'P-2', projectName: 'Riverside Business Park', milestoneName: 'Tower A Foundation', description: 'Pile foundation for Tower A.', dueDate: '2026-08-01', completionDate: null, status: 'In Progress' },
-    { milestoneId: 'M-6', projectId: 'P-3', projectName: 'Greenfield Metro Extension', milestoneName: 'Track Laying Complete', description: 'Ballast-less track across full corridor.', dueDate: '2025-11-15', completionDate: '2025-11-10', status: 'Completed' },
-    { milestoneId: 'M-7', projectId: 'P-3', projectName: 'Greenfield Metro Extension', milestoneName: 'Commissioning & Handover', description: 'Signal testing and final handover to operator.', dueDate: '2026-01-05', completionDate: '2026-01-02', status: 'Completed' },
-    { milestoneId: 'M-8', projectId: 'P-4', projectName: 'Harborview Logistics Hub', milestoneName: 'Environmental Clearance', description: 'Pending state pollution control board approval.', dueDate: '2026-05-01', completionDate: null, status: 'Pending' },
-  ];
+  private projects$$  = new BehaviorSubject<Project[]>([]);
+  private milestones$$ = new BehaviorSubject<ProjectMilestone[]>([]);
 
-  private projects$$ = new BehaviorSubject<Project[]>(this.projects);
-  private milestones$$ = new BehaviorSubject<ProjectMilestone[]>(this.milestones);
+  // Lookup data for forms
+  private categories$$ = new BehaviorSubject<ProjectCategory[]>([]);
+  private statuses$$   = new BehaviorSubject<ProjectStatusOption[]>([]);
 
-  projects$ = this.projects$$.asObservable();
+  projects$   = this.projects$$.asObservable();
   milestones$ = this.milestones$$.asObservable();
+  categories$ = this.categories$$.asObservable();
+  statuses$   = this.statuses$$.asObservable();
+
+  constructor(private http: HttpClient) {}
+
+  private headers(): HttpHeaders {
+    const token = localStorage.getItem(TOKEN_KEY) ?? '';
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+  }
+
+  private handleError<T>(fallback: T) {
+    return (err: any): Observable<T> => {
+      console.error('[ProjectsDataService]', err);
+      return of(fallback);
+    };
+  }
+
+  loadAll() {
+    forkJoin({
+      projects: this.http.get<ApiProject[]>(this.projectsUrl, { headers: this.headers() })
+        .pipe(catchError(this.handleError([]))),
+      milestones: this.http.get<ApiMilestone[]>(this.milestonesUrl, { headers: this.headers() })
+        .pipe(catchError(this.handleError([]))),
+      categories: this.http.get<ProjectCategory[]>(`${this.projectsBase}/categories`, { headers: this.headers() })
+        .pipe(catchError(this.handleError([]))),
+      statuses: this.http.get<ProjectStatusOption[]>(`${this.projectsBase}/statuses`, { headers: this.headers() })
+        .pipe(catchError(this.handleError([]))),
+    }).subscribe(({ projects, milestones, categories, statuses }) => {
+      this.projects$$.next(projects.map(mapProject));
+      this.milestones$$.next(milestones.map(mapMilestone));
+      this.categories$$.next(categories);
+      this.statuses$$.next(statuses);
+    });
+  }
 
   get managers(): string[] {
-    return Array.from(new Set(this.projects.map(p => p.manager)));
+    return Array.from(new Set(this.projects$$.value.map(p => p.manager)));
   }
 
   getProjectById(id: string): Project | undefined {
-    return this.projects.find(p => p.projectId === id);
+    return this.projects$$.value.find(p => p.projectId === id);
   }
 
-  /** Completion % derived from that project's milestones — completed / total. */
   getProgress(projectId: string): number {
-    const rows = this.milestones.filter(m => m.projectId === projectId);
+    const rows = this.milestones$$.value.filter(m => m.projectId === projectId);
     if (rows.length === 0) return 0;
     const completed = rows.filter(m => m.status === 'Completed').length;
     return Math.round((completed / rows.length) * 100);
   }
 
-  addProject(project: Project) {
-    this.projects = [project, ...this.projects];
-    this.projects$$.next(this.projects);
+  /**
+   * createProject — POSTs to the real backend.
+   * The form provides string names; we resolve them to IDs here.
+   * company_id and manager_id come from the currently logged-in user's session.
+   */
+  createProject(payload: {
+    projectName: string;
+    description: string;
+    location: string;
+    categoryName: string;
+    statusName: string;
+    managerName: string;
+    clientName: string;
+    startDate: string;
+    expectedEndDate: string;
+    companyId: number;
+    managerId: number;
+    clientId: number;
+  }): Observable<any> {
+    const category = this.categories$$.value.find(c => c.category_name === payload.categoryName);
+    const statusObj = this.statuses$$.value.find(s => s.status_name === payload.statusName);
+
+    if (!category || !statusObj) {
+      console.error('Category or status not found', payload.categoryName, payload.statusName);
+      return of(null);
+    }
+
+    const body = {
+      company_id: payload.companyId,
+      manager_id: payload.managerId,
+      client_id: payload.clientId,
+      category_id: category.category_id,
+      status_id: statusObj.status_id,
+      project_name: payload.projectName,
+      description: payload.description,
+      location: payload.location,
+      start_date: payload.startDate,
+      expected_end_date: payload.expectedEndDate,
+    };
+
+    return this.http.post(`${this.projectsBase}`, body, { headers: this.headers() }).pipe(
+      tap(() => this.loadAll()),     // Reload from DB after save
+      catchError(this.handleError(null))
+    );
   }
 
-  updateProjectStatus(projectId: string, status: ProjectStatus) {
-    this.projects = this.projects.map(p =>
+  /** Legacy local-only add — kept for backward compat, now calls createProject internally */
+  addProject(project: Project) {
+    // Optimistic add so UI feels instant
+    this.projects$$.next([project, ...this.projects$$.value]);
+  }
+
+  updateProjectStatus(projectId: string, newStatus: ProjectStatus) {
+    const numericId = parseInt(projectId.replace('P-', ''), 10);
+    const statusObj = this.statuses$$.value.find(s => s.status_name === newStatus);
+
+    // Optimistic UI update
+    this.projects$$.next(this.projects$$.value.map(p =>
       p.projectId === projectId
-        ? { ...p, status, actualEndDate: status === 'Completed' ? '2026-07-12' : p.actualEndDate }
+        ? { ...p, status: newStatus, actualEndDate: newStatus === 'Completed' ? new Date().toISOString().split('T')[0] : p.actualEndDate }
         : p
-    );
-    this.projects$$.next(this.projects);
+    ));
+
+    if (statusObj) {
+      this.http.put(
+        `${this.projectsBase}/${numericId}`,
+        { status_id: statusObj.status_id },
+        { headers: this.headers() }
+      ).pipe(catchError(this.handleError(null)))
+       .subscribe(() => this.loadAll());
+    }
   }
 
   addMilestone(milestone: ProjectMilestone) {
-    this.milestones = [milestone, ...this.milestones];
-    this.milestones$$.next(this.milestones);
+    this.milestones$$.next([milestone, ...this.milestones$$.value]);
   }
 
   markMilestoneStatus(milestoneId: string, status: MilestoneStatus) {
-    this.milestones = this.milestones.map(m =>
-      m.milestoneId === milestoneId
-        ? { ...m, status, completionDate: status === 'Completed' ? '2026-07-12' : m.completionDate }
-        : m
+    const numericId = parseInt(milestoneId.replace('M-', ''), 10);
+    const today = new Date().toISOString().split('T')[0];
+
+    this.milestones$$.next(
+      this.milestones$$.value.map(m =>
+        m.milestoneId === milestoneId
+          ? { ...m, status, completionDate: status === 'Completed' ? today : null }
+          : m
+      )
     );
-    this.milestones$$.next(this.milestones);
+
+    this.http.put(
+      `${this.milestonesBase}/${numericId}`,
+      { status, completion_date: status === 'Completed' ? today : null },
+      { headers: this.headers() }
+    ).pipe(catchError(this.handleError(null)))
+     .subscribe(() => this.loadAll());
   }
 }

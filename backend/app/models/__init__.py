@@ -10,5 +10,5 @@ from .vendor import Vendor
 from .procurement_request import ProcurementRequest
 from .inventory import MaterialCategory, Material, Inventory
 from .resource import ResourceCategory, Resource
-from .workforce import WorkforceCategory, EmployeeProfile, Attendance
+from .workforce import WorkforceCategory, EmployeeProfile, Attendance, Shift
 from .report import DBReport

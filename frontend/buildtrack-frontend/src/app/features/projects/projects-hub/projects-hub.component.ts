@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { ProjectsDataService } from '../projects-data.service';
 
 interface ProjectOption {
@@ -17,7 +17,7 @@ interface ProjectOption {
 @Component({
   selector: 'app-projects-hub',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './projects-hub.component.html',
   styleUrls: ['./projects-hub.component.css'],
 })
@@ -65,6 +65,13 @@ export class ProjectsHubComponent implements OnInit {
       this.inProgressCount = projects.filter(p => p.status === 'In Progress').length;
       this.onHoldCount = projects.filter(p => p.status === 'On Hold').length;
       this.completedCount = projects.filter(p => p.status === 'Completed').length;
+      
+      this.options[0].stat = projects.length.toString();
+      this.options[2].stat = this.inProgressCount.toString();
+    });
+
+    this.data.milestones$.subscribe(milestones => {
+      this.options[1].stat = milestones.length.toString();
     });
   }
 
