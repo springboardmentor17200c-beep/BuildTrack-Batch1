@@ -7,7 +7,6 @@ import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser, RoleName } from '../../auth/models/auth.model';
 import { AnalyticsDataService } from '../../analytics/analytics-data.service';
 import { ProjectsDataService } from '../../projects/projects-data.service';
-import { TranslatePipe } from '../../shared/translate.pipe';
 import { environment } from '../../../../environments/environment';
 import { Subscription, catchError, of } from 'rxjs';
 
@@ -20,7 +19,7 @@ interface ApiUser { user_id: number; full_name?: string; role?: string; created_
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css'],
 })

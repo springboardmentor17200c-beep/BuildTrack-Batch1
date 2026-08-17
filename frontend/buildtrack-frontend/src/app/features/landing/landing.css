@@ -1,1 +1,9 @@
-/* Styling comes from the shared bt-theme.css (landing additions section). No component-scoped styles needed here. */
+/* Styling comes from the shared bt-theme.css (landing additions section). */
+
+.bt-lang-menu {
+  bottom: auto !important;
+  top: calc(100% + 6px) !important;
+  min-width: 140px;
+  right: 0;
+  left: auto !important;
+}

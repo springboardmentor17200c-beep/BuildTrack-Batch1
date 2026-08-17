@@ -5,7 +5,6 @@ import { AuthDataService } from '../auth/auth-data.service';
 import { AppUser, DASHBOARD_ROUTE_BY_ROLE } from '../auth/models/auth.model';
 import { ThemeService } from '../shared/theme.service';
 import { LanguageService } from '../shared/language.service';
-import { LangCode } from '../shared/translations';
 
 interface FeatureCard {
   icon: 'projects' | 'resources' | 'inventory' | 'workforce' | 'analytics' | 'reports' | 'budget' | 'procurement' | 'notifications';
@@ -13,6 +12,12 @@ interface FeatureCard {
   description: string;
   route: string;
   color: 'blue' | 'green' | 'purple' | 'orange';
+}
+
+interface LangOption {
+  code: string;
+  name: string;
+  native: string;
 }
 
 @Component({
@@ -24,8 +29,6 @@ interface FeatureCard {
 })
 export class Landing implements OnInit {
   currentUser: AppUser | null = null;
-  langMenuOpen = false;
-
   features: FeatureCard[] = [
     { icon: 'projects', title: 'Project Management', description: 'Plan, schedule, and track every project from kickoff to closure.', route: '/projects', color: 'blue' },
     { icon: 'resources', title: 'Resource Management', description: 'Allocate equipment and machinery, and track utilization across sites.', route: '/resources', color: 'purple' },
@@ -72,6 +75,19 @@ export class Landing implements OnInit {
   ];
   openFaqIndex: number | null = null;
 
+  langMenuOpen = false;
+  currentLangCode = 'en';
+  currentLangName = 'EN';
+  
+  languages: LangOption[] = [
+    { code: 'en', name: 'English', native: 'English' },
+    { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
+    { code: 'ta', name: 'Tamil', native: 'தமிழ்' },
+    { code: 'te', name: 'Telugu', native: 'తెలుగు' },
+    { code: 'bn', name: 'Bengali', native: 'বাংলা' }
+  ];
+
+
   constructor(
     private auth: AuthDataService,
     private router: Router,
@@ -99,18 +115,39 @@ export class Landing implements OnInit {
     }
   }
 
-  toggleTheme(): void {
-    this.theme.toggle();
-  }
-
+  
   toggleLangMenu(): void {
     this.langMenuOpen = !this.langMenuOpen;
   }
 
-  selectLanguage(code: LangCode): void {
-    this.lang.setLanguage(code);
+  selectLanguage(lang: LangOption): void {
+    this.currentLangCode = lang.code;
+    this.currentLangName = lang.name.toUpperCase().substring(0, 2);
     this.langMenuOpen = false;
+    
+    // Force load the Google Translate script if not loaded
+    if (!(window as any).gt_translate_script) {
+        const script = document.createElement('script');
+        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit2';
+        document.body.appendChild(script);
+        (window as any).gt_translate_script = script;
+    }
+    
+    // Call global GTranslate function
+    const gt = (window as any).doGTranslate;
+    if (gt) {
+      gt('en|' + lang.code);
+    }
   }
+
+  toggleTheme(): void {
+
+    this.theme.toggle();
+  }
+
+  
+
+  
 
   toggleFaq(index: number): void {
     this.openFaqIndex = this.openFaqIndex === index ? null : index;

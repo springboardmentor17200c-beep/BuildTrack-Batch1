@@ -5,14 +5,14 @@
         <div class="bt-hero-bg"></div>
         <div class="bt-hero-content">
           <div class="bt-hero-text">
-            <h1 class="bt-hero-title">{{ 'dashboard.welcomeBack' | translate }} {{ currentUser?.fullName || 'Administrator' }}</h1>
-            <p class="bt-hero-subtitle">{{ 'dashboard.adminSubtitle' | translate }}</p>
+            <h1 class="bt-hero-title">Welcome back, {{ currentUser?.fullName || 'Administrator' }}</h1>
+            <p class="bt-hero-subtitle">{{ 'Here\'s what\'s happening across all your projects today.' }}</p>
           </div>
           <div class="bt-hero-actions">
             <span class="bt-hero-badge">{{ currentUser?.role }}</span>
             <a class="bt-hero-btn" [routerLink]="['/profile']">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              {{ 'nav.profile' | translate }}
+              Profile
             </a>
           </div>
         </div>
@@ -26,7 +26,7 @@
           </div>
           <div class="bt-kpi-details">
             <span class="bt-kpi-value">{{ totalUsers }}</span>
-            <span class="bt-kpi-label">{{ 'dashboard.totalUsers' | translate }}</span>
+            <span class="bt-kpi-label">Total Users</span>
           </div>
         </div>
 
@@ -36,7 +36,7 @@
           </div>
           <div class="bt-kpi-details">
             <span class="bt-kpi-value">{{ activeProjects }}</span>
-            <span class="bt-kpi-label">{{ 'dashboard.activeProjects' | translate }}</span>
+            <span class="bt-kpi-label">Active Projects</span>
           </div>
         </div>
 
@@ -46,7 +46,7 @@
           </div>
           <div class="bt-kpi-details">
             <span class="bt-kpi-value">{{ budgetUsedPercent }}%</span>
-            <span class="bt-kpi-label">{{ 'dashboard.budgetUsed' | translate }}</span>
+            <span class="bt-kpi-label">Budget Used</span>
           </div>
         </div>
 
@@ -56,7 +56,7 @@
           </div>
           <div class="bt-kpi-details">
             <span class="bt-kpi-value">{{ completedProjects }}</span>
-            <span class="bt-kpi-label">{{ 'dashboard.completedProjects' | translate }}</span>
+            <span class="bt-kpi-label">Completed Projects</span>
           </div>
         </div>
       </div>
@@ -70,11 +70,11 @@
           <div class="bt-premium-panel">
             <div class="bt-panel-header">
               <div class="bt-panel-header-text">
-                <h3>{{ 'dashboard.projectMonitoring' | translate }}</h3>
-                <p>{{ 'dashboard.liveStatus' | translate }}</p>
+                <h3>Project Monitoring</h3>
+                <p>Live Status</p>
               </div>
               <a class="bt-btn-ghost" [routerLink]="['/analytics/progress']">
-                {{ 'dashboard.viewAll' | translate }}
+                View All
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
               </a>
             </div>
@@ -114,26 +114,26 @@
           <div class="bt-premium-panel">
             <div class="bt-panel-header">
               <div class="bt-panel-header-text">
-                <h3>{{ 'dashboard.reports' | translate }}</h3>
-                <p>{{ 'dashboard.jumpToAnalytics' | translate }}</p>
+                <h3>Reports</h3>
+                <p>Jump to Analytics</p>
               </div>
             </div>
             <div class="bt-reports-grid">
               <a class="bt-report-card blue-hover" [routerLink]="['/analytics/budget']">
                 <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
-                <span>{{ 'dashboard.budgetAnalytics' | translate }}</span>
+                <span>Budget Analytics</span>
               </a>
               <a class="bt-report-card purple-hover" [routerLink]="['/analytics/progress']">
                 <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-                <span>{{ 'dashboard.projectProgress' | translate }}</span>
+                <span>Project Progress</span>
               </a>
               <a class="bt-report-card green-hover" [routerLink]="['/analytics/resources']">
                 <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
-                <span>{{ 'dashboard.resourceAnalytics' | translate }}</span>
+                <span>Resource Analytics</span>
               </a>
               <a class="bt-report-card orange-hover" [routerLink]="['/analytics/procurement']">
                 <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
-                <span>{{ 'dashboard.procurementAnalytics' | translate }}</span>
+                <span>Procurement Analytics</span>
               </a>
             </div>
           </div>
@@ -146,8 +146,8 @@
           <div class="bt-premium-panel">
             <div class="bt-panel-header">
               <div class="bt-panel-header-text">
-                <h3>{{ 'dashboard.userManagement' | translate }}</h3>
-                <p>{{ totalUsers }} {{ 'dashboard.accounts' | translate }}</p>
+                <h3>User Management</h3>
+                <p>{{ totalUsers }} accounts</p>
               </div>
             </div>
             <div class="bt-roles-list">
@@ -164,8 +164,8 @@
           <div class="bt-premium-panel">
             <div class="bt-panel-header">
               <div class="bt-panel-header-text">
-                <h3>{{ 'dashboard.activityMonitoring' | translate }}</h3>
-                <p>{{ 'dashboard.recentActivity' | translate }}</p>
+                <h3>Activity Monitoring</h3>
+                <p>Recent Activity</p>
               </div>
             </div>
             
