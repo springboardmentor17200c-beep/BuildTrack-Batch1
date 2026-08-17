@@ -15,6 +15,7 @@ export type ReportType =
   | 'budget' 
   | 'workforce' 
   | 'procurement' 
+  | 'project_comprehensive'
   | 'custom';
 
 export type ReportStatus = 'draft' | 'generated' | 'scheduled' | 'archived';
@@ -26,7 +27,7 @@ export interface ReportFilter {
     start: Date;
     end: Date;
   };
-  projectId?: string;
+  projectId?: number | string;
   department?: string;
   status?: string;
   categories?: string[];

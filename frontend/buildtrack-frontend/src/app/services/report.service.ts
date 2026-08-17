@@ -92,6 +92,16 @@ export class ReportService {
     const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
     const title = `${formattedType} Report - ${new Date().toLocaleDateString()}`;
 
+    // If a project is selected, call the new endpoint
+    if (filter.projectId) {
+      return this.http.post<Report>(`${this.apiUrl}/project/${filter.projectId}/generate`, { type, title, filter }).pipe(
+        map(apiReport => {
+          this.reports.unshift(apiReport);
+          return apiReport;
+        })
+      );
+    }
+
     return this.http.post<Report>(this.apiUrl, { type, title, filter }).pipe(
       map(apiReport => ({
         ...apiReport,
@@ -112,6 +122,10 @@ export class ReportService {
         return of(newReport).pipe(delay(400));
       })
     );
+  }
+
+  getProjects(): Observable<any[]> {
+    return this.http.get<any[]>('http://localhost:8000/projects').pipe(catchError(() => of([])));
   }
 
   generateProgressReport(filter: ReportFilter): Observable<ProgressReportData> {

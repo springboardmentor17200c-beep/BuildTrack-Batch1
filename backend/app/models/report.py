@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.database import Base
@@ -13,5 +13,6 @@ class DBReport(Base):
     file_name = Column(String(255), nullable=False)
     file_path = Column(Text, nullable=False)
     generated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    report_data = Column(JSON, nullable=True)
 
     user = relationship("User")

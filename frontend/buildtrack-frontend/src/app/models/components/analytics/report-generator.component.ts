@@ -33,11 +33,20 @@ import { Report, ReportFilter, ReportType } from '../../../models/report.model';
           <div class="form-group">
             <label>Report Type *</label>
             <select [(ngModel)]="reportType" (change)="onTypeChange()" class="form-control">
+              <option value="project_comprehensive">🏢 Comprehensive Project Report</option>
               <option value="progress">📊 Progress Report</option>
               <option value="resource">🔧 Resource Report</option>
               <option value="budget">💰 Budget Report</option>
               <option value="workforce">👷 Workforce Report</option>
               <option value="procurement">📦 Procurement Report</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="reportType === 'project_comprehensive'">
+            <label>Select Project *</label>
+            <select [(ngModel)]="filter.projectId" class="form-control">
+              <option value="" disabled selected>Select a project</option>
+              <option *ngFor="let p of projects" [value]="p.project_id">{{ p.project_name }}</option>
             </select>
           </div>
 
@@ -321,6 +330,8 @@ export class ReportGeneratorComponent implements OnInit {
     supplier: 'all'
   };
 
+  projects: any[] = [];
+
   constructor(
     private reportService: ReportService,
     private router: Router,
@@ -329,6 +340,7 @@ export class ReportGeneratorComponent implements OnInit {
 
   ngOnInit() {
     this.setDefaultTitle();
+    this.reportService.getProjects().subscribe(p => this.projects = p);
   }
 
   onTypeChange() {
@@ -342,6 +354,7 @@ export class ReportGeneratorComponent implements OnInit {
       budget: 'Budget Report',
       workforce: 'Workforce Report',
       procurement: 'Procurement Report',
+      project_comprehensive: 'Comprehensive Project Report',
       custom: 'Custom Report'
     };
     this.reportTitle = `${typeNames[this.reportType]} - ${new Date().toLocaleDateString()}`;
@@ -352,6 +365,11 @@ export class ReportGeneratorComponent implements OnInit {
       alert('Please select a report type');
       return;
     }
+    
+    if (this.reportType === 'project_comprehensive' && !this.filter.projectId) {
+      alert('Please select a project');
+      return;
+    }
 
     this.isGenerating = true;
     this.generatedReport = null;
@@ -360,7 +378,8 @@ export class ReportGeneratorComponent implements OnInit {
       dateRange: {
         start: this.filter.startDate ? new Date(this.filter.startDate) : new Date(),
         end: this.filter.endDate ? new Date(this.filter.endDate) : new Date()
-      }
+      },
+      projectId: this.filter.projectId
     };
 
     this.reportService.generateReport(this.reportType, reportFilter).subscribe({
@@ -385,6 +404,21 @@ export class ReportGeneratorComponent implements OnInit {
 
   exportGeneratedPDF() {
     if (this.generatedReport) {
+      if (this.generatedReport.type === 'project_comprehensive') {
+        const dataStr = JSON.stringify(this.generatedReport.data, null, 2);
+        const html = `<html><head><title>Comprehensive Project Report</title></head><body style="font-family:sans-serif;padding:20px;"><h2>Comprehensive Project Report</h2><pre>${dataStr}</pre></body></html>`;
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.generatedReport!.title}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+
       this.reportService.exportReportToPDF(this.generatedReport.id).subscribe({
         next: (blob: Blob) => {
           const url = window.URL.createObjectURL(blob);
@@ -403,6 +437,20 @@ export class ReportGeneratorComponent implements OnInit {
 
   exportGeneratedExcel() {
     if (this.generatedReport) {
+      if (this.generatedReport.type === 'project_comprehensive') {
+        const csv = `"Project Comprehensive Report"\n"Please view the PDF/HTML version for structured data."`;
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.generatedReport!.title}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+
       this.reportService.exportReportToExcel(this.generatedReport.id).subscribe({
         next: (blob: Blob) => {
           const url = window.URL.createObjectURL(blob);
