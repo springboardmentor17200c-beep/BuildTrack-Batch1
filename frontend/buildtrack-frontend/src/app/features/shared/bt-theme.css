@@ -909,6 +909,10 @@ body.bt-dark .bt-form-grid input:focus,
 body.bt-dark .bt-auth-field input:focus {
   background: #181b25;
 }
+body.bt-dark select option {
+  background: #1b1e29;
+  color: #e5e7eb;
+}
 body.bt-dark .bt-settings-signout {
   background: #1b1e29;
   border-color: #2a2f3d;
