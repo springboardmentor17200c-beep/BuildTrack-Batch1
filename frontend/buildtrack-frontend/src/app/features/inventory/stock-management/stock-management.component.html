@@ -12,17 +12,25 @@
       <p class="bt-subtitle">Manage materials catalog and inventory levels.</p>
     </div>
     <div class="bt-actions">
-      <button class="bt-add-btn" (click)="toggleAddForm()">
+      <button class="bt-add-btn" (click)="toggleAddMaterialForm()" style="margin-right: 8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14"></path><path d="M5 12h14"></path>
         </svg>
-        <span *ngIf="!showAddForm">Add Material</span>
-        <span *ngIf="showAddForm">Cancel</span>
+        <span *ngIf="!showAddMaterialForm">New Catalog Item</span>
+        <span *ngIf="showAddMaterialForm">Cancel</span>
+      </button>
+      <button class="bt-add-btn" (click)="toggleAddStockForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14"></path><path d="M5 12h14"></path>
+        </svg>
+        <span *ngIf="!showAddStockForm">Add Stock</span>
+        <span *ngIf="showAddStockForm">Cancel</span>
       </button>
     </div>
   </div>
 
-  <form class="bt-form-card" *ngIf="showAddForm" [formGroup]="addForm" (ngSubmit)="addMaterial()">
+  <form class="bt-form-card" *ngIf="showAddMaterialForm" [formGroup]="addMaterialForm" (ngSubmit)="addNewMaterial()">
+    <h3 style="margin-bottom:16px;">Add New Material to Catalog</h3>
     <div class="bt-form-grid">
       <label>
         <span>Material Name *</span>
@@ -40,6 +48,26 @@
         <input type="text" formControlName="unitOfMeasure" placeholder="e.g. bags, tons, pieces" />
       </label>
       <label>
+        <span>Description</span>
+        <input type="text" formControlName="description" placeholder="Optional description" />
+      </label>
+    </div>
+    <div class="bt-form-actions">
+      <button type="submit" class="bt-add-btn">Add Catalog Item</button>
+    </div>
+  </form>
+
+  <form class="bt-form-card" *ngIf="showAddStockForm" [formGroup]="addStockForm" (ngSubmit)="addStock()">
+    <h3 style="margin-bottom:16px;">Add Inventory Stock</h3>
+    <div class="bt-form-grid">
+      <label>
+        <span>Material *</span>
+        <select formControlName="materialId">
+          <option value="" disabled selected>Select an existing material</option>
+          <option *ngFor="let m of materials" [value]="m.materialId">{{ m.materialName }} ({{ m.category }})</option>
+        </select>
+      </label>
+      <label>
         <span>Initial Quantity *</span>
         <input type="number" formControlName="quantity" placeholder="e.g. 1000" min="0" />
       </label>
@@ -51,13 +79,9 @@
         <span>Storage Location *</span>
         <input type="text" formControlName="storageLocation" placeholder="e.g. Central Warehouse" />
       </label>
-      <label>
-        <span>Description</span>
-        <input type="text" formControlName="description" placeholder="Optional description" />
-      </label>
     </div>
     <div class="bt-form-actions">
-      <button type="submit" class="bt-add-btn">Add Material</button>
+      <button type="submit" class="bt-add-btn">Add Stock</button>
     </div>
   </form>
 

@@ -17,12 +17,16 @@ import { InventoryRecord, Material } from '../models/inventory.model';
 export class StockManagementComponent implements OnInit, OnDestroy {
   materials: Material[] = [];
   inventoryRecords: InventoryRecord[] = [];
-  showAddForm = false;
+  
+  showAddMaterialForm = false;
+  showAddStockForm = false;
   showEditForm = false;
   selectedMaterial: Material | null = null;
   
-  addForm: FormGroup;
+  addMaterialForm: FormGroup;
+  addStockForm: FormGroup;
   editForm: FormGroup;
+  
   private subscriptions = new Subscription();
 
   categories = [
@@ -35,11 +39,15 @@ export class StockManagementComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private location: Location
   ) {
-    this.addForm = this.fb.group({
+    this.addMaterialForm = this.fb.group({
       materialName: ['', Validators.required],
       category: ['', Validators.required],
       unitOfMeasure: ['', Validators.required],
-      description: [''],
+      description: ['']
+    });
+
+    this.addStockForm = this.fb.group({
+      materialId: ['', Validators.required],
       quantity: ['', [Validators.required, Validators.min(0)]],
       minimumStockLevel: ['', [Validators.required, Validators.min(0)]],
       storageLocation: ['', Validators.required]
@@ -68,22 +76,33 @@ export class StockManagementComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  toggleAddForm() {
-    this.showAddForm = !this.showAddForm;
-    if (!this.showAddForm) {
-      this.addForm.reset();
+  toggleAddMaterialForm() {
+    this.showAddMaterialForm = !this.showAddMaterialForm;
+    this.showAddStockForm = false;
+    this.showEditForm = false;
+    if (!this.showAddMaterialForm) {
+      this.addMaterialForm.reset();
     }
   }
 
-  addMaterial() {
-    if (this.addForm.invalid) {
-      this.addForm.markAllAsTouched();
+  toggleAddStockForm() {
+    this.showAddStockForm = !this.showAddStockForm;
+    this.showAddMaterialForm = false;
+    this.showEditForm = false;
+    if (!this.showAddStockForm) {
+      this.addStockForm.reset();
+      this.addStockForm.get('materialId')?.setValue('');
+    }
+  }
+
+  addNewMaterial() {
+    if (this.addMaterialForm.invalid) {
+      this.addMaterialForm.markAllAsTouched();
       return;
     }
 
-    const { materialName, category, unitOfMeasure, description, quantity, minimumStockLevel, storageLocation } = this.addForm.value;
+    const { materialName, category, unitOfMeasure, description } = this.addMaterialForm.value;
 
-    // Add to materials catalog
     this.data.addMaterial({
       materialName,
       category,
@@ -91,25 +110,34 @@ export class StockManagementComponent implements OnInit, OnDestroy {
       description
     });
 
-    // Find the newly added material
-    setTimeout(() => {
-      const newMaterial = this.materials.find(m => m.materialName === materialName);
-      if (newMaterial) {
-        // Add inventory record
-        this.data.addInventoryRecord({
-          materialId: newMaterial.materialId,
-          materialName: newMaterial.materialName,
-          category: newMaterial.category,
-          unitOfMeasure: newMaterial.unitOfMeasure,
-          availableQuantity: quantity,
-          minimumStockLevel: minimumStockLevel,
-          storageLocation: storageLocation
-        });
-      }
-    }, 100);
+    this.addMaterialForm.reset();
+    this.showAddMaterialForm = false;
+  }
 
-    this.addForm.reset();
-    this.showAddForm = false;
+  addStock() {
+    if (this.addStockForm.invalid) {
+      this.addStockForm.markAllAsTouched();
+      return;
+    }
+
+    const { materialId, quantity, minimumStockLevel, storageLocation } = this.addStockForm.value;
+    const material = this.materials.find(m => m.materialId === materialId);
+
+    if (material) {
+      this.data.addInventoryRecord({
+        materialId: material.materialId,
+        materialName: material.materialName,
+        category: material.category,
+        unitOfMeasure: material.unitOfMeasure,
+        availableQuantity: quantity,
+        minimumStockLevel: minimumStockLevel,
+        storageLocation: storageLocation
+      });
+    }
+
+    this.addStockForm.reset();
+    this.addStockForm.get('materialId')?.setValue('');
+    this.showAddStockForm = false;
   }
 
   editMaterial(material: Material) {
@@ -124,6 +152,8 @@ export class StockManagementComponent implements OnInit, OnDestroy {
       storageLocation: record?.storageLocation || ''
     });
     this.showEditForm = true;
+    this.showAddMaterialForm = false;
+    this.showAddStockForm = false;
   }
 
   updateMaterial() {
@@ -134,7 +164,6 @@ export class StockManagementComponent implements OnInit, OnDestroy {
 
     const { materialName, category, unitOfMeasure, description, minimumStockLevel, storageLocation } = this.editForm.value;
 
-    // Update material catalog
     this.data.updateMaterial(this.selectedMaterial.materialId, {
       materialName,
       category,
@@ -142,7 +171,6 @@ export class StockManagementComponent implements OnInit, OnDestroy {
       description
     });
 
-    // Update inventory record
     const record = this.getInventoryRecord(this.selectedMaterial.materialId);
     if (record) {
       this.data.updateInventoryRecord(record.inventoryId, {

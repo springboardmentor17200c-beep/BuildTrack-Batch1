@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from app.core.permissions import require_roles
 from app.db.database import get_db
 from app.models.inventory import Inventory, Material
-from app.models.project import Project
 from app.schemas.inventory import InventoryCreate, InventoryResponse, InventoryUpdate
 
 router = APIRouter(
@@ -14,11 +13,11 @@ router = APIRouter(
 
 
 @router.get(
-    "/project/{project_id}",
+    "/company/{company_id}",
     response_model=list[InventoryResponse],
 )
-def get_inventory_by_project(
-    project_id: int,
+def get_inventory_by_company(
+    company_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
@@ -28,16 +27,12 @@ def get_inventory_by_project(
         )
     ),
 ):
-    """Retrieve all inventory items for a specific project."""
-    project = db.query(Project).filter(Project.project_id == project_id).first()
-
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found.",
-        )
-
-    return db.query(Inventory).filter(Inventory.project_id == project_id).all()
+    """Retrieve all inventory items for a specific company."""
+    # Ensure user belongs to the company (assuming current_user has company_id)
+    if current_user.company_id != company_id and current_user.role.role_name != "Administrator":
+        raise HTTPException(status_code=403, detail="Not authorized to access this company's inventory")
+        
+    return db.query(Inventory).filter(Inventory.company_id == company_id).all()
 
 
 @router.get(
@@ -84,16 +79,9 @@ def create_inventory(
         )
     ),
 ):
-    """Add a material stock entry to a project."""
-    project = db.query(Project).filter(
-        Project.project_id == payload.project_id
-    ).first()
-
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found.",
-        )
+    """Add a material stock entry to a company."""
+    if current_user.company_id != payload.company_id and current_user.role.role_name != "Administrator":
+        raise HTTPException(status_code=403, detail="Not authorized to add inventory for this company")
 
     material = db.query(Material).filter(
         Material.material_id == payload.material_id
@@ -106,14 +94,16 @@ def create_inventory(
         )
 
     duplicate = db.query(Inventory).filter(
-        Inventory.project_id == payload.project_id,
+        Inventory.company_id == payload.company_id,
         Inventory.material_id == payload.material_id,
+        Inventory.storage_location == payload.storage_location
     ).first()
 
     if duplicate:
+        # Instead of failing, we should ideally add to stock, but for now we enforce one record per location
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="An inventory record for this material already exists in this project.",
+            detail="An inventory record for this material at this location already exists.",
         )
 
     inventory = Inventory(**payload.model_dump())
