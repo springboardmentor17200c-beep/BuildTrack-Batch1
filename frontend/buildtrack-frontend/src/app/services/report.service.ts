@@ -125,7 +125,9 @@ export class ReportService {
   }
 
   getProjects(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8000/projects').pipe(catchError(() => of([])));
+    const token = (typeof window !== 'undefined') ? localStorage.getItem('buildtrack_access_token') : null;
+    const headers: any = token ? { 'Authorization': `Bearer ${token}` } : {};
+    return this.http.get<any[]>('http://localhost:8000/projects', { headers }).pipe(catchError(() => of([])));
   }
 
   generateProgressReport(filter: ReportFilter): Observable<ProgressReportData> {
