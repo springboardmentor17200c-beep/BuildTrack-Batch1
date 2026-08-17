@@ -55,7 +55,7 @@
 
   <!-- ===================== KPI CARDS ===================== -->
   <section class="stats-grid">
-    @for (kpi of kpiCards(); track kpi.title) {
+    <ng-container *ngFor="let kpi of kpiCards()">
       <article class="stat-card glass">
         <div class="stat-icon" [style.background]="kpi.accent" [innerHTML]="kpi.icon"></div>
         <div class="stat-body">
@@ -64,7 +64,7 @@
           <span class="stat-desc">{{ kpi.description }}</span>
         </div>
       </article>
-    }
+    </ng-container>
   </section>
 
   <!-- ===================== PROJECTS TABLE ===================== -->
@@ -91,7 +91,8 @@
           </tr>
         </thead>
         <tbody>
-          @for (project of filteredProjects(); track project.id) {
+          <ng-container *ngIf="filteredProjects().length > 0; else emptyProjects">
+          <ng-container *ngFor="let project of filteredProjects()">
             <tr>
               <td data-label="Project" class="cell-primary">
                 <span class="project-name">{{ project.name }}</span>
@@ -140,7 +141,9 @@
                 </div>
               </td>
             </tr>
-          } @empty {
+          </ng-container>
+          </ng-container>
+          <ng-template #emptyProjects>
             <tr class="empty-row">
               <td colspan="8">
                 <div class="empty-state">
@@ -149,7 +152,7 @@
                 </div>
               </td>
             </tr>
-          }
+          </ng-template>
         </tbody>
       </table>
     </div>

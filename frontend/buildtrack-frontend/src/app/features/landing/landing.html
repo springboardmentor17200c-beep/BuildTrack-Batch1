@@ -14,7 +14,7 @@
           <span>Language</span>
           <span class="bt-lang-current">{{ currentLangName }}</span>
         </button>
-        <ul class="bt-lang-menu" *ngIf="langMenuOpen">
+        <ul class="bt-lang-menu bt-landing-lang-menu" *ngIf="langMenuOpen">
           <li *ngFor="let l of languages">
             <button class="bt-lang-option" [class.active]="l.code === currentLangCode" (click)="selectLanguage(l)">
               {{ l.native }}
