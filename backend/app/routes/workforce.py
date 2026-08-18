@@ -113,7 +113,7 @@ def create_employee(
         user = User(
             full_name=payload.full_name,
             username=payload.employee_code,
-            email=f"{payload.employee_code}@buildtrack.local",
+            email=f"{payload.employee_code}@buildtrack.com",
             password_hash=hash_password("12345t"),
             phone_number="N/A", # Will be updated later
             role_id=role_id,
