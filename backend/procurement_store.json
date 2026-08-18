@@ -51,6 +51,57 @@
       "comments": "Approved by Project Manager",
       "vendorId": "6",
       "poId": "fde2d35e-6b51-4bc8-92f3-619a29410beb"
+    },
+    "f547ab11-011b-4570-ad87-12619e1aa51e": {
+      "projectId": "P-8",
+      "material": "sand",
+      "quantity": 1000,
+      "requiredDate": "2026-08-20",
+      "priority": "High",
+      "id": "f547ab11-011b-4570-ad87-12619e1aa51e",
+      "status": "Material Received",
+      "timeline": [
+        {
+          "timestamp": "2026-08-18T11:32:26.810477",
+          "action": "Site Engineer created request",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:32:27.966094",
+          "action": "PM approved request",
+          "user": null,
+          "notes": "Approved by Project Manager"
+        },
+        {
+          "timestamp": "2026-08-18T11:32:31.187057",
+          "action": "Procurement selected vendor (ID: 6)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:32:34.268168",
+          "action": "Admin generated Purchase Order (PO-1001)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:32:37.288060",
+          "action": "Admin sent Purchase Order to vendor",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:33:27.608876",
+          "action": "Material fully received (1000/1000)",
+          "user": null,
+          "notes": null
+        }
+      ],
+      "receivedQuantity": 1000,
+      "comments": "Approved by Project Manager",
+      "vendorId": "6",
+      "poId": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a"
     }
   },
   "purchase_orders": {
@@ -67,6 +118,20 @@
       "id": "fde2d35e-6b51-4bc8-92f3-619a29410beb",
       "poNumber": "PO-1000",
       "status": "Delivered"
+    },
+    "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a": {
+      "vendorId": "6",
+      "requestId": "f547ab11-011b-4570-ad87-12619e1aa51e",
+      "materials": [
+        "sand"
+      ],
+      "quantity": 1000,
+      "unitPrice": 250.0,
+      "totalAmount": 255000.0,
+      "expectedDeliveryDate": "2026-08-18",
+      "id": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a",
+      "poNumber": "PO-1001",
+      "status": "Delivered"
     }
   },
   "deliveries": {
@@ -79,13 +144,23 @@
       "deliveryDate": "2026-08-18",
       "status": "Received",
       "id": "85c9e519-a3c3-4dff-be54-3dad8f4cdd2e"
+    },
+    "577337bf-edd9-42fb-a4e8-0d5c39e69ca3": {
+      "poId": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a",
+      "material": "sand",
+      "quantity": 1000,
+      "acceptedQuantity": 1000,
+      "rejectedQuantity": 0,
+      "deliveryDate": "2026-08-18",
+      "status": "Received",
+      "id": "577337bf-edd9-42fb-a4e8-0d5c39e69ca3"
     }
   },
   "inventory": {
     "sand": {
       "id": "3b1e824f-77f0-4693-b9a1-eea8314b5489",
       "material": "sand",
-      "stock": 500
+      "stock": 1500
     }
   },
   "invoices": {
@@ -100,6 +175,19 @@
       "paymentRef": "TRX-CDEC13A7",
       "id": "56336a65-de85-485d-8dd7-095ddd2b7952",
       "invoiceNo": "INV-1000",
+      "paymentStatus": "Paid"
+    },
+    "d997f872-1e2f-4b5e-827b-6350a06f6e1f": {
+      "vendorId": "6",
+      "purchaseOrderId": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a",
+      "unitPrice": 250.0,
+      "amount": 255000.0,
+      "gst": 2.0,
+      "date": "2026-08-18",
+      "paymentDate": "2026-08-18T11:33:30.040745",
+      "paymentRef": "TRX-3832541A",
+      "id": "d997f872-1e2f-4b5e-827b-6350a06f6e1f",
+      "invoiceNo": "INV-1001",
       "paymentStatus": "Paid"
     }
   }
