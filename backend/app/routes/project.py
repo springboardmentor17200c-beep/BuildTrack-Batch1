@@ -65,7 +65,12 @@ def get_projects_enriched(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles(*ALL_ROLES)),
 ):
-    projects = db.query(Project).all()
+    query = db.query(Project)
+    if current_user.role and current_user.role.role_name == "Project Manager":
+        query = query.filter(Project.manager_id == current_user.user_id)
+    elif current_user.role and current_user.role.role_name in ("Client", "Client / Owner"):
+        query = query.filter(Project.client_id == current_user.user_id)
+    projects = query.all()
     return [_enrich(p) for p in projects]
 
 
@@ -183,7 +188,10 @@ def get_projects(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles("Administrator", "Project Manager")),
 ):
-    return db.query(Project).all()
+    query = db.query(Project)
+    if current_user.role and current_user.role.role_name == "Project Manager":
+        query = query.filter(Project.manager_id == current_user.user_id)
+    return query.all()
 
 @router.get(
     "/{project_id}",

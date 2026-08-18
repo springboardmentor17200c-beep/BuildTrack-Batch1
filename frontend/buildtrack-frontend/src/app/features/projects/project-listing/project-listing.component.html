@@ -41,14 +41,14 @@
             <span>Manager</span>
             <select formControlName="manager">
             <option value="" disabled selected>Select a manager</option>
-            <option *ngFor="let m of availableManagers" [value]="m">{{ m }}</option>
+            <option *ngFor="let m of availableManagers" [value]="m.id">{{ m.name }}</option>
           </select>
           </label>
           <label>
             <span>Client</span>
             <select formControlName="client">
             <option value="" disabled selected>Select a client</option>
-            <option *ngFor="let c of availableClients" [value]="c">{{ c }}</option>
+            <option *ngFor="let c of availableClients" [value]="c.id">{{ c.name }}</option>
           </select>
           </label>
           <label>
