@@ -34,6 +34,7 @@ interface ApiMilestone {
   due_date: string;
   completion_date: string | null;
   status: string;
+  progress_percentage: number;
 }
 
 export interface ProjectCategory { category_id: number; category_name: string; }
@@ -65,6 +66,7 @@ function mapMilestone(a: ApiMilestone): ProjectMilestone {
     dueDate: a.due_date,
     completionDate: a.completion_date,
     status: a.status as MilestoneStatus,
+    progressPercentage: a.progress_percentage || 0,
   };
 }
 
