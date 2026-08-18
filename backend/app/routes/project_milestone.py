@@ -26,7 +26,7 @@ VALID_STATUSES = {
     "Completed",
 }
 
-ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer")
+ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer", "Client", "Client / Owner", "Vendor", "Contractor", "Worker")
 
 
 def _enrich(m: ProjectMilestone) -> ProjectMilestoneEnrichedResponse:
@@ -65,11 +65,7 @@ def create_milestone(
     payload: ProjectMilestoneCreate,
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles(
-            "Administrator",
-            "Project Manager",
-            "Site Engineer",
-        )
+require_roles(*ALL_ROLES)
     ),
 ):
     project = db.query(Project).filter(
@@ -132,11 +128,7 @@ def create_milestone(
 def get_milestones(
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles(
-            "Administrator",
-            "Project Manager",
-            "Site Engineer",
-        )
+require_roles(*ALL_ROLES)
     ),
 ):
     return db.query(ProjectMilestone).all()
@@ -149,11 +141,7 @@ def get_milestone(
     milestone_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles(
-            "Administrator",
-            "Project Manager",
-            "Site Engineer",
-        )
+require_roles(*ALL_ROLES)
     ),
 ):
     milestone = db.query(ProjectMilestone).filter(
@@ -177,11 +165,7 @@ def update_milestone(
     payload: ProjectMilestoneUpdate,
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles(
-            "Administrator",
-            "Project Manager",
-            "Site Engineer",
-        )
+require_roles(*ALL_ROLES)
     ),
 ):
     milestone = db.query(ProjectMilestone).filter(
