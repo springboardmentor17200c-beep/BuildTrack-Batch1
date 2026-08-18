@@ -114,8 +114,8 @@ export class ProjectsDataService {
         .pipe(catchError(this.handleError([]))),
     }).subscribe(({ projects, milestones, categories, statuses }) => {
       console.log('[ProjectsDataService] loadAll results:', { categories, statuses });
-      this.projects$$.next(projects.map(mapProject));
       this.milestones$$.next(milestones.map(mapMilestone));
+      this.projects$$.next(projects.map(mapProject));
       this.categories$$.next(categories);
       this.statuses$$.next(statuses);
     });

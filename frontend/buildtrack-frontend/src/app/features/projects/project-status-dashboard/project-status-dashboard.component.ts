@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { combineLatest } from 'rxjs';
 import { } from '../../shared/sidebar/app-sidebar.component';
 import { Project, ProjectCategory, ProjectStatus } from '../models/projects.model';
 import { ProjectsDataService } from '../projects-data.service';
@@ -31,7 +32,7 @@ export class ProjectStatusDashboardComponent implements OnInit {
   constructor(private data: ProjectsDataService, private location: Location) {}
 
   ngOnInit(): void {
-    this.data.projects$.subscribe(projects => {
+    combineLatest([this.data.projects$, this.data.milestones$]).subscribe(([projects, _]) => {
       this.projects = projects;
       this.computeStats();
     });

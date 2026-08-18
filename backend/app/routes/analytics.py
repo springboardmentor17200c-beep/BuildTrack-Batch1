@@ -11,7 +11,7 @@ from app.models.vendor import Vendor
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
-ALL_ROLES = ("Administrator", "Project Manager")
+ALL_ROLES = ("Administrator", "Project Manager", "Client", "Client / Owner", "Engineer", "Contractor", "Worker")
 
 
 @router.get("/progress")
