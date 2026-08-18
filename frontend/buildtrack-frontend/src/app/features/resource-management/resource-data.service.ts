@@ -118,13 +118,13 @@ export class ResourceDataService {
 
   addAllocation(alloc: ResourceAllocation) {
     const proj = this.projects.value.find(p => p.project_name === alloc.project);
-    const projId = proj ? proj.project_id : 1; // Fallback to 1 if not found
+    const projId = proj ? proj.project_id : 1;
     const numResourceId = parseInt(alloc.resourceId.replace('R-', ''), 10) || parseInt(alloc.resourceId, 10);
     
     const body = {
       resource_id: numResourceId,
       project_id: projId,
-      allocated_by_id: 1, // Will be overridden by backend using current_user
+      allocated_by_id: 1,
       allocation_date: alloc.allocationDate,
       expected_return_date: alloc.expectedReturnDate,
       allocation_status: 'Allocated',
@@ -141,7 +141,6 @@ export class ResourceDataService {
     const today = new Date().toISOString().split('T')[0];
     const numericId = parseInt(allocId.replace('A-', ''), 10) || parseInt(allocId, 10);
     
-    // Optimistic UI update
     const update = this.allocations.value.map(a => {
       if(a.allocationId === allocId) {
          return { ...a, actualReturnDate: today, allocationStatus: 'Returned' as any };
@@ -156,6 +155,24 @@ export class ResourceDataService {
     }, this.headers).subscribe({
       next: () => this.loadAll(),
       error: err => console.error('Failed to return allocation', err)
+    });
+  }
+
+  addMaintenance(record: Partial<MaintenanceRecord>) {
+    const numResourceId = parseInt((record.resourceId || '').replace('R-', ''), 10) || parseInt(record.resourceId || '0', 10);
+    const body = {
+      resource_id: numResourceId,
+      maintenance_type: record.maintenanceType,
+      maintenance_date: record.maintenanceDate,
+      next_maintenance_date: record.nextMaintenanceDate || null,
+      maintenance_cost: record.maintenanceCost || 0,
+      serviced_by: record.servicedBy || 'Unknown',
+      remarks: record.remarks || ''
+    };
+
+    this.http.post(`${environment.apiUrl}/resources/maintenance`, body, this.headers).subscribe({
+      next: () => this.loadAll(),
+      error: err => console.error('Failed to add maintenance', err)
     });
   }
 }

@@ -140,6 +140,31 @@ def update_resource_allocation(allocation_id: int, payload: ResourceAllocationUp
 
 # --- Maintenance Records ---
 
+@router.post("/maintenance", response_model=dict, status_code=status.HTTP_201_CREATED)
+def create_maintenance_record(payload: MaintenanceRecordCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    maintenance = MaintenanceRecord(
+        resource_id=payload.resource_id,
+        maintenance_type=payload.maintenance_type,
+        maintenance_date=payload.maintenance_date,
+        next_maintenance_date=payload.next_maintenance_date,
+        maintenance_cost=payload.maintenance_cost,
+        serviced_by=payload.serviced_by,
+        remarks=payload.remarks
+    )
+    db.add(maintenance)
+    
+    # Optionally update resource status to "Under Maintenance"
+    if payload.maintenance_type == 'Corrective':
+        resource = db.query(Resource).filter(Resource.resource_id == payload.resource_id).first()
+        if resource:
+            resource.current_status = 'Under Maintenance'
+            
+    db.commit()
+    db.refresh(maintenance)
+    return {"maintenance_id": maintenance.maintenance_id}
+
+
+
 @router.get("/maintenance", response_model=list[dict])
 def get_maintenance_records(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     records = db.query(MaintenanceRecord).all()
