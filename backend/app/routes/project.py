@@ -104,6 +104,10 @@ def create_project(
             "Project Manager",
             "Client",
             "Client / Owner",
+            "Vendor",
+            "Site Engineer",
+            "Contractor",
+            "Worker",
         )
     ),
 ):
