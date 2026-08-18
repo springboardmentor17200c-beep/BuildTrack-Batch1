@@ -307,7 +307,24 @@ def create_shift(
     ).first():
         raise HTTPException(status_code=404, detail="Employee not found.")
 
-    shift = Shift(**payload.model_dump())
+    # Resolve project_id
+    proj_id = payload.project_id
+    if not proj_id and payload.project_name:
+        proj = db.query(Project).filter(Project.project_name == payload.project_name).first()
+        if not proj:
+            proj = Project(project_name=payload.project_name, status="In Progress")
+            db.add(proj)
+            db.commit()
+            db.refresh(proj)
+        proj_id = proj.project_id
+        
+    if not proj_id:
+        proj_id = db.query(Project).first().project_id
+
+    shift_data = payload.model_dump(exclude={"project_name"})
+    shift_data["project_id"] = proj_id
+
+    shift = Shift(**shift_data)
     db.add(shift)
     db.commit()
     db.refresh(shift)
