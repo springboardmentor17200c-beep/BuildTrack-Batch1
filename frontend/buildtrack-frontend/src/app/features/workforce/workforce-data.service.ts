@@ -216,10 +216,9 @@ export class WorkforceDataService {
     }
 
     // Persist to backend (upsert)
-    const projectNumericId = 1; // fallback; real implementation should resolve project_id from emp.project
     const payload = {
       employee_id: numericId,
-      project_id: projectNumericId,
+      project_name: emp.project,
       attendance_date: date,
       attendance_status: status,
       check_in_time: (status === 'Present' || status === 'Half Day')

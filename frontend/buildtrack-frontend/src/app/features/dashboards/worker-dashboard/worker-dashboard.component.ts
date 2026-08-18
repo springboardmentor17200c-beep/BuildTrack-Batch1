@@ -54,7 +54,7 @@ export class WorkerDashboardComponent implements OnInit {
                 employeeId: `E-${a.employee_id}`,
                 employeeName: a.employee_name,
                 attendanceDate: a.attendance_date,
-                status: a.status as any,
+                status: a.attendance_status as any,
                 checkInTime: a.check_in_time,
                 checkOutTime: a.check_out_time
               }));
