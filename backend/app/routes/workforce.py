@@ -19,7 +19,7 @@ from app.schemas.workforce import (
 
 router = APIRouter(prefix="/workforce", tags=["Workforce"])
 
-ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer")
+ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer", "Worker")
 MANAGE_ROLES = ("Administrator", "Project Manager")
 
 

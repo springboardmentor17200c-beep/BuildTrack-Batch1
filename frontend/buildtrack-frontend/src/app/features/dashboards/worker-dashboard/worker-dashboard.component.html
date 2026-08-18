@@ -65,6 +65,49 @@
           </div>
 
         </div>
+
+        <!-- Right Column (Attendance Calendar) -->
+        <div class="bt-dashboard-col" style="flex: 1;">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Attendance Calendar</h3>
+                <p>{{ currentMonthName }}</p>
+              </div>
+            </div>
+            
+            <div class="bt-calendar-grid">
+              <!-- Calendar Header -->
+              <div class="bt-calendar-header">Sun</div>
+              <div class="bt-calendar-header">Mon</div>
+              <div class="bt-calendar-header">Tue</div>
+              <div class="bt-calendar-header">Wed</div>
+              <div class="bt-calendar-header">Thu</div>
+              <div class="bt-calendar-header">Fri</div>
+              <div class="bt-calendar-header">Sat</div>
+
+              <!-- Empty days padding (optional, assuming 1st of month starts somewhere, but for simplicity we just render days 1-31) -->
+              <div *ngFor="let empty of [].constructor(calendarDays.length > 0 ? calendarDays[0].date.getDay() : 0)" class="bt-calendar-day empty"></div>
+
+              <!-- Days -->
+              <div *ngFor="let day of calendarDays" class="bt-calendar-day">
+                <div class="bt-day-number">{{ day.date | date:'d' }}</div>
+                <div *ngIf="day.record" class="bt-day-badge" [ngClass]="getAttendanceClass(day.record.status)">
+                  {{ day.record.status }}
+                </div>
+              </div>
+            </div>
+
+            <div class="bt-calendar-legend">
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-present"></span> Present</span>
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-absent"></span> Absent</span>
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-leave"></span> Leave</span>
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-half"></span> Half Day</span>
+            </div>
+          </div>
+
+        </div>
         
       </div>
 </div>
