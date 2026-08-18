@@ -8,7 +8,7 @@ from app.core.permissions import require_roles
 from app.models.workforce import EmployeeProfile, WorkforceCategory, Attendance, Shift
 from app.models.project import Project
 from app.models.user import User
-from app.core.security import get_password_hash
+from app.core.security import hash_password
 from app.models.role import Role
 from app.schemas.workforce import (
     EmployeeCreate, EmployeeUpdate, EmployeeResponse,
@@ -114,7 +114,7 @@ def create_employee(
             full_name=payload.full_name,
             username=payload.employee_code,
             email=f"{payload.employee_code}@buildtrack.local",
-            password_hash=get_password_hash("12345t"),
+            password_hash=hash_password("12345t"),
             phone_number="N/A", # Will be updated later
             role_id=role_id,
             company_id=current_user.company_id if current_user else 1
