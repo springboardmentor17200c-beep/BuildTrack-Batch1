@@ -27,9 +27,9 @@ export class ResourceAllocationComponent implements OnInit {
     this.form = this.fb.group({
       resourceId: ['', Validators.required],
       project: ['', Validators.required],
-      allocatedBy: ['', Validators.required],
       allocationDate: ['', Validators.required],
       expectedReturnDate: ['', Validators.required],
+      remarks: [''],
     });
   }
 
