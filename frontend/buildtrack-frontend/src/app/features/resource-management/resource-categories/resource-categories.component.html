@@ -55,13 +55,13 @@
   <div class="bt-actions" style="margin-bottom: 24px;">
     <div class="bt-search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" placeholder="Search category...">
+      <input type="text" placeholder="Search category..." [(ngModel)]="searchText">
     </div>
   </div>
 
   <!-- Category Cards -->
   <div class="bt-option-grid">
-    <div class="bt-panel" *ngFor="let category of categories" style="display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+    <div class="bt-panel" *ngFor="let category of filteredCategories" style="display: flex; flex-direction: column; gap: 12px; padding: 20px;">
       
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <h3 style="margin: 0; font-size: 18px; font-weight: 700;">{{ category.category_name }}</h3>
@@ -81,7 +81,7 @@
 
       <div class="bt-actions" style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--bt-border);">
         <button class="bt-filter-btn" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">View</button>
-        <button class="bt-filter-btn" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">Edit</button>
+        <button class="bt-filter-btn" (click)="openModal(category)" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">Edit</button>
         <button class="bt-filter-btn" (click)="deleteCategory(category.resource_category_id)" style="flex: 1; justify-content: center; color: var(--bt-red); box-shadow: none; border-color: transparent;">Delete</button>
       </div>
 
@@ -95,7 +95,7 @@
   <div class="bt-form-card" style="width: 100%; max-width: 500px; padding: 32px;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--bt-text);">Add Resource Category</h3>
+      <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--bt-text);">{{ editCategoryId ? 'Edit' : 'Add' }} Resource Category</h3>
       <button class="bt-filter-btn" (click)="closeModal()" style="border: none; background: transparent; padding: 4px; box-shadow: none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
@@ -103,8 +103,8 @@
 
     <div class="bt-form-grid">
       <label >
-        <span>category.category_name</span>
-        <input type="text" [(ngModel)]="newCategoryName" placeholder="Enter category.category_name">
+        <span>Category Name</span>
+        <input type="text" [(ngModel)]="newCategoryName" placeholder="Enter category name">
       </label>
 
       <label >
@@ -123,7 +123,7 @@
 
     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
       <button class="bt-filter-btn" (click)="closeModal()">Cancel</button>
-      <button class="bt-add-btn" (click)="saveCategory()">Save Category</button>
+      <button class="bt-add-btn" (click)="saveCategory()">{{ editCategoryId ? 'Update' : 'Save' }} Category</button>
     </div>
 
   </div>
