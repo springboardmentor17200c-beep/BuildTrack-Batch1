@@ -33,6 +33,7 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
   availableManagers: {id: number, name: string}[] = [];
   availableClients: {id: number, name: string}[] = [];
 
+  canCreateProject = true;
   showForm = false;
   submitting = false;
   submitError = '';
@@ -59,6 +60,8 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const role = this.auth.currentUser?.role;
+    this.canCreateProject = role !== 'Project Manager';
 
     this.subs.add(
       this.auth.getAllUsers().subscribe(users => {
