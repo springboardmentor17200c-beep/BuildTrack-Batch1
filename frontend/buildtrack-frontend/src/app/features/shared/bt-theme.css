@@ -2227,3 +2227,22 @@ body.bt-dark .bt-activity-line {
 
 body.bt-dark .bt-role-dot.gray { box-shadow: 0 0 0 3px #2a2f3d; }
 
+
+
+/* Fix missing dark mode colors in dashboards */
+body.bt-dark .bt-admin-dashboard {
+  --bt-text-secondary: #9aa1b1;
+  --bt-bg-light: #12141c;
+  --bt-border-light: #2a2f3d;
+}
+
+body.bt-dark .bt-text-secondary {
+  color: #9aa1b1;
+}
+
+body.bt-dark .bt-table-modern td,
+body.bt-dark .bt-table-modern th,
+body.bt-dark .bt-font-medium {
+  color: #f3f4f6;
+}
+
