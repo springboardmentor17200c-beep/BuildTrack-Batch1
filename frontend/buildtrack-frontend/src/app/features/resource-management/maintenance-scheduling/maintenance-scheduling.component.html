@@ -47,16 +47,16 @@
       </thead>
       <tbody>
         <tr *ngFor="let r of filteredRecords">
-          <td style="font-weight: 600;">{{ r.resourceName || r.resource }}</td>
-          <td>{{ r.type || r.maintenanceType }}</td>
+          <td style="font-weight: 600;">{{ r.resourceName }}</td>
+          <td>{{ r.maintenanceType }}</td>
           <td>{{ r.maintenanceDate }}</td>
-          <td>{{ r.nextDate || r.nextMaintenanceDate || '-' }}</td>
-          <td>₹{{ r.cost || r.maintenanceCost }}</td>
+          <td>{{ r.nextMaintenanceDate || '-' }}</td>
+          <td>₹{{ r.maintenanceCost }}</td>
           <td>{{ r.servicedBy }}</td>
           <td>
             <span class="bt-badge" 
-                  [ngClass]="(r.status || 'Completed') === 'Completed' ? 'bt-badge-green' : 'bt-badge-orange'">
-              {{ r.status || 'Completed' }}
+                  [ngClass]="('Completed') === 'Completed' ? 'bt-badge-green' : 'bt-badge-orange'">
+              {{ 'Completed' }}
             </span>
           </td>
         </tr>
