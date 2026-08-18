@@ -30,6 +30,8 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
   // DB-backed dropdown options for the create form
   dbCategories: ApiCategory[] = [];
   dbStatuses: ProjectStatusOption[] = [];
+  availableManagers: string[] = [];
+  availableClients: string[] = [];
 
   showForm = false;
   submitting = false;
