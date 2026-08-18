@@ -34,6 +34,7 @@ export class MilestoneTrackingComponent implements OnInit {
       milestoneName: ['', Validators.required],
       description: ['', Validators.required],
       dueDate: ['', Validators.required],
+      progressPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
   }
 
@@ -60,7 +61,7 @@ export class MilestoneTrackingComponent implements OnInit {
       return;
     }
 
-    const { projectId, milestoneName, description, dueDate } = this.form.value;
+    const { projectId, milestoneName, description, dueDate, progressPercentage } = this.form.value;
     const project = this.projects.find(p => p.projectId === projectId);
     if (!project) return;
 
@@ -73,6 +74,7 @@ export class MilestoneTrackingComponent implements OnInit {
       dueDate,
       completionDate: null,
       status: 'Pending',
+      progressPercentage: parseInt(progressPercentage, 10) || 0,
     };
 
     this.data.addMilestone(milestone);

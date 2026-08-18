@@ -31,7 +31,10 @@ def get_progress_analytics(
         milestones = db.query(ProjectMilestone).filter(ProjectMilestone.project_id == p.project_id).all()
         total = len(milestones)
         completed = sum(1 for m in milestones if m.status == "Completed")
-        completion_pct = round((completed / total) * 100) if total else 0
+        # Sum the percentage weight of all completed milestones
+        completion_pct = sum((m.progress_percentage or 0) for m in milestones if m.status == "Completed")
+        # Cap at 100
+        completion_pct = min(100, completion_pct)
 
         status_name = p.status.status_name if p.status else "Planning"
         category_name = p.category.category_name if p.category else "Other"

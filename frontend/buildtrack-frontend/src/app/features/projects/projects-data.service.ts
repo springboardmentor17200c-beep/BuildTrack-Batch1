@@ -208,7 +208,20 @@ export class ProjectsDataService {
   }
 
   addMilestone(milestone: ProjectMilestone) {
-    this.milestones$$.next([milestone, ...this.milestones$$.value]);
+    const numericProjectId = parseInt(milestone.projectId.replace('P-', ''), 10);
+    const body = {
+      project_id: numericProjectId,
+      milestone_name: milestone.milestoneName,
+      description: milestone.description,
+      due_date: milestone.dueDate,
+      status: milestone.status,
+      progress_percentage: milestone.progressPercentage || 0
+    };
+    
+    this.http.post(this.milestonesBase, body, { headers: this.headers() }).subscribe({
+      next: () => this.loadAll(),
+      error: err => console.error('Failed to create milestone', err)
+    });
   }
 
   markMilestoneStatus(milestoneId: string, status: MilestoneStatus) {

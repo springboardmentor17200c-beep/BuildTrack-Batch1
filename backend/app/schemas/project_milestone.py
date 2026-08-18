@@ -10,6 +10,7 @@ class ProjectMilestoneCreate(BaseModel):
     description: Optional[str] = None
     due_date: date
     status: str = "Pending"
+    progress_percentage: int = 0
 
 
 class ProjectMilestoneUpdate(BaseModel):
@@ -17,6 +18,7 @@ class ProjectMilestoneUpdate(BaseModel):
     description: Optional[str] = None
     due_date: Optional[date] = None
     completion_date: Optional[date] = None
+    progress_percentage: int = 0
     status: Optional[str] = None
 
 

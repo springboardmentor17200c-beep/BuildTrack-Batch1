@@ -101,6 +101,24 @@ def create_milestone(
     milestone = ProjectMilestone(**payload.model_dump())
 
     db.add(milestone)
+
+    project = db.query(Project).filter(Project.project_id == milestone.project_id).first()
+    if project:
+
+        # --- Auto-Completion Logic ---
+        # Recalculate total project progress
+        all_milestones = db.query(ProjectMilestone).filter(ProjectMilestone.project_id == project.project_id).all()
+        total_progress = sum((m.progress_percentage or 0) for m in all_milestones if m.status == "Completed")
+        
+        if total_progress >= 100 and project.status and project.status.status_name != "Completed":
+                # Find 'Completed' status ID
+                from app.models.project_status import ProjectStatus
+                completed_status = db.query(ProjectStatus).filter(ProjectStatus.status_name == "Completed").first()
+                if completed_status:
+                        project.status_id = completed_status.status_id
+                        import datetime
+                        project.actual_end_date = datetime.date.today()
+
     db.commit()
     db.refresh(milestone)
 
@@ -188,6 +206,24 @@ def update_milestone(
 
     for key, value in update_data.items():
         setattr(milestone, key, value)
+
+
+    project = db.query(Project).filter(Project.project_id == milestone.project_id).first()
+    if project:
+
+        # --- Auto-Completion Logic ---
+        # Recalculate total project progress
+        all_milestones = db.query(ProjectMilestone).filter(ProjectMilestone.project_id == project.project_id).all()
+        total_progress = sum((m.progress_percentage or 0) for m in all_milestones if m.status == "Completed")
+        
+        if total_progress >= 100 and project.status and project.status.status_name != "Completed":
+                # Find 'Completed' status ID
+                from app.models.project_status import ProjectStatus
+                completed_status = db.query(ProjectStatus).filter(ProjectStatus.status_name == "Completed").first()
+                if completed_status:
+                        project.status_id = completed_status.status_id
+                        import datetime
+                        project.actual_end_date = datetime.date.today()
 
     db.commit()
     db.refresh(milestone)

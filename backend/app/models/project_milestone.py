@@ -38,6 +38,7 @@ class ProjectMilestone(Base):
 
     completion_date = Column(Date)
 
+    progress_percentage = Column(Integer, default=0)
     status = Column(
         String(30),
         nullable=False,
