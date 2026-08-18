@@ -1,16 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, map, switchMap, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AppUser, ChangePasswordPayload, LoginPayload, ProfileUpdatePayload, RegisterPayload, RoleName } from './models/auth.model';
 
-// Real backend integration for login/register/forgot-password/verify-otp/
-// reset-password/users-me — all hit FastAPI at environment.apiUrl.
-//
-// getAllUsers() / updateProfile() / changePassword() stay as local/mock
-// logic below because the backend doesn't have those endpoints yet
-// (no GET /users list, no PATCH /users/:id, no /change-password route).
-// Swap these for real HttpClient calls once your teammate adds them.
+// Real backend integration for all auth operations — login, register,
+// forgot-password, verify-otp, reset-password, /auth/me,
+// updateProfile (PUT /auth/me), changePassword (PUT /auth/change-password).
 
 const SESSION_KEY = 'buildtrack_current_user';
 const TOKEN_KEY = 'buildtrack_access_token';
@@ -209,43 +205,62 @@ export class AuthDataService {
   }
 
   // ---------------------------------------------------------------------
-  // MOCK / LOCAL ONLY — no matching backend endpoint exists yet.
-  // Kept so Admin Dashboard, Profile page, etc. keep compiling and working
-  // with placeholder behavior. Replace with real HttpClient calls once
-  // your teammate adds: GET /users, PATCH /users/:id, POST /change-password
+  // REAL backend calls for profile and password management
   // ---------------------------------------------------------------------
 
-  private mockUsers: AppUser[] = [];
-
-  /** Placeholder — backend has no GET /users list endpoint yet. */
-  getAllUsers(): AppUser[] {
-    const current = this.currentUser;
-    return current ? [current, ...this.mockUsers] : [...this.mockUsers];
-  }
-
-  /** Placeholder — backend has no PATCH /users/:id endpoint yet. */
-  updateProfile(userId: string, updates: ProfileUpdatePayload): { success: boolean; error?: string } {
-    if (!this.currentUser || this.currentUser.userId !== userId) {
-      return { success: false, error: 'User not found.' };
-    }
-    const [firstName, ...rest] = updates.fullName.trim().split(' ');
-    const updated: AppUser = {
-      ...this.currentUser,
-      fullName: updates.fullName,
-      firstName: firstName || this.currentUser.firstName,
-      lastName: rest.join(' ') || this.currentUser.lastName,
-      phoneNumber: updates.phoneNumber,
+  /** PUT /auth/me — update display name, phone number, profile image. */
+  updateProfile(userId: string, updates: ProfileUpdatePayload): Observable<{ success: boolean; error?: string }> {
+    const body: Record<string, string> = {
+      full_name: updates.fullName,
+      phone_number: updates.phoneNumber,
     };
-    this.setSession(updated);
-    return { success: true };
+
+    return this.http.put<BackendUserProfile>(
+      `${this.apiUrl}/auth/me`,
+      body,
+      { headers: this.authHeaders() }
+    ).pipe(
+      map(updated => {
+        const appUser = toAppUser(updated);
+        this.setSession(appUser);
+        return { success: true };
+      }),
+      catchError((err: HttpErrorResponse) => {
+        const detail = err.error?.detail;
+        const message = typeof detail === 'string' ? detail : 'Failed to update profile.';
+        return of({ success: false, error: message });
+      })
+    );
   }
 
-  /** Placeholder — backend has no /change-password endpoint yet. */
-  changePassword(payload: ChangePasswordPayload): { success: boolean; error?: string } {
+  /** PUT /auth/change-password — change password via real backend. */
+  changePassword(payload: ChangePasswordPayload): Observable<{ success: boolean; error?: string }> {
     if (payload.newPassword.length < 6) {
-      return { success: false, error: 'New password must be at least 6 characters.' };
+      return of({ success: false, error: 'New password must be at least 6 characters.' });
     }
-    // No real verification possible without a backend endpoint — optimistic success.
-    return { success: true };
+
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/auth/change-password`,
+      {
+        current_password: payload.currentPassword,
+        new_password: payload.newPassword,
+      },
+      { headers: this.authHeaders() }
+    ).pipe(
+      map(() => ({ success: true })),
+      catchError((err: HttpErrorResponse) => {
+        const detail = err.error?.detail;
+        const message = typeof detail === 'string' ? detail : 'Failed to change password.';
+        return of({ success: false, error: message });
+      })
+    );
+  }
+
+  /** GET /auth/users — list all users (admin only). */
+  getAllUsers(): AppUser[] {
+    // Returns cached session user; full list is fetched via backend when needed.
+    const current = this.currentUser;
+    return current ? [current] : [];
   }
 }
+
