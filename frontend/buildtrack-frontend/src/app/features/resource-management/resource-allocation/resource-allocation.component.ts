@@ -35,7 +35,7 @@ export class ResourceAllocationComponent implements OnInit {
 
   ngOnInit(): void {
     this.data.allocations$.subscribe(a => (this.allocations = a));
-    this.data.resources$.subscribe(r => (this.availableResources = r.filter(x => x.currentStatus === 'Available')));
+    this.data.resources$.subscribe(r => (this.availableResources = r));
     this.projectsData.projects$.subscribe(p => this.projectNames = p.map(x => x.projectName));
   }
 
