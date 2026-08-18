@@ -8,6 +8,8 @@ from app.core.permissions import require_roles
 from app.models.workforce import EmployeeProfile, WorkforceCategory, Attendance, Shift
 from app.models.project import Project
 from app.models.user import User
+from app.core.security import get_password_hash
+from app.models.role import Role
 from app.schemas.workforce import (
     EmployeeCreate, EmployeeUpdate, EmployeeResponse,
     AttendanceCreate, AttendanceResponse,
@@ -100,13 +102,22 @@ def create_employee(
     # Resolve or create User
     user_id = payload.user_id
     if not user_id and payload.full_name:
-        ts = int(datetime.utcnow().timestamp())
-        fake_email = f"{payload.full_name.lower().replace(' ', '')}{ts}@buildtrack.local"
+        # Check if username exists
+        existing_user = db.query(User).filter(User.username == payload.employee_code).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User ID already exists.")
+            
+        worker_role = db.query(Role).filter(Role.role_name == "Worker").first()
+        role_id = worker_role.role_id if worker_role else None
+        
         user = User(
             full_name=payload.full_name,
-            email=fake_email,
-            password_hash="N/A",
-            phone_number="N/A"
+            username=payload.employee_code,
+            email=f"{payload.employee_code}@buildtrack.local",
+            password_hash=get_password_hash("12345t"),
+            phone_number="N/A", # Will be updated later
+            role_id=role_id,
+            company_id=current_user.company_id if current_user else 1
         )
         db.add(user)
         db.commit()
