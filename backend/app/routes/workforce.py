@@ -232,14 +232,28 @@ def mark_attendance(
         Attendance.attendance_date == payload.attendance_date,
     ).first()
 
+    # Resolve project_id
+    proj_id = payload.project_id
+    if not proj_id and payload.project_name:
+        proj = db.query(Project).filter(Project.project_name == payload.project_name).first()
+        if proj:
+            proj_id = proj.project_id
+            
+    if not proj_id:
+        proj_id = emp.project_id
+
+    att_data = payload.model_dump(exclude={"project_name"})
+    att_data["project_id"] = proj_id
+
     if existing:
-        for key, value in payload.model_dump(exclude_unset=True).items():
-            setattr(existing, key, value)
+        for key, value in att_data.items():
+            if value is not None:
+                setattr(existing, key, value)
         db.commit()
         db.refresh(existing)
         return _attendance_to_response(existing)
 
-    record = Attendance(**payload.model_dump())
+    record = Attendance(**att_data)
     db.add(record)
     db.commit()
     db.refresh(record)
