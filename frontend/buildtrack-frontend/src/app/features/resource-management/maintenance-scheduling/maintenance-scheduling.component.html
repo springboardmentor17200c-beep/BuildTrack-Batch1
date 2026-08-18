@@ -86,9 +86,8 @@
       <label >
         <span>Equipment</span>
         <select>
-          <option>Select Equipment</option>
-          <option>CAT 320 Excavator</option>
-          <option>Tower Crane TC-02</option>
+          <option value="" disabled selected>Select Equipment</option>
+          <option *ngFor="let res of availableResources" [value]="res.resourceId">{{ res.resourceName }}</option>
         </select>
       </label>
 

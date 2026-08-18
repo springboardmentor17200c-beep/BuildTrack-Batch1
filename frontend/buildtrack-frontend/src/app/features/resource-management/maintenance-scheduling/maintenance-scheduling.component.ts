@@ -2,7 +2,7 @@
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { MaintenanceRecord } from '../models/resource.model';
+import { MaintenanceRecord, Resource } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
 
 @Component({
@@ -18,6 +18,7 @@ export class MaintenanceSchedulingComponent implements OnInit, OnDestroy {
   selectedType = 'All';
 
   allRecords: MaintenanceRecord[] = [];
+  availableResources: Resource[] = [];
   private sub?: Subscription;
 
   constructor(
@@ -29,6 +30,7 @@ export class MaintenanceSchedulingComponent implements OnInit, OnDestroy {
     this.sub = this.resourceData.maintenance$.subscribe(records => {
       this.allRecords = records;
     });
+    this.resourceData.resources$.subscribe(r => this.availableResources = r);
   }
 
   ngOnDestroy() {
