@@ -76,50 +76,50 @@
   <div class="bt-form-card" style="width: 100%; max-width: 500px; padding: 32px; max-height: 90vh; overflow-y: auto;">
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h3 style="margin: 0; font-size: 20px; font-weight: 700;">Schedule Maintenance</h3>
+      <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--bt-text);">Schedule Maintenance</h3>
       <button class="bt-filter-btn" (click)="closeModal()" style="border: none; background: transparent; padding: 4px; box-shadow: none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
 
-    <div class="bt-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+    <div class="bt-form-grid">
+      <label >
         <span>Equipment</span>
-        <select style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; background: white;">
+        <select>
           <option>Select Equipment</option>
           <option>CAT 320 Excavator</option>
           <option>Tower Crane TC-02</option>
         </select>
       </label>
 
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+      <label >
         <span>Maintenance Type</span>
-        <select style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; background: white;">
+        <select>
           <option>Preventive</option>
           <option>Corrective</option>
         </select>
       </label>
 
       <div style="display: flex; gap: 16px;">
-        <label style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <label style="flex: 1;">
           <span>Date</span>
-          <input type="date" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+          <input type="date">
         </label>
         
-        <label style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <label style="flex: 1;">
           <span>Next Due Date</span>
-          <input type="date" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+          <input type="date">
         </label>
       </div>
 
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+      <label >
         <span>Estimated Cost (₹)</span>
-        <input type="number" placeholder="Enter cost" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+        <input type="number" placeholder="Enter cost">
       </label>
       
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+      <label >
         <span>Serviced By</span>
-        <input type="text" placeholder="Service provider name" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+        <input type="text" placeholder="Service provider name">
       </label>
     </div>
 

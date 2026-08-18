@@ -95,26 +95,26 @@
   <div class="bt-form-card" style="width: 100%; max-width: 500px; padding: 32px;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h3 style="margin: 0; font-size: 20px; font-weight: 700;">Add Resource Category</h3>
+      <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--bt-text);">Add Resource Category</h3>
       <button class="bt-filter-btn" (click)="closeModal()" style="border: none; background: transparent; padding: 4px; box-shadow: none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
 
-    <div class="bt-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+    <div class="bt-form-grid">
+      <label >
         <span>category.category_name</span>
-        <input type="text" [(ngModel)]="newCategoryName" placeholder="Enter category.category_name" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%;">
+        <input type="text" [(ngModel)]="newCategoryName" placeholder="Enter category.category_name">
       </label>
 
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+      <label >
         <span>Description</span>
-        <textarea rows="3" [(ngModel)]="newCategoryDesc" placeholder="Enter description" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%; resize: vertical;"></textarea>
+        <textarea rows="3" [(ngModel)]="newCategoryDesc" placeholder="Enter description"></textarea>
       </label>
 
-      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+      <label >
         <span>Status</span>
-        <select style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%; background: white;">
+        <select>
           <option>Active</option>
           <option>Inactive</option>
         </select>
