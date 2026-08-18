@@ -5,6 +5,7 @@ import { ProjectsDataService } from './features/projects/projects-data.service';
 import { InventoryDataService } from './features/inventory/inventory-data.service';
 import { WorkforceDataService } from './features/workforce/workforce-data.service';
 import { AnalyticsDataService } from './features/analytics/analytics-data.service';
+import { ResourceDataService } from './features/resource-management/resource-data.service';
 import { AppUser } from './features/auth/models/auth.model';
 
 /**
@@ -22,6 +23,7 @@ export class AppDataService {
     private inventory: InventoryDataService,
     private workforce: WorkforceDataService,
     private analytics: AnalyticsDataService,
+    private resources: ResourceDataService,
   ) {
     // Reload all data services whenever a user logs in.
     // distinctUntilChanged prevents double-reload on same user object ref.
@@ -37,6 +39,7 @@ export class AppDataService {
         this.inventory.loadAll();
         this.workforce.loadAll();
         this.analytics.loadAll();
+        this.resources.loadAll();
       });
   }
 }

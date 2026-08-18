@@ -19,7 +19,6 @@ class ResourceCategoryResponse(ResourceCategoryBase):
     class Config:
         from_attributes = True
 
-
 # Resource Schemas
 class ResourceBase(BaseModel):
     company_id: int
@@ -48,6 +47,65 @@ class ResourceResponse(ResourceBase):
     created_at: datetime
     updated_at: datetime
     category: ResourceCategoryResponse
+
+    class Config:
+        from_attributes = True
+
+# Resource Allocation Schemas
+class ResourceAllocationBase(BaseModel):
+    resource_id: int
+    project_id: int
+    allocated_by_id: int
+    allocation_date: date
+    expected_return_date: date
+    actual_return_date: Optional[date] = None
+    allocation_status: str = "Allocated"
+    remarks: Optional[str] = None
+
+class ResourceAllocationCreate(ResourceAllocationBase):
+    pass
+
+class ResourceAllocationUpdate(BaseModel):
+    expected_return_date: Optional[date] = None
+    actual_return_date: Optional[date] = None
+    allocation_status: Optional[str] = None
+    remarks: Optional[str] = None
+
+class ResourceAllocationResponse(ResourceAllocationBase):
+    allocation_id: int
+    resource_name: Optional[str] = None
+    category_name: Optional[str] = None
+    project_name: Optional[str] = None
+    allocated_by_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+# Maintenance Record Schemas
+class MaintenanceRecordBase(BaseModel):
+    resource_id: int
+    maintenance_type: str
+    maintenance_date: date
+    next_maintenance_date: Optional[date] = None
+    maintenance_cost: float
+    serviced_by: str
+    remarks: Optional[str] = None
+
+class MaintenanceRecordCreate(MaintenanceRecordBase):
+    pass
+
+class MaintenanceRecordUpdate(BaseModel):
+    maintenance_type: Optional[str] = None
+    maintenance_date: Optional[date] = None
+    next_maintenance_date: Optional[date] = None
+    maintenance_cost: Optional[float] = None
+    serviced_by: Optional[str] = None
+    remarks: Optional[str] = None
+
+class MaintenanceRecordResponse(MaintenanceRecordBase):
+    maintenance_id: int
+    resource_name: Optional[str] = None
+    category_name: Optional[str] = None
 
     class Config:
         from_attributes = True

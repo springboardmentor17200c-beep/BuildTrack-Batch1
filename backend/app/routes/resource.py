@@ -4,14 +4,18 @@ from sqlalchemy import func
 
 from app.core.dependencies import get_current_user
 from app.db.database import get_db
-from app.models.resource import ResourceCategory, Resource
+from app.models.resource import ResourceCategory, Resource, ResourceAllocation, MaintenanceRecord
 from app.schemas.resource import (
     ResourceCategoryCreate,
     ResourceCategoryResponse,
-    ResourceCategoryUpdate,
     ResourceCreate,
     ResourceResponse,
-    ResourceUpdate
+    ResourceAllocationCreate,
+    ResourceAllocationUpdate,
+    ResourceAllocationResponse,
+    MaintenanceRecordCreate,
+    MaintenanceRecordUpdate,
+    MaintenanceRecordResponse
 )
 
 router = APIRouter(
@@ -23,7 +27,6 @@ router = APIRouter(
 
 @router.get("/categories", response_model=list[dict])
 def get_resource_categories(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    """Retrieve all resource categories with resource counts."""
     categories = db.query(ResourceCategory).all()
     result = []
     for cat in categories:
@@ -33,7 +36,7 @@ def get_resource_categories(db: Session = Depends(get_db), current_user=Depends(
             "category_name": cat.category_name,
             "description": cat.description,
             "resources": count,
-            "status": "Active" # Mock status for now as DB model doesn't have it
+            "status": "Active"
         })
     return result
 
@@ -53,17 +56,75 @@ def delete_resource_category(category_id: int, db: Session = Depends(get_db), cu
     category = db.query(ResourceCategory).filter(ResourceCategory.resource_category_id == category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found.")
-    
     count = db.query(Resource).filter(Resource.resource_category_id == category_id).count()
     if count > 0:
         raise HTTPException(status_code=400, detail="Cannot delete category with associated resources.")
-        
     db.delete(category)
     db.commit()
 
 # --- Resources ---
 
-@router.get("", response_model=list[ResourceResponse])
+@router.get("", response_model=list[dict])
 def get_resources(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return db.query(Resource).all()
+    resources = db.query(Resource).all()
+    result = []
+    for r in resources:
+        item = {
+            "resource_id": r.resource_id,
+            "company_id": r.company_id,
+            "resource_category_id": r.resource_category_id,
+            "resource_name": r.resource_name,
+            "manufacturer": r.manufacturer,
+            "model_number": r.model_number,
+            "serial_number": r.serial_number,
+            "purchase_date": r.purchase_date,
+            "current_status": r.current_status,
+            "category_name": r.category.category_name if r.category else None
+        }
+        result.append(item)
+    return result
 
+# --- Resource Allocations ---
+
+@router.get("/allocations", response_model=list[dict])
+def get_resource_allocations(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    allocations = db.query(ResourceAllocation).all()
+    result = []
+    for a in allocations:
+        result.append({
+            "allocation_id": a.allocation_id,
+            "resource_id": a.resource_id,
+            "project_id": a.project_id,
+            "allocated_by_id": a.allocated_by_id,
+            "allocation_date": a.allocation_date,
+            "expected_return_date": a.expected_return_date,
+            "actual_return_date": a.actual_return_date,
+            "allocation_status": a.allocation_status,
+            "remarks": a.remarks,
+            "resource_name": a.resource.resource_name if a.resource else None,
+            "category_name": a.resource.category.category_name if a.resource and a.resource.category else None,
+            "project_name": a.project.project_name if a.project else None,
+            "allocated_by_name": a.allocated_by.full_name if a.allocated_by else None,
+        })
+    return result
+
+# --- Maintenance Records ---
+
+@router.get("/maintenance", response_model=list[dict])
+def get_maintenance_records(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    records = db.query(MaintenanceRecord).all()
+    result = []
+    for m in records:
+        result.append({
+            "maintenance_id": m.maintenance_id,
+            "resource_id": m.resource_id,
+            "maintenance_type": m.maintenance_type,
+            "maintenance_date": m.maintenance_date,
+            "next_maintenance_date": m.next_maintenance_date,
+            "maintenance_cost": m.maintenance_cost,
+            "serviced_by": m.serviced_by,
+            "remarks": m.remarks,
+            "resource_name": m.resource.resource_name if m.resource else None,
+            "category_name": m.resource.category.category_name if m.resource and m.resource.category else None,
+        })
+    return result
