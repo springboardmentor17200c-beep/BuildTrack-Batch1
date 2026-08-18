@@ -39,6 +39,7 @@ def _enrich(m: ProjectMilestone) -> ProjectMilestoneEnrichedResponse:
         due_date=m.due_date,
         completion_date=m.completion_date,
         status=m.status,
+        progress_percentage=m.progress_percentage,
     )
 
 
