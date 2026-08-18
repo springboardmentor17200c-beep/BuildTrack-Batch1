@@ -276,6 +276,19 @@ def create_delivery(
                 db_inventory[mat]["stock"] += accepted
             else:
                 db_inventory[mat] = {"id": generate_id(), "material": mat, "stock": accepted}
+            
+            # Update PostgreSQL database to sync with Inventory Dashboard
+            try:
+                from app.models.inventory import Material, Inventory
+                from sqlalchemy import func
+                material_db = db.query(Material).filter(func.lower(Material.material_name) == mat.lower()).first()
+                if material_db:
+                    inv_db = db.query(Inventory).filter(Inventory.material_id == material_db.material_id).first()
+                    if inv_db:
+                        inv_db.available_quantity = float(inv_db.available_quantity) + float(accepted)
+                        db.commit()
+            except Exception as e:
+                print("Failed to sync inventory to DB:", e)
 
     po = db_purchase_orders.get(delivery.poId)
     if po:
