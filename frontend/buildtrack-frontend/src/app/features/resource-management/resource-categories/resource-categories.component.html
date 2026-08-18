@@ -1,129 +1,130 @@
-<div class="page-container">
+﻿<div class="bt-page">
 
   <!-- Header -->
-  <div class="page-header">
-    <button class="back-btn" (click)="goBack()">← Back</button>
-
-    <div class="header-content">
-      <h2>Resource Categories</h2>
-      <p>Manage construction resource categories used across projects.</p>
+  <div class="bt-topbar">
+    <div>
+      <button class="bt-back-btn" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+        Back
+      </button>
+      <h2 class="bt-title">Resource Categories</h2>
+      <p class="bt-subtitle">Manage construction resource categories used across projects.</p>
     </div>
-
-    <button class="add-btn" (click)="openModal()">
-      + Add Category
-    </button>
+    <div class="bt-actions">
+      <button class="bt-add-btn" (click)="openModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Add Category
+      </button>
+    </div>
   </div>
 
   <!-- Summary Cards -->
-  <div class="summary-section">
-
-    <div class="summary-card">
-      <h3>{{ categories.length }}</h3>
-      <span>Total Categories</span>
+  <div class="bt-stats-row" style="margin-bottom: 24px;">
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">{{ categories.length }}</span>
+        <span class="bt-stat-label">Total Categories</span>
+      </div>
     </div>
 
-    <div class="summary-card">
-      <h3>55</h3>
-      <span>Total Resources</span>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">55</span>
+        <span class="bt-stat-label">Total Resources</span>
+      </div>
     </div>
 
-    <div class="summary-card">
-      <h3>4</h3>
-      <span>Active Categories</span>
+    <div class="bt-stat-card">
+      <div class="bt-stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      </div>
+      <div class="bt-stat-text">
+        <span class="bt-stat-value">4</span>
+        <span class="bt-stat-label">Active Categories</span>
+      </div>
     </div>
-
   </div>
 
   <!-- Search -->
-  <div class="search-section">
-    <input
-      type="text"
-      placeholder="Search category..."
-      class="search-box">
+  <div class="bt-actions" style="margin-bottom: 24px;">
+    <div class="bt-search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" placeholder="Search category...">
+    </div>
   </div>
 
   <!-- Category Cards -->
-  <div class="category-grid">
-
-    <div class="category-card" *ngFor="let category of categories">
-
-      <div class="card-header">
-        <h3>{{ category.name }}</h3>
-
-        <span class="status active">
+  <div class="bt-option-grid">
+    <div class="bt-panel" *ngFor="let category of categories" style="display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <h3 style="margin: 0; font-size: 18px; font-weight: 700;">{{ category.name }}</h3>
+        <span class="bt-badge" [ngClass]="category.status === 'Active' ? 'green' : 'gray'">
           {{ category.status }}
         </span>
       </div>
 
-      <p class="description">
+      <p style="margin: 0; color: var(--bt-muted); font-size: 14px; line-height: 1.5;">
         {{ category.description }}
       </p>
 
-      <div class="resource-count">
-        <strong>{{ category.resources }}</strong>
-        <span>Resources</span>
+      <div style="margin-top: 8px;">
+        <span style="font-size: 28px; font-weight: 800; color: var(--bt-blue); letter-spacing: -0.5px;">{{ category.resources }}</span>
+        <span style="font-size: 13px; color: var(--bt-muted); margin-left: 6px; font-weight: 600;">Resources</span>
       </div>
 
-      <div class="actions">
-        <button class="view-btn">View</button>
-        <button class="edit-btn">Edit</button>
-        <button class="delete-btn">Delete</button>
+      <div class="bt-actions" style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--bt-border);">
+        <button class="bt-filter-btn" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">View</button>
+        <button class="bt-filter-btn" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">Edit</button>
+        <button class="bt-filter-btn" style="flex: 1; justify-content: center; color: var(--bt-red); box-shadow: none; border-color: transparent;">Delete</button>
       </div>
 
     </div>
-
   </div>
 
 </div>
 
 <!-- Add Category Modal -->
-
-<div class="modal-overlay" *ngIf="showModal">
-
-  <div class="modal">
-
-    <h2>Add Resource Category</h2>
-
-    <div class="form-group">
-      <label>Category Name</label>
-      <input
-        type="text"
-        placeholder="Enter category name">
-    </div>
-
-    <div class="form-group">
-      <label>Description</label>
-      <textarea
-        rows="3"
-        placeholder="Enter description">
-      </textarea>
-    </div>
-
-    <div class="form-group">
-      <label>Status</label>
-
-      <select>
-        <option>Active</option>
-        <option>Inactive</option>
-      </select>
-    </div>
-
-    <div class="modal-actions">
-
-      <button
-        class="cancel-btn"
-        (click)="closeModal()">
-        Cancel
+<div class="modal-overlay" *ngIf="showModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);">
+  <div class="bt-form-card" style="width: 100%; max-width: 500px; padding: 32px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h3 style="margin: 0; font-size: 20px; font-weight: 700;">Add Resource Category</h3>
+      <button class="bt-filter-btn" (click)="closeModal()" style="border: none; background: transparent; padding: 4px; box-shadow: none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
+    </div>
 
-      <button
-        class="save-btn"
-        (click)="saveCategory()">
-        Save Category
-      </button>
+    <div class="bt-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Category Name</span>
+        <input type="text" placeholder="Enter category name" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%;">
+      </label>
 
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Description</span>
+        <textarea rows="3" placeholder="Enter description" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%; resize: vertical;"></textarea>
+      </label>
+
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Status</span>
+        <select style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%; background: white;">
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </label>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+      <button class="bt-filter-btn" (click)="closeModal()">Cancel</button>
+      <button class="bt-add-btn" (click)="saveCategory()">Save Category</button>
     </div>
 
   </div>
-
 </div>
