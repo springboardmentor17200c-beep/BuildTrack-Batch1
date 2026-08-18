@@ -102,6 +102,8 @@ def create_project(
         require_roles(
             "Administrator",
             "Project Manager",
+            "Client",
+            "Client / Owner",
         )
     ),
 ):
