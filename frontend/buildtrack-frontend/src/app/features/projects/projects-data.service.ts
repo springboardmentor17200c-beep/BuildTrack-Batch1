@@ -132,8 +132,9 @@ export class ProjectsDataService {
   getProgress(projectId: string): number {
     const rows = this.milestones$$.value.filter(m => m.projectId === projectId);
     if (rows.length === 0) return 0;
-    const completed = rows.filter(m => m.status === 'Completed').length;
-    return Math.round((completed / rows.length) * 100);
+    const completedRows = rows.filter(m => m.status === 'Completed');
+    const totalPercentage = completedRows.reduce((sum, m) => sum + (m.progressPercentage || 0), 0);
+    return Math.min(100, totalPercentage);
   }
 
   /**
