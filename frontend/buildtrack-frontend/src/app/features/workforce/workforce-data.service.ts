@@ -147,7 +147,10 @@ export class WorkforceDataService {
   loadShifts() {
     this.http.get<ApiShift[]>(`${this.base}/shifts`, { headers: this.headers() })
       .pipe(catchError(this.handleError([])))
-      .subscribe(data => this.shifts$$.next(data.map(mapShift)));
+      .subscribe(data => {
+        console.log("FETCHED SHIFTS FROM BACKEND: ", data);
+        this.shifts$$.next(data.map(mapShift));
+      });
   }
 
   get projectNames(): string[] {

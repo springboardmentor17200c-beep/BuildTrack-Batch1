@@ -234,12 +234,12 @@ def mark_attendance(
 
     # Resolve project_id
     proj_id = payload.project_id
-    if not proj_id and payload.project_name:
+    if (not proj_id or proj_id == 1) and payload.project_name:
         proj = db.query(Project).filter(Project.project_name == payload.project_name).first()
         if proj:
             proj_id = proj.project_id
             
-    if not proj_id:
+    if not proj_id or proj_id == 1:
         proj_id = emp.project_id
 
     att_data = payload.model_dump(exclude={"project_name"})
@@ -323,7 +323,8 @@ def create_shift(
 
     # Resolve project_id
     proj_id = payload.project_id
-    if not proj_id and payload.project_name:
+    # Force resolve by name if project_id is 1 (dummy frontend value) or None
+    if (not proj_id or proj_id == 1) and payload.project_name:
         proj = db.query(Project).filter(Project.project_name == payload.project_name).first()
         if not proj:
             proj = Project(project_name=payload.project_name, status="In Progress")
@@ -332,7 +333,7 @@ def create_shift(
             db.refresh(proj)
         proj_id = proj.project_id
         
-    if not proj_id:
+    if not proj_id or proj_id == 1:
         proj_id = db.query(Project).first().project_id
 
     shift_data = payload.model_dump(exclude={"project_name"})
