@@ -148,6 +148,18 @@ def create_employee(
             db.commit()
             db.refresh(proj)
         proj_id = proj.project_id
+        
+    # Provide a default project if none was selected (since it's a required field in DB)
+    if not proj_id:
+        first_proj = db.query(Project).first()
+        if first_proj:
+            proj_id = first_proj.project_id
+        else:
+            proj = Project(project_name="General Assignments", status="In Progress")
+            db.add(proj)
+            db.commit()
+            db.refresh(proj)
+            proj_id = proj.project_id
 
     # Prevent duplicate employee codes
     if db.query(EmployeeProfile).filter(
