@@ -90,7 +90,7 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let p of projects">
-                    <td class="bt-font-medium">{{ p.project || p.projectName }}</td>
+                    <td class="bt-font-medium">{{ p.project }}</td>
                     <td>
                       <span class="bt-status-pill" [ngClass]="statusClass(p.status)">
                         <span class="bt-status-dot"></span>
