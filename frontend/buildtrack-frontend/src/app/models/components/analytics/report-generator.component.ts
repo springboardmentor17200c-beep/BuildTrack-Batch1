@@ -156,7 +156,7 @@ export class ReportGeneratorComponent implements OnInit {
   }
 
   generate(type: ReportType) {
-    alert("Clicked: " + type);
+
     this.isGenerating = true;
     this.generatedReport = null;
 
