@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -122,22 +123,28 @@ import { Report, ReportFilter, ReportType } from '../../../models/report.model';
         <p class="bt-subtitle" style="margin-top: 8px;">Gathering analytics data and formatting report outputs.</p>
       </div>
 
-      <!-- Generation Success -->
-      <div *ngIf="generatedReport && !isGenerating" class="bt-panel" style="padding: 60px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
-        <h3 class="bt-title">Report Generated Successfully!</h3>
-        <p class="bt-subtitle" style="margin-top: 8px;"><strong>{{ generatedReport.title }}</strong> has been added to your reports list.</p>
-        
-        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 32px;">
-          <button class="bt-filter-btn" (click)="exportGeneratedPDF()">
-            📥 Download PDF
-          </button>
-          <button class="bt-filter-btn" (click)="exportGeneratedExcel()">
-            📊 Download CSV
-          </button>
-          <button class="bt-add-btn" (click)="close()">
-            View All Reports
-          </button>
+      <!-- Generation Success / Live Preview -->
+      <div *ngIf="generatedReport && !isGenerating" class="bt-panel" style="display: flex; flex-direction: column; height: 800px; padding: 0;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--bt-panel-border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+          <div>
+            <h3 class="bt-title" style="margin: 0; color: #0f172a; font-size: 18px;">✅ {{ generatedReport.title }}</h3>
+            <p class="bt-subtitle" style="margin: 4px 0 0 0;">Live Report Preview</p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="bt-filter-btn" (click)="exportGeneratedPDF()">
+              📥 Download HTML/PDF
+            </button>
+            <button class="bt-filter-btn" (click)="exportGeneratedExcel()">
+              📊 Download CSV
+            </button>
+          </div>
+        </div>
+        <div style="flex: 1; background: #e2e8f0; padding: 24px; overflow-y: auto;">
+          <iframe 
+            [srcdoc]="reportHtml" 
+            style="width: 100%; height: 100%; min-height: 800px; border: none; background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);"
+            title="Report Preview">
+          </iframe>
         </div>
       </div>
     </div>
@@ -155,6 +162,7 @@ export class ReportGeneratorComponent implements OnInit {
   generatedReport: Report | null = null;
   exportPDF = true;
   exportExcel = false;
+  reportHtml: SafeHtml | string = '';
 
   filter: any = {
     startDate: '',
@@ -167,7 +175,8 @@ export class ReportGeneratorComponent implements OnInit {
   constructor(
     private reportService: ReportService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -211,6 +220,13 @@ export class ReportGeneratorComponent implements OnInit {
         this.generatedReport = report;
         this.isGenerating = false;
         
+        // Generate the HTML for the iframe
+        this.reportService.exportReportToPDF(report.id).subscribe((blob: Blob) => {
+          blob.text().then(text => {
+            this.reportHtml = this.sanitizer.bypassSecurityTrustHtml(text);
+          });
+        });
+
         if (this.exportPDF) {
           this.exportGeneratedPDF();
         }

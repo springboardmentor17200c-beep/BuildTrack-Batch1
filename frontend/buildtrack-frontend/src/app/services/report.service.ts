@@ -43,10 +43,11 @@ export class ReportService {
     return this.getReportDataByType(type, filter).pipe(
       switchMap(data => {
         return this.http.post<Report>(this.apiUrl, { type, title, filter }, { headers: this.headers() }).pipe(
-          map(apiReport => ({
-            ...apiReport,
-            data: data
-          })),
+          map(apiReport => {
+            const newReport = { ...apiReport, data: data };
+            this.reports.unshift(newReport);
+            return newReport;
+          }),
           catchError(() => {
             const newReport: Report = {
               id: `rep-${Date.now()}`,
