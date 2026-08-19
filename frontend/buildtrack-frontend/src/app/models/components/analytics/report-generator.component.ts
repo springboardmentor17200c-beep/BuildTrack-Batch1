@@ -160,16 +160,26 @@ export class ReportGeneratorComponent implements OnInit {
         this.isGenerating = false;
         
         // Generate the HTML for the iframe preview
-        this.reportService.exportReportToPDF(report.id).subscribe((blob: Blob) => {
-          blob.text().then(text => {
-            this.reportHtml = this.sanitizer.bypassSecurityTrustHtml(text);
-          });
+        this.reportService.exportReportToPDF(report.id).subscribe({
+          next: (blob: Blob) => {
+            blob.text().then(text => {
+              this.reportHtml = this.sanitizer.bypassSecurityTrustHtml(text);
+            }).catch(err => {
+              console.error('Blob text error:', err);
+              alert('Error reading report HTML');
+            });
+          },
+          error: (err: any) => {
+            console.error('PDF Export Error:', err);
+            alert('Failed to render report preview: ' + (err.message || err));
+          }
         });
       },
       error: (err: any) => {
         console.error('Error generating report:', err);
-        alert('Failed to generate report.');
+        alert('Failed to generate report: ' + (err.message || JSON.stringify(err)));
         this.isGenerating = false;
+        this.generatedReport = null;
       }
     });
   }
