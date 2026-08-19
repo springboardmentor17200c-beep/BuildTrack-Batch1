@@ -24,6 +24,17 @@ interface ApiProgressRow {
   completed_milestones: number;
 }
 
+interface ApiBudgetRow {
+  project_id: number;
+  project_name: string;
+  allocated_budget: number;
+  labour_cost: number;
+  material_cost: number;
+  total_spent: number;
+  remaining: number;
+  status: string;
+}
+
 interface ApiPO {
   purchase_order_id: string;
   project: string;
@@ -55,17 +66,28 @@ interface ApiSummary {
   total_procurement_requests: number;
 }
 
+export interface ProjectCostBreakdown {
+  projectId: number;
+  projectName: string;
+  allocatedBudget: number;
+  labourCost: number;
+  materialCost: number;
+  totalSpent: number;
+  remaining: number;
+  status: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AnalyticsDataService {
   private readonly base = `${environment.apiUrl}/analytics`;
 
-  // Keep the same BehaviorSubjects so all existing components work unchanged
   private budgets$$       = new BehaviorSubject<ProjectBudget[]>([]);
   private expenses$$      = new BehaviorSubject<Expense[]>([]);
   private progress$$      = new BehaviorSubject<ProjectProgressSummary[]>([]);
   private purchaseOrders$$= new BehaviorSubject<PurchaseOrderSummary[]>([]);
   private vendors$$       = new BehaviorSubject<VendorSummary[]>([]);
   private summary$$       = new BehaviorSubject<ApiSummary | null>(null);
+  private projectCosts$$  = new BehaviorSubject<ProjectCostBreakdown[]>([]);
 
   budgets$       = this.budgets$$.asObservable();
   expenses$      = this.expenses$$.asObservable();
@@ -73,6 +95,7 @@ export class AnalyticsDataService {
   purchaseOrders$= this.purchaseOrders$$.asObservable();
   vendors$       = this.vendors$$.asObservable();
   summary$       = this.summary$$.asObservable();
+  projectCosts$  = this.projectCosts$$.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -93,7 +116,8 @@ export class AnalyticsDataService {
       progress:    this.http.get<ApiProgressRow[]>(`${this.base}/progress`, { headers: this.headers() }).pipe(catchError(this.err([]))),
       procurement: this.http.get<ApiProcurement>(`${this.base}/procurement`, { headers: this.headers() }).pipe(catchError(this.err({ purchase_orders: [], vendors: [] }))),
       summary:     this.http.get<ApiSummary>(`${this.base}/summary`, { headers: this.headers() }).pipe(catchError(this.err(null))),
-    }).subscribe(({ progress, procurement, summary }) => {
+      budgetData:  this.http.get<ApiBudgetRow[]>(`${this.base}/budget`, { headers: this.headers() }).pipe(catchError(this.err([]))),
+    }).subscribe(({ progress, procurement, summary, budgetData }) => {
       // Map progress
       this.progress$$.next(progress.map(r => ({
         projectId:  `P-${r.project_id}`,
@@ -116,7 +140,7 @@ export class AnalyticsDataService {
         orderStatus:     po.order_status as any,
       }));
       this.purchaseOrders$$.next(mappedPOs);
-      
+
       this.vendors$$.next(procurement.vendors.map(v => ({
         vendorId:       v.vendor_id,
         vendorName:     v.vendor_name,
@@ -125,49 +149,63 @@ export class AnalyticsDataService {
         pendingInvoices:v.pending_invoices,
       })));
 
-      // Generate synthetic budgets for projects (since we don't have a real budget table yet)
-      const syntheticBudgets: ProjectBudget[] = progress.map((r, i) => ({
-        budgetId: `B-${r.project_id}`,
-        project: r.project,
-        estimatedCost: 1500000 + (i * 200000),
-        approvedBudget: 1200000 + (i * 200000),
-        budgetStatus: r.status === 'Completed' ? 'Closed' : 'Approved'
+      // Map real budget data from backend
+      const costBreakdowns: ProjectCostBreakdown[] = budgetData.map(b => ({
+        projectId: b.project_id,
+        projectName: b.project_name,
+        allocatedBudget: b.allocated_budget,
+        labourCost: b.labour_cost,
+        materialCost: b.material_cost,
+        totalSpent: b.total_spent,
+        remaining: b.remaining,
+        status: b.status,
       }));
-      this.budgets$$.next(syntheticBudgets);
+      this.projectCosts$$.next(costBreakdowns);
 
-      // Map Purchase Orders as actual expenses in the budget tracker
-      const syntheticExpenses: Expense[] = mappedPOs.filter(po => po.orderStatus !== 'Cancelled').map((po, i) => {
-        const matchingBudget = syntheticBudgets.find(b => b.project === po.project) || syntheticBudgets[0];
-        return {
-          expenseId: `E-${i}`,
-          budgetId: matchingBudget ? matchingBudget.budgetId : 'B-0',
-          project: po.project,
-          category: 'Material Cost',
-          title: `Purchase Order ${po.purchaseOrderId}`,
-          amount: po.totalAmount,
-          expenseDate: po.orderDate
-        };
-      });
-      
-      // Add a dummy labor expense to make the doughnut chart colorful
-      syntheticBudgets.forEach((b, i) => {
-          syntheticExpenses.push({
-              expenseId: `EL-${i}`,
-              budgetId: b.budgetId,
-              project: b.project,
-              category: 'Labor Cost',
-              title: 'Workforce Payroll',
-              amount: 50000 + (i * 10000),
-              expenseDate: new Date().toISOString().split('T')[0]
+      // Map into ProjectBudget using real allocated_budget
+      const realBudgets: ProjectBudget[] = budgetData.map(b => ({
+        budgetId: `B-${b.project_id}`,
+        project: b.project_name,
+        estimatedCost: b.allocated_budget,
+        approvedBudget: b.allocated_budget,
+        budgetStatus: b.status === 'Completed' ? 'Closed' : (b.allocated_budget > 0 ? 'Approved' : 'Planned'),
+      }));
+      this.budgets$$.next(realBudgets);
+
+      // Build expenses from real data: material + labour per project
+      const realExpenses: Expense[] = [];
+      budgetData.forEach(b => {
+        const budgetId = `B-${b.project_id}`;
+        if (b.material_cost > 0) {
+          realExpenses.push({
+            expenseId: `EM-${b.project_id}`,
+            budgetId,
+            project: b.project_name,
+            category: 'Material Cost',
+            title: 'Procurement Materials',
+            amount: b.material_cost,
+            expenseDate: new Date().toISOString().split('T')[0],
           });
+        }
+        if (b.labour_cost > 0) {
+          realExpenses.push({
+            expenseId: `EL-${b.project_id}`,
+            budgetId,
+            project: b.project_name,
+            category: 'Labor Cost',
+            title: 'Workforce Payroll',
+            amount: b.labour_cost,
+            expenseDate: new Date().toISOString().split('T')[0],
+          });
+        }
       });
-      this.expenses$$.next(syntheticExpenses);
+      this.expenses$$.next(realExpenses);
 
       if (summary) this.summary$$.next(summary);
     });
   }
 
-  // ── Aggregation helpers (same API as before) ─────────────────────────
+  // ── Aggregation helpers ─────────────────────────────────────────────
   totalApprovedBudget(): number {
     return this.budgets$$.value.reduce((s, b) => s + b.approvedBudget, 0);
   }
@@ -177,7 +215,7 @@ export class AnalyticsDataService {
   }
 
   spentForProject(project: string): number {
-    return this.expenses$$.value.filter(e => e.project === project).reduce((s, e) => s + e.amount, 0);
+    return this.projectCosts$$.value.find(p => p.projectName === project)?.totalSpent ?? 0;
   }
 
   expensesByCategory(): { category: ExpenseCategory; amount: number }[] {
@@ -204,6 +242,5 @@ export class AnalyticsDataService {
     }));
   }
 
-  // Live KPIs (from /analytics/summary)
   get summaryKpis() { return this.summary$$.value; }
 }

@@ -22,6 +22,7 @@ interface ApiProject {
   start_date: string;
   expected_end_date: string;
   actual_end_date: string | null;
+  allocated_budget: number | null;
 }
 
 /** Shape returned by GET /milestones/enriched */
@@ -157,6 +158,7 @@ export class ProjectsDataService {
     companyId: number;
     managerId: number;
     clientId: number;
+    allocatedBudget?: number;
   }): Observable<any> {
     const category = this.categories$$.value.find(c => c.category_name === payload.categoryName);
     const statusObj = this.statuses$$.value.find(s => s.status_name === payload.statusName);
@@ -177,6 +179,7 @@ export class ProjectsDataService {
       location: payload.location,
       start_date: payload.startDate,
       expected_end_date: payload.expectedEndDate,
+      allocated_budget: payload.allocatedBudget ?? 0,
     };
 
     return this.http.post(`${this.projectsBase}`, body, { headers: this.headers() }).pipe(
