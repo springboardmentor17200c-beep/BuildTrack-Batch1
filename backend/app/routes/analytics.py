@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
 
+import json
+import os
 from app.core.permissions import require_roles
 from app.db.database import get_db
 from app.models.project import Project
@@ -56,56 +58,75 @@ def get_progress_analytics(
 
 
 @router.get("/procurement")
+
 def get_procurement_analytics(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles(*ALL_ROLES)),
 ):
-    """Procurement analytics using raw SQL to match actual DB schema."""
-    # Use raw SQL since the ORM model is out of sync with the real table
-    po_rows = db.execute(text("""
-        SELECT pr.procurement_request_id, pr.project_id, pr.vendor_id,
-               pr.request_status, pr.request_date, pr.required_date,
-               pr.po_id, pr.priority,
-               p.project_name,
-               v.vendor_name,
-               po.total_amount
-        FROM procurement_requests pr
-        LEFT JOIN projects p ON pr.project_id = p.project_id
-        LEFT JOIN vendors v ON pr.vendor_id = v.vendor_id
-        LEFT JOIN purchase_orders po ON pr.po_id = po.po_id
-        ORDER BY pr.request_date DESC
-        LIMIT 50
-    """)).fetchall()
+    """Procurement analytics using JSON store data to match the active procurement system."""
+    
+    # Read directly from the JSON store where actual procurement happens
+    store_path = os.path.join(os.path.dirname(__file__), "..", "..", "procurement_store.json")
+    try:
+        with open(store_path, "r", encoding="utf-8") as f:
+            store_data = json.load(f)
+    except Exception:
+        store_data = {"vendors": {}, "requests": {}, "purchase_orders": {}, "invoices": {}}
+
+    db_requests = store_data.get("requests", {})
+    db_pos = store_data.get("purchase_orders", {})
+    db_invoices = store_data.get("invoices", {})
+    
+    # Retrieve all vendors from PostgreSQL to ensure we don't miss any UI vendors
+    postgres_vendors = db.query(Vendor).all()
+    vendor_map = {str(v.vendor_id): v.vendor_name for v in postgres_vendors}
+    # Also blend with JSON vendors in case they only exist there
+    for vid, v in store_data.get("vendors", {}).items():
+        if str(vid) not in vendor_map:
+            vendor_map[str(vid)] = v.get("name", "Unknown")
 
     purchase_orders = []
-    for row in po_rows:
-        total = row[10] if len(row) > 10 and row[10] is not None else 0
+    for po_id, po in db_pos.items():
+        req = db_requests.get(po.get("requestId"), {})
+        proj_name = "Unknown"
+        # We need to map projectId (e.g. "P-13") to a real name if we want, but for now just use the ID
+        proj_id_raw = req.get("projectId")
+        if proj_id_raw:
+            try:
+                pid = int(proj_id_raw.replace("P-", ""))
+                p_db = db.query(Project).filter(Project.project_id == pid).first()
+                if p_db:
+                    proj_name = p_db.project_name
+            except:
+                proj_name = proj_id_raw
+                
+        vid = str(po.get("vendorId", ""))
         purchase_orders.append({
-            "purchase_order_id": f"PO-{row[0]}",
-            "project": row[8] or "Unknown",
-            "vendor": row[9] or "Unknown",
-            "order_date": str(row[4].date()) if row[4] else "",
-            "expected_delivery_date": row[5] or "",
-            "total_amount": float(total),
-            "order_status": row[3] or "Pending",
+            "purchase_order_id": po.get("poNumber", f"PO-{po_id[:6]}"),
+            "project": proj_name,
+            "vendor": vendor_map.get(vid, "Unknown"),
+            "order_date": req.get("requiredDate", ""),
+            "expected_delivery_date": po.get("expectedDeliveryDate", ""),
+            "total_amount": po.get("totalAmount", 0),
+            "order_status": po.get("status", "Pending"),
         })
 
-    # Vendor summaries
-    vendors = db.query(Vendor).all()
+    # Sort purchase orders by date descending
+    purchase_orders = sorted(purchase_orders, key=lambda x: x["order_date"], reverse=True)[:50]
+
     vendor_summaries = []
-    for v in vendors:
-        vendor_req_count = db.execute(text(
-            "SELECT COUNT(*) FROM procurement_requests WHERE vendor_id = :vid"
-        ), {"vid": v.vendor_id}).scalar() or 0
-        pending = db.execute(text(
-            "SELECT COUNT(*) FROM procurement_requests WHERE vendor_id = :vid AND request_status IN ('Pending','Quoted')"
-        ), {"vid": v.vendor_id}).scalar() or 0
-        total_spend = db.execute(text(
-            "SELECT SUM(total_amount) FROM purchase_orders WHERE vendor_id = :vid AND status != 'Cancelled'"
-        ), {"vid": v.vendor_id}).scalar() or 0
+    for vid, vname in vendor_map.items():
+        vendor_req_count = sum(1 for req in db_requests.values() if str(req.get("vendorId")) == str(vid))
+        
+        # Pending invoices for this vendor
+        pending = sum(1 for inv in db_invoices.values() if str(inv.get("vendorId")) == str(vid) and inv.get("paymentStatus") != "Paid")
+        
+        # Spend is calculated strictly from PAID INVOICES
+        total_spend = sum(float(inv.get("amount", 0)) for inv in db_invoices.values() if str(inv.get("vendorId")) == str(vid) and inv.get("paymentStatus") == "Paid")
+        
         vendor_summaries.append({
-            "vendor_id": f"V-{v.vendor_id}",
-            "vendor_name": v.vendor_name,
+            "vendor_id": f"V-{vid}",
+            "vendor_name": vname,
             "total_orders": vendor_req_count,
             "total_spend": float(total_spend),
             "pending_invoices": pending,
@@ -133,7 +154,15 @@ def get_analytics_summary(
     avg_completion = round((done_m / total_m) * 100) if total_m else 0
 
     vendors_count = db.query(Vendor).count()
-    requests_count = db.execute(text("SELECT COUNT(*) FROM procurement_requests")).scalar() or 0
+    
+    # Read from procurement store
+    store_path = os.path.join(os.path.dirname(__file__), "..", "..", "procurement_store.json")
+    try:
+        with open(store_path, "r", encoding="utf-8") as f:
+            store_data = json.load(f)
+            requests_count = len(store_data.get("requests", {}))
+    except Exception:
+        requests_count = db.execute(text("SELECT COUNT(*) FROM procurement_requests")).scalar() or 0
 
     return {
         "total_projects": total_projects,
