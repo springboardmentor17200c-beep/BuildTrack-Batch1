@@ -127,7 +127,7 @@ export class AnalyticsDataService {
 
       // Generate synthetic budgets for projects (since we don't have a real budget table yet)
       const syntheticBudgets: ProjectBudget[] = progress.map((r, i) => ({
-        projectId: `P-${r.project_id}`,
+        budgetId: `B-${r.project_id}`,
         project: r.project,
         estimatedCost: 1500000 + (i * 200000),
         approvedBudget: 1200000 + (i * 200000),
@@ -136,23 +136,29 @@ export class AnalyticsDataService {
       this.budgets$$.next(syntheticBudgets);
 
       // Map Purchase Orders as actual expenses in the budget tracker
-      const syntheticExpenses: Expense[] = mappedPOs.filter(po => po.orderStatus !== 'Cancelled').map((po, i) => ({
-        expenseId: `E-${i}`,
-        project: po.project,
-        category: 'Materials',
-        amount: po.totalAmount,
-        date: po.orderDate,
-        description: `Purchase Order ${po.purchaseOrderId}`
-      }));
+      const syntheticExpenses: Expense[] = mappedPOs.filter(po => po.orderStatus !== 'Cancelled').map((po, i) => {
+        const matchingBudget = syntheticBudgets.find(b => b.project === po.project) || syntheticBudgets[0];
+        return {
+          expenseId: `E-${i}`,
+          budgetId: matchingBudget ? matchingBudget.budgetId : 'B-0',
+          project: po.project,
+          category: 'Material Cost',
+          title: `Purchase Order ${po.purchaseOrderId}`,
+          amount: po.totalAmount,
+          expenseDate: po.orderDate
+        };
+      });
+      
       // Add a dummy labor expense to make the doughnut chart colorful
       syntheticBudgets.forEach((b, i) => {
           syntheticExpenses.push({
               expenseId: `EL-${i}`,
+              budgetId: b.budgetId,
               project: b.project,
-              category: 'Labor',
+              category: 'Labor Cost',
+              title: 'Workforce Payroll',
               amount: 50000 + (i * 10000),
-              date: new Date().toISOString().split('T')[0],
-              description: 'Workforce Payroll'
+              expenseDate: new Date().toISOString().split('T')[0]
           });
       });
       this.expenses$$.next(syntheticExpenses);
