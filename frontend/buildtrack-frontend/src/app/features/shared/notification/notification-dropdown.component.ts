@@ -1,6 +1,6 @@
 import {
   Component, OnInit, OnDestroy,
-  HostListener, ElementRef, ViewChild, AfterViewInit
+  HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -298,12 +298,14 @@ export class NotificationDropdownComponent implements OnInit, AfterViewInit, OnD
 
   constructor(
     private notifService: NotificationService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.sub = this.notifService.notifications$.subscribe(data => {
       this.notifications = data.map(n => ({ ...n }));
+      this.cdr.detectChanges();
     });
   }
 
