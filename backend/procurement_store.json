@@ -357,6 +357,57 @@
       "comments": "Approved by Project Manager",
       "vendorId": "8",
       "poId": "6b3003d2-e4ce-4be2-8de5-08e30827b245"
+    },
+    "dd500b70-89a9-4ca4-8853-e489cac53148": {
+      "projectId": "P-14",
+      "material": "bricks",
+      "quantity": 205,
+      "requiredDate": "2026-08-27",
+      "priority": "Urgent",
+      "id": "dd500b70-89a9-4ca4-8853-e489cac53148",
+      "status": "Material Received",
+      "timeline": [
+        {
+          "timestamp": "2026-08-19T05:31:44.271136",
+          "action": "Site Engineer created request",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-19T05:31:45.983283",
+          "action": "PM approved request",
+          "user": null,
+          "notes": "Approved by Project Manager"
+        },
+        {
+          "timestamp": "2026-08-19T05:31:51.629456",
+          "action": "Procurement selected vendor (ID: 8)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-19T05:31:59.197427",
+          "action": "Admin generated Purchase Order (PO-1007)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-19T05:32:02.736927",
+          "action": "Admin sent Purchase Order to vendor",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-19T05:33:29.316515",
+          "action": "Material fully received (205/205)",
+          "user": null,
+          "notes": null
+        }
+      ],
+      "receivedQuantity": 205,
+      "comments": "Approved by Project Manager",
+      "vendorId": "8",
+      "poId": "77faf738-9b06-4e61-b1e1-22c27800efc4"
     }
   },
   "purchase_orders": {
@@ -457,6 +508,20 @@
       "id": "6b3003d2-e4ce-4be2-8de5-08e30827b245",
       "poNumber": "PO-1006",
       "status": "Delivered"
+    },
+    "77faf738-9b06-4e61-b1e1-22c27800efc4": {
+      "vendorId": "8",
+      "requestId": "dd500b70-89a9-4ca4-8853-e489cac53148",
+      "materials": [
+        "bricks"
+      ],
+      "quantity": 205,
+      "unitPrice": 15.0,
+      "totalAmount": 3136.5,
+      "expectedDeliveryDate": "2026-08-20",
+      "id": "77faf738-9b06-4e61-b1e1-22c27800efc4",
+      "poNumber": "PO-1007",
+      "status": "Delivered"
     }
   },
   "deliveries": {
@@ -529,6 +594,16 @@
       "deliveryDate": "2026-08-20",
       "status": "Received",
       "id": "c76ecda8-a9bc-4131-87b9-ff9a8ad339e8"
+    },
+    "b88a21c4-8030-4570-9e74-6c506bc277ae": {
+      "poId": "77faf738-9b06-4e61-b1e1-22c27800efc4",
+      "material": "bricks",
+      "quantity": 205,
+      "acceptedQuantity": 205,
+      "rejectedQuantity": 0,
+      "deliveryDate": "2026-08-20",
+      "status": "Received",
+      "id": "b88a21c4-8030-4570-9e74-6c506bc277ae"
     }
   },
   "inventory": {
@@ -545,7 +620,7 @@
     "bricks": {
       "id": "c60477d6-00c2-4b53-8917-20a549e4963f",
       "material": "bricks",
-      "stock": 500
+      "stock": 705
     }
   },
   "invoices": {
@@ -638,6 +713,19 @@
       "paymentRef": "TRX-6CFB0E49",
       "id": "ca5c046c-f6a1-4cd0-87ba-13d7f75e8f91",
       "invoiceNo": "INV-1006",
+      "paymentStatus": "Paid"
+    },
+    "a7c51870-b3b8-4b40-91fa-68fcb103067b": {
+      "vendorId": "8",
+      "purchaseOrderId": "77faf738-9b06-4e61-b1e1-22c27800efc4",
+      "unitPrice": 15.0,
+      "amount": 3136.5,
+      "gst": 2.0,
+      "date": "2026-08-20",
+      "paymentDate": "2026-08-19T05:33:33.536536",
+      "paymentRef": "TRX-543275AC",
+      "id": "a7c51870-b3b8-4b40-91fa-68fcb103067b",
+      "invoiceNo": "INV-1007",
       "paymentStatus": "Paid"
     }
   }
