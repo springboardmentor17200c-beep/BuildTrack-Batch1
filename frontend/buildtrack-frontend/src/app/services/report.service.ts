@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, delay, catchError, map } from 'rxjs';
 import { switchMap, forkJoin } from 'rxjs';
 import { 
@@ -22,6 +22,11 @@ export class ReportService {
 
   constructor(private http: HttpClient) {}
 
+  private headers(): HttpHeaders {
+    const token = localStorage.getItem('buildtrack_access_token') ?? '';
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+  }
+
   getReports(): Observable<Report[]> {
     return of(this.reports).pipe(delay(200));
   }
@@ -37,7 +42,7 @@ export class ReportService {
 
     return this.getReportDataByType(type, filter).pipe(
       switchMap(data => {
-        return this.http.post<Report>(this.apiUrl, { type, title, filter }).pipe(
+        return this.http.post<Report>(this.apiUrl, { type, title, filter }, { headers: this.headers() }).pipe(
           map(apiReport => ({
             ...apiReport,
             data: data
@@ -125,7 +130,7 @@ export class ReportService {
   }
 
   private fetchProgressReportData(filter: Partial<ReportFilter>): Observable<ProgressReportData> {
-    return this.http.get<any[]>('http://localhost:8000/analytics/progress').pipe(
+    return this.http.get<any[]>('http://localhost:8000/analytics/progress', { headers: this.headers() }).pipe(
       map(data => {
         const completed = data.filter(d => d.status === 'Completed').length;
         const total = data.length;
@@ -156,7 +161,7 @@ export class ReportService {
   }
 
   private fetchBudgetReportData(filter: Partial<ReportFilter>): Observable<BudgetReportData> {
-    return this.http.get<any[]>('http://localhost:8000/analytics/budget').pipe(
+    return this.http.get<any[]>('http://localhost:8000/analytics/budget', { headers: this.headers() }).pipe(
       map(data => {
         const totalBudget = data.reduce((s, d) => s + d.allocated_budget, 0);
         const totalSpent = data.reduce((s, d) => s + d.total_spent, 0);
@@ -189,7 +194,7 @@ export class ReportService {
   }
 
   private fetchProcurementReportData(filter: Partial<ReportFilter>): Observable<ProcurementReportData> {
-    return this.http.get<any>('http://localhost:8000/analytics/procurement').pipe(
+    return this.http.get<any>('http://localhost:8000/analytics/procurement', { headers: this.headers() }).pipe(
       map(data => {
         const pos = data.purchase_orders || [];
         const vendors = data.vendors || [];
