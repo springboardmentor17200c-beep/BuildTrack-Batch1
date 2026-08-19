@@ -27,6 +27,7 @@ export type RoleName =
     assignedProjects: string[];
     isActive: boolean;
     createdAt?: string;
+    profileImage?: string;
   }
 
 // POST /login expects OAuth2 form fields: username + password (not email).

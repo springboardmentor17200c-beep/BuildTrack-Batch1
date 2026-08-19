@@ -214,6 +214,9 @@ export class AuthDataService {
       full_name: updates.fullName,
       phone_number: updates.phoneNumber,
     };
+    if (updates.profileImage !== undefined) {
+      body['profile_image'] = updates.profileImage;
+    }
 
     return this.http.put<BackendUserProfile>(
       `${this.apiUrl}/auth/me`,
