@@ -385,6 +385,8 @@
 .bt-progress-fill.green { background: linear-gradient(90deg, var(--bt-green), #34d399); box-shadow: var(--bt-glow-green); }
 .bt-progress-fill.orange { background: linear-gradient(90deg, var(--bt-orange), #fbbf24); box-shadow: var(--bt-glow-orange); }
 .bt-progress-fill.red { background: linear-gradient(90deg, var(--bt-red), #f87171); box-shadow: var(--bt-glow-red); }
+.bt-progress-fill.gray { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+.bt-progress-fill.purple { background: linear-gradient(90deg, var(--bt-purple), #c084fc); box-shadow: var(--bt-glow-purple); }
 .bt-progress-value { font-size: 12.5px; font-weight: 700; color: var(--bt-text); min-width: 34px; }
 
 /* Row actions */
@@ -1985,6 +1987,8 @@ a.bt-sidebar-logout {
 .bt-progress-fill.orange { background: var(--bt-orange); }
 .bt-progress-fill.green { background: var(--bt-green); }
 .bt-progress-fill.red { background: var(--bt-red); }
+.bt-progress-fill.gray { background: #94a3b8; }
+.bt-progress-fill.purple { background: var(--bt-purple); }
 
 .bt-progress-text {
   font-size: 13px;
