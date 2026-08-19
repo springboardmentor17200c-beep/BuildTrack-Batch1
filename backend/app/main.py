@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, company, project, project_milestone, vendor, material, inventory, report, notification, workforce, analytics, resource
+from app.routes import auth, company, project, project_milestone, vendor, material, inventory, report, notification, workforce, analytics, resource, material_allocations
 from routes.procurement import router as procurement_router
 from app.db.init_db import init_db
 
