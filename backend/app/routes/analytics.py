@@ -108,7 +108,7 @@ def get_procurement_analytics(
             "order_date": req.get("requiredDate", ""),
             "expected_delivery_date": po.get("expectedDeliveryDate", ""),
             "total_amount": po.get("totalAmount", 0),
-            "order_status": po.get("status", "Pending"),
+                        "order_status": "Delivered" if po.get("status") == "Delivered" else ("Confirmed" if po.get("status") == "Accepted" else ("Cancelled" if po.get("status") == "Rejected" else "Pending")),
         })
 
     # Sort purchase orders by date descending
