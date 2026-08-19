@@ -68,23 +68,31 @@
         <span class="bt-panel-sub">Average across all assets in each category</span>
       </div>
     </div>
-    <div class="bt-table-wrap">
-      <table class="bt-table">
-        <thead><tr><th>Category</th><th>In Use</th><th>Utilization</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let c of categorySummaries">
-            <td class="bt-strong">{{ c.category }}</td>
-            <td class="bt-muted">{{ c.inUse }}/{{ c.total }}</td>
-            <td>
-              <div class="bt-progress">
-                <div class="bt-progress-bar" style="width:100%;"><div class="bt-progress-fill blue" [style.width.%]="c.avgUtilization"></div></div>
-                <span class="bt-progress-value">{{ c.avgUtilization }}%</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    
+    <div class="bt-table-wrap" style="display: flex; gap: 24px;">
+      <div style="flex: 1; min-height: 250px;">
+        <canvas #statusChart></canvas>
+      </div>
+      <div style="flex: 1;">
+        <table class="bt-table">
+          <thead><tr><th>Category</th><th>Total Assets</th><th>In Use</th><th>Avg Utilization</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of categorySummaries">
+              <td class="bt-strong">{{ c.category }}</td>
+              <td>{{ c.total }}</td>
+              <td>{{ c.inUse }}</td>
+              <td>
+                <div class="bt-progress">
+                  <div class="bt-progress-bar"><div class="bt-progress-fill purple" [style.width.%]="c.avgUtilization"></div></div>
+                  <span class="bt-progress-value">{{ c.avgUtilization }}%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+
   </div>
 
   <div class="bt-panel">
@@ -94,7 +102,12 @@
         <span class="bt-panel-sub">{{ resources.length }} tracked</span>
       </div>
     </div>
+    
+    <div style="padding: 16px; min-height: 300px;">
+      <canvas #utilizationChart></canvas>
+    </div>
     <div class="bt-table-wrap">
+
       <table class="bt-table">
         <thead><tr><th>Resource</th><th>Category</th><th>Status</th></tr></thead>
         <tbody>
