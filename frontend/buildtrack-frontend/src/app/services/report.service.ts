@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, delay, catchError, map } from 'rxjs';
+import { Observable, of, delay, catchError, map, timeout } from 'rxjs';
 import { switchMap, forkJoin } from 'rxjs';
 import { 
   Report, 
@@ -43,6 +43,7 @@ export class ReportService {
     return this.getReportDataByType(type, filter).pipe(
       switchMap(data => {
         return this.http.post<Report>(this.apiUrl, { type, title, filter }, { headers: this.headers() }).pipe(
+          timeout(3000),
           map(apiReport => {
             const newReport = { ...apiReport, data: data };
             this.reports.unshift(newReport);
@@ -132,6 +133,7 @@ export class ReportService {
 
   private fetchProgressReportData(filter: Partial<ReportFilter>): Observable<ProgressReportData> {
     return this.http.get<any[]>('http://localhost:8000/analytics/progress', { headers: this.headers() }).pipe(
+      timeout(3000),
       map(data => {
         const completed = data.filter(d => d.status === 'Completed').length;
         const total = data.length;
@@ -163,6 +165,7 @@ export class ReportService {
 
   private fetchBudgetReportData(filter: Partial<ReportFilter>): Observable<BudgetReportData> {
     return this.http.get<any[]>('http://localhost:8000/analytics/budget', { headers: this.headers() }).pipe(
+      timeout(3000),
       map(data => {
         const totalBudget = data.reduce((s, d) => s + d.allocated_budget, 0);
         const totalSpent = data.reduce((s, d) => s + d.total_spent, 0);
@@ -196,6 +199,7 @@ export class ReportService {
 
   private fetchProcurementReportData(filter: Partial<ReportFilter>): Observable<ProcurementReportData> {
     return this.http.get<any>('http://localhost:8000/analytics/procurement', { headers: this.headers() }).pipe(
+      timeout(3000),
       map(data => {
         const pos = data.purchase_orders || [];
         const vendors = data.vendors || [];

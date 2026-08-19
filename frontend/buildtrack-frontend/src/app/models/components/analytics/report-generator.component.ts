@@ -26,8 +26,9 @@ import { Report, ReportType } from '../../../models/report.model';
         </div>
       </div>
 
+
       <!-- Selection Grid -->
-      <div class="report-selection-grid" *ngIf="!generatedReport">
+      <div class="report-selection-grid" *ngIf="!isGenerating && !generatedReport">
         
         <div class="report-card" (click)="generate('progress')">
           <div class="rc-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">📊</div>
@@ -50,6 +51,14 @@ import { Report, ReportType } from '../../../models/report.model';
       </div>
 
 
+
+
+      <!-- Generating Progress -->
+      <div *ngIf="isGenerating" class="bt-panel" style="padding: 60px; text-align: center;">
+        <div style="width: 40px; height: 40px; border: 3px solid var(--bt-panel-border); border-top-color: var(--bt-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+        <h3 class="bt-title">Gathering Data...</h3>
+        <p class="bt-subtitle" style="margin-top: 8px;">Compiling live database records for your report.</p>
+      </div>
 
       <!-- Generation Success / Live Preview -->
       <div *ngIf="generatedReport" class="bt-panel" style="display: flex; flex-direction: column; height: 850px; padding: 0;">
@@ -147,6 +156,7 @@ export class ReportGeneratorComponent implements OnInit {
   }
 
   generate(type: ReportType) {
+    alert("Clicked: " + type);
     this.isGenerating = true;
     this.generatedReport = null;
 
