@@ -28,12 +28,12 @@ export class ReportService {
   }
 
   getReports(): Observable<Report[]> {
-    return of(this.reports).pipe(delay(200));
+    return of(this.reports);
   }
 
   getReportById(id: string): Observable<Report> {
     const report = this.reports.find(r => r.id === id) || this.reports[0];
-    return of({ ...report }).pipe(delay(200));
+    return of({ ...report });
   }
 
   generateReport(type: string, filter: ReportFilter): Observable<Report> {
@@ -60,7 +60,7 @@ export class ReportService {
               data: data
             };
             this.reports.unshift(newReport);
-            return of(newReport).pipe(delay(400));
+            return of(newReport);
           })
         );
       })
@@ -72,7 +72,7 @@ export class ReportService {
   }
 
   generateResourceReport(filter: ReportFilter): Observable<ResourceReportData> {
-    return of(this.createResourceReportData(filter)).pipe(delay(400));
+    return of(this.createResourceReportData(filter));
   }
 
   generateBudgetReport(filter: ReportFilter): Observable<BudgetReportData> {
@@ -80,7 +80,7 @@ export class ReportService {
   }
 
   generateWorkforceReport(filter: ReportFilter): Observable<WorkforceReportData> {
-    return of(this.createWorkforceReportData(filter)).pipe(delay(400));
+    return of(this.createWorkforceReportData(filter));
   }
 
   generateProcurementReport(filter: ReportFilter): Observable<ProcurementReportData> {
@@ -91,7 +91,7 @@ export class ReportService {
     const report = this.reports.find(r => r.id === reportId) || this.reports[0];
     const content = this.generatePDFContent(report);
     const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
-    return of(blob).pipe(delay(400));
+    return of(blob);
   }
 
   exportReportToExcel(reportId: string): Observable<Blob> {
@@ -100,7 +100,7 @@ export class ReportService {
     const blob = new Blob([content], { 
       type: 'text/csv;charset=utf-8;' 
     });
-    return of(blob).pipe(delay(400));
+    return of(blob);
   }
 
   deleteReport(id: string): Observable<boolean> {
@@ -210,13 +210,13 @@ export class ReportService {
             { status: 'Pending', count: pos.filter((po: any) => po.order_status === 'Pending').length },
             { status: 'Confirmed', count: pos.filter((po: any) => po.order_status === 'Confirmed').length }
           ],
-          vendorPerformance: vendors.map((v: any) => ({
-            vendor: v.vendor_name,
-            orders: v.total_orders,
+          supplierPerformance: vendors.map((v: any) => ({
+            supplier: v.vendor_name,
+            orders: v.total_orders, delivered: v.total_orders, onTime: 95,
             value: v.total_spend,
             rating: 4.5
           })),
-          totalSpent: totalValue, supplierPerformance: [], deliveryTimeline: [], procurementCategories: [], itemsReceived: 0, averageLeadTime: 0,
+          totalSpent: totalValue,  deliveryTimeline: [], procurementCategories: [], itemsReceived: 0, averageLeadTime: 0,
           recentOrders: pos.slice(0, 5).map((po: any) => ({
             id: po.purchase_order_id,
             item: po.project,
@@ -585,13 +585,13 @@ export class ReportService {
         </tr>
       `).join('');
 
-      const expRows = (data.topExpenses || []).map((e: any) => `
+      const expRows = (data.projectBudgets || []).map((e: any) => `
         <tr>
-          <td style="font-weight: 600;">${e.description}</td>
-          <td>${e.category}</td>
-          <td>${e.vendor || 'N/A'}</td>
-          <td>${fmtDate(e.date)}</td>
-          <td class="text-right style-bold">${fmtCurr(e.amount)}</td>
+          <td style="font-weight: 600;">${e.project}</td>
+          <td class="text-right">${fmtCurr(e.allocated)}</td>
+          <td class="text-right">${fmtCurr(e.spent)}</td>
+          <td class="text-right ${e.variance < 0 ? 'text-red' : 'text-green'}">${fmtCurr(e.variance)}</td>
+          <td class="text-right style-bold">${e.allocated ? Math.round((e.spent/e.allocated)*100) : 0}%</td>
         </tr>
       `).join('');
 
@@ -613,18 +613,18 @@ export class ReportService {
         </div>
 
         <div class="section-block">
-          <h3 class="section-title">Recent Major Expenditure</h3>
+          <h3 class="section-title">Project Budget Allocations</h3>
           <table class="report-table">
             <thead>
               <tr>
-                <th>Expense Item</th>
-                <th>Category</th>
-                <th>Vendor / Contractor</th>
-                <th>Date</th>
-                <th class="text-right">Amount</th>
+                <th>Project Name</th>
+                <th class="text-right">Allocated Budget</th>
+                <th class="text-right">Total Spent</th>
+                <th class="text-right">Remaining Variance</th>
+                <th class="text-right">Utilization %</th>
               </tr>
             </thead>
-            <tbody>${expRows || '<tr><td colspan="5">No expenses recorded</td></tr>'}</tbody>
+            <tbody>${expRows || '<tr><td colspan="5">No projects recorded</td></tr>'}</tbody>
           </table>
         </div>
       `;

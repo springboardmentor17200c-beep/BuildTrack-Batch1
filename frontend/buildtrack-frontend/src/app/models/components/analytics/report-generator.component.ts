@@ -30,19 +30,19 @@ import { Report, ReportType } from '../../../models/report.model';
       <div class="report-selection-grid" *ngIf="!isGenerating && !generatedReport">
         
         <div class="report-card" (click)="generate('progress')">
-          <div class="rc-icon" style="background: #eff6ff; color: #3b82f6;">📊</div>
+          <div class="rc-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">📊</div>
           <h3>Progress Report</h3>
           <p>Real-time completion percentages, milestones, and timeline status of all projects.</p>
         </div>
 
         <div class="report-card" (click)="generate('budget')">
-          <div class="rc-icon" style="background: #f0fdf4; color: #22c55e;">💰</div>
+          <div class="rc-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">💰</div>
           <h3>Budget Report</h3>
           <p>Live budget vs actual spend tracking, including labor and material costs.</p>
         </div>
 
         <div class="report-card" (click)="generate('procurement')">
-          <div class="rc-icon" style="background: #fefce8; color: #eab308;">📦</div>
+          <div class="rc-icon" style="background: rgba(234, 179, 8, 0.1); color: #eab308;">📦</div>
           <h3>Procurement Report</h3>
           <p>Vendor performance, active purchase orders, and total material spend analysis.</p>
         </div>
@@ -58,9 +58,9 @@ import { Report, ReportType } from '../../../models/report.model';
 
       <!-- Generation Success / Live Preview -->
       <div *ngIf="generatedReport && !isGenerating" class="bt-panel" style="display: flex; flex-direction: column; height: 850px; padding: 0;">
-        <div style="padding: 20px 24px; border-bottom: 1px solid var(--bt-panel-border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--bt-panel-border); display: flex; justify-content: space-between; align-items: center; background: var(--bt-panel-bg);">
           <div>
-            <h3 class="bt-title" style="margin: 0; color: #0f172a; font-size: 18px;">✅ {{ generatedReport.title }}</h3>
+            <h3 class="bt-title" style="margin: 0; color: var(--text-primary); font-size: 18px;">✅ {{ generatedReport.title }}</h3>
             <p class="bt-subtitle" style="margin: 4px 0 0 0;">Live Report Preview</p>
           </div>
           <div style="display: flex; gap: 12px;">
@@ -75,10 +75,10 @@ import { Report, ReportType } from '../../../models/report.model';
             </button>
           </div>
         </div>
-        <div style="flex: 1; background: #cbd5e1; padding: 24px; overflow-y: auto; display: flex; justify-content: center;">
+        <div style="flex: 1; background: var(--bt-body-bg); padding: 24px; overflow-y: auto; display: flex; justify-content: center;">
           <iframe 
             [srcdoc]="reportHtml" 
-            style="width: 100%; max-width: 1000px; height: 100%; min-height: 1000px; border: none; background: white; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);"
+            style="width: 100%; max-width: 1000px; height: 100%; min-height: 1000px; border: none; background: #ffffff; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);"
             title="Report Preview">
           </iframe>
         </div>
@@ -96,7 +96,7 @@ import { Report, ReportType } from '../../../models/report.model';
       margin-top: 16px;
     }
     .report-card {
-      background: white;
+      background: var(--bt-panel-bg);
       border: 1px solid var(--bt-panel-border);
       border-radius: 12px;
       padding: 32px 24px;
@@ -108,7 +108,7 @@ import { Report, ReportType } from '../../../models/report.model';
     .report-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 12px 20px rgba(0,0,0,0.08);
-      border-color: #cbd5e1;
+      border-color: var(--bt-blue);
     }
     .rc-icon {
       width: 64px;
