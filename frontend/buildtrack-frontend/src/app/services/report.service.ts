@@ -18,68 +18,12 @@ import {
 export class ReportService {
   private apiUrl = 'http://localhost:8000/reports';
 
-  private reports: Report[] = [
-    {
-      id: 'rep-001',
-      title: 'Project Progress Report - Q3 2026',
-      type: 'progress',
-      generatedDate: new Date('2026-07-01'),
-      status: 'generated',
-      format: 'both',
-      description: 'Comprehensive progress report for Q3 2026',
-      data: this.createProgressReportData({})
-    },
-    {
-      id: 'rep-002',
-      title: 'Budget Utilization Report - June 2026',
-      type: 'budget',
-      generatedDate: new Date('2026-07-05'),
-      status: 'generated',
-      format: 'pdf',
-      description: 'Budget analysis and utilization report for June',
-      data: this.createBudgetReportData({})
-    },
-    {
-      id: 'rep-003',
-      title: 'Resource Utilization Report',
-      type: 'resource',
-      generatedDate: new Date('2026-07-10'),
-      status: 'draft',
-      format: 'excel',
-      description: 'Resource allocation and utilization analysis',
-      data: this.createResourceReportData({})
-    },
-    {
-      id: 'rep-004',
-      title: 'Workforce Performance Report',
-      type: 'workforce',
-      generatedDate: new Date('2026-07-12'),
-      status: 'generated',
-      format: 'both',
-      description: 'Employee attendance and productivity report',
-      data: this.createWorkforceReportData({})
-    },
-    {
-      id: 'rep-005',
-      title: 'Procurement Summary Report',
-      type: 'procurement',
-      generatedDate: new Date('2026-07-15'),
-      status: 'scheduled',
-      format: 'pdf',
-      description: 'Procurement activities and supplier performance',
-      data: this.createProcurementReportData({})
-    }
-  ];
+  private reports: Report[] = [];
 
   constructor(private http: HttpClient) {}
 
   getReports(): Observable<Report[]> {
-    return this.http.get<Report[]>(this.apiUrl).pipe(
-      catchError((err) => {
-        console.error('Failed to load real reports from backend', err);
-        return of([]);
-      })
-    );
+    return of(this.reports).pipe(delay(200));
   }
 
   getReportById(id: string): Observable<Report> {
