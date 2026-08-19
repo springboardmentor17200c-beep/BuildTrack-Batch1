@@ -24,7 +24,7 @@ import { Report } from '../../../models/report.model';
           <p class="bt-subtitle">View and export your generated project reports</p>
         </div>
         <div style="display: flex; gap: 16px; align-items: center;">
-          <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="🔍 Search reports..." style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--bt-panel-border); min-width: 250px;">
+          <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="🔍 Search reports..." style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--bt-panel-border); min-width: 250px; background: var(--bt-panel-bg); color: var(--text-primary); outline: none;">
           <button class="bt-add-btn" routerLink="/analytics/reports/generate" style="background: #3b82f6; color: white;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             <span>Generate New</span>

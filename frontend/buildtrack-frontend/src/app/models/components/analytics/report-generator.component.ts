@@ -12,11 +12,11 @@ import { Report, ReportType } from '../../../models/report.model';
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="bt-page">
-      <button class="bt-back-btn" routerLink="/analytics">
+      <button class="bt-back-btn" routerLink="/analytics/reports">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
         </svg>
-        Back to Analytics
+        Back to Reports Dashboard
       </button>
 
       <div class="bt-topbar">
@@ -27,7 +27,7 @@ import { Report, ReportType } from '../../../models/report.model';
       </div>
 
       <!-- Selection Grid -->
-      <div class="report-selection-grid" *ngIf="!isGenerating && !generatedReport">
+      <div class="report-selection-grid" *ngIf="!generatedReport">
         
         <div class="report-card" (click)="generate('progress')">
           <div class="rc-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">📊</div>
@@ -49,15 +49,10 @@ import { Report, ReportType } from '../../../models/report.model';
 
       </div>
 
-      <!-- Generating Progress -->
-      <div *ngIf="isGenerating" class="bt-panel" style="padding: 60px; text-align: center;">
-        <div style="width: 40px; height: 40px; border: 3px solid var(--bt-panel-border); border-top-color: var(--bt-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-        <h3 class="bt-title">Gathering Data...</h3>
-        <p class="bt-subtitle" style="margin-top: 8px;">Compiling live database records for your report.</p>
-      </div>
+
 
       <!-- Generation Success / Live Preview -->
-      <div *ngIf="generatedReport && !isGenerating" class="bt-panel" style="display: flex; flex-direction: column; height: 850px; padding: 0;">
+      <div *ngIf="generatedReport" class="bt-panel" style="display: flex; flex-direction: column; height: 850px; padding: 0;">
         <div style="padding: 20px 24px; border-bottom: 1px solid var(--bt-panel-border); display: flex; justify-content: space-between; align-items: center; background: var(--bt-panel-bg);">
           <div>
             <h3 class="bt-title" style="margin: 0; color: var(--text-primary); font-size: 18px;">✅ {{ generatedReport.title }}</h3>
