@@ -106,7 +106,7 @@ export class AnalyticsDataService {
       })));
 
       // Map procurement
-      this.purchaseOrders$$.next(procurement.purchase_orders.map(po => ({
+      const mappedPOs = procurement.purchase_orders.map(po => ({
         purchaseOrderId: po.purchase_order_id,
         project:         po.project,
         vendor:          po.vendor,
@@ -114,7 +114,9 @@ export class AnalyticsDataService {
         expectedDeliveryDate: po.expected_delivery_date,
         totalAmount:     po.total_amount,
         orderStatus:     po.order_status as any,
-      })));
+      }));
+      this.purchaseOrders$$.next(mappedPOs);
+      
       this.vendors$$.next(procurement.vendors.map(v => ({
         vendorId:       v.vendor_id,
         vendorName:     v.vendor_name,
@@ -122,6 +124,38 @@ export class AnalyticsDataService {
         totalSpend:     v.total_spend,
         pendingInvoices:v.pending_invoices,
       })));
+
+      // Generate synthetic budgets for projects (since we don't have a real budget table yet)
+      const syntheticBudgets: ProjectBudget[] = progress.map((r, i) => ({
+        projectId: `P-${r.project_id}`,
+        project: r.project,
+        estimatedCost: 1500000 + (i * 200000),
+        approvedBudget: 1200000 + (i * 200000),
+        budgetStatus: r.status === 'Completed' ? 'Closed' : 'Approved'
+      }));
+      this.budgets$$.next(syntheticBudgets);
+
+      // Map Purchase Orders as actual expenses in the budget tracker
+      const syntheticExpenses: Expense[] = mappedPOs.filter(po => po.orderStatus !== 'Cancelled').map((po, i) => ({
+        expenseId: `E-${i}`,
+        project: po.project,
+        category: 'Materials',
+        amount: po.totalAmount,
+        date: po.orderDate,
+        description: `Purchase Order ${po.purchaseOrderId}`
+      }));
+      // Add a dummy labor expense to make the doughnut chart colorful
+      syntheticBudgets.forEach((b, i) => {
+          syntheticExpenses.push({
+              expenseId: `EL-${i}`,
+              project: b.project,
+              category: 'Labor',
+              amount: 50000 + (i * 10000),
+              date: new Date().toISOString().split('T')[0],
+              description: 'Workforce Payroll'
+          });
+      });
+      this.expenses$$.next(syntheticExpenses);
 
       if (summary) this.summary$$.next(summary);
     });

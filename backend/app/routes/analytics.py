@@ -67,23 +67,26 @@ def get_procurement_analytics(
                pr.request_status, pr.request_date, pr.required_date,
                pr.po_id, pr.priority,
                p.project_name,
-               v.vendor_name
+               v.vendor_name,
+               po.total_amount
         FROM procurement_requests pr
         LEFT JOIN projects p ON pr.project_id = p.project_id
         LEFT JOIN vendors v ON pr.vendor_id = v.vendor_id
+        LEFT JOIN purchase_orders po ON pr.po_id = po.po_id
         ORDER BY pr.request_date DESC
         LIMIT 50
     """)).fetchall()
 
     purchase_orders = []
     for row in po_rows:
+        total = row[10] if len(row) > 10 and row[10] is not None else 0
         purchase_orders.append({
             "purchase_order_id": f"PO-{row[0]}",
             "project": row[8] or "Unknown",
             "vendor": row[9] or "Unknown",
             "order_date": str(row[4].date()) if row[4] else "",
             "expected_delivery_date": row[5] or "",
-            "total_amount": 0,
+            "total_amount": float(total),
             "order_status": row[3] or "Pending",
         })
 
@@ -97,11 +100,14 @@ def get_procurement_analytics(
         pending = db.execute(text(
             "SELECT COUNT(*) FROM procurement_requests WHERE vendor_id = :vid AND request_status IN ('Pending','Quoted')"
         ), {"vid": v.vendor_id}).scalar() or 0
+        total_spend = db.execute(text(
+            "SELECT SUM(total_amount) FROM purchase_orders WHERE vendor_id = :vid AND status != 'Cancelled'"
+        ), {"vid": v.vendor_id}).scalar() or 0
         vendor_summaries.append({
             "vendor_id": f"V-{v.vendor_id}",
             "vendor_name": v.vendor_name,
             "total_orders": vendor_req_count,
-            "total_spend": 0,
+            "total_spend": float(total_spend),
             "pending_invoices": pending,
         })
 
