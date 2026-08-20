@@ -11,7 +11,7 @@
           <h1 class="bt-title">All Projects</h1>
           <p class="bt-subtitle">Browse, search, and create projects.</p>
         </div>
-        <div class="bt-actions">
+        <div class="bt-actions" *ngIf="canCreateProject">
           <button class="bt-add-btn" (click)="toggleForm()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
             <span *ngIf="!showForm">New Project</span>
@@ -39,11 +39,17 @@
           </label>
           <label>
             <span>Manager</span>
-            <input type="text" formControlName="manager" placeholder="e.g. Priya Menon" />
+            <select formControlName="manager">
+            <option value="" disabled selected>Select a manager</option>
+            <option *ngFor="let m of availableManagers" [value]="m.id">{{ m.name }}</option>
+          </select>
           </label>
           <label>
             <span>Client</span>
-            <input type="text" formControlName="client" placeholder="e.g. L&T Realty" />
+            <select formControlName="client">
+            <option value="" disabled selected>Select a client</option>
+            <option *ngFor="let c of availableClients" [value]="c.id">{{ c.name }}</option>
+          </select>
           </label>
           <label>
             <span>Start Date</span>
@@ -57,6 +63,10 @@
         <label class="bt-auth-field" style="margin-top:16px;">
           <span>Description</span>
           <input type="text" formControlName="description" placeholder="Brief scope of work" />
+        </label>
+        <label class="bt-auth-field" style="margin-top:12px;">
+          <span>Allocated Budget (&#8377;)</span>
+          <input type="number" formControlName="allocatedBudget" placeholder="e.g. 5000000" min="0" />
         </label>
         <div class="bt-form-actions">
           <button type="submit" class="bt-add-btn">Create Project</button>

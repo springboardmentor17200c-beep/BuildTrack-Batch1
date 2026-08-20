@@ -8,6 +8,8 @@ from app.core.permissions import require_roles
 from app.models.workforce import EmployeeProfile, WorkforceCategory, Attendance, Shift
 from app.models.project import Project
 from app.models.user import User
+from app.core.security import hash_password
+from app.models.role import Role
 from app.schemas.workforce import (
     EmployeeCreate, EmployeeUpdate, EmployeeResponse,
     AttendanceCreate, AttendanceResponse,
@@ -17,7 +19,7 @@ from app.schemas.workforce import (
 
 router = APIRouter(prefix="/workforce", tags=["Workforce"])
 
-ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer")
+ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer", "Worker")
 MANAGE_ROLES = ("Administrator", "Project Manager")
 
 
@@ -100,13 +102,22 @@ def create_employee(
     # Resolve or create User
     user_id = payload.user_id
     if not user_id and payload.full_name:
-        ts = int(datetime.utcnow().timestamp())
-        fake_email = f"{payload.full_name.lower().replace(' ', '')}{ts}@buildtrack.local"
+        # Check if username exists
+        existing_user = db.query(User).filter(User.username == payload.employee_code).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User ID already exists.")
+            
+        worker_role = db.query(Role).filter(Role.role_name == "Worker").first()
+        role_id = worker_role.role_id if worker_role else None
+        
         user = User(
             full_name=payload.full_name,
-            email=fake_email,
-            password_hash="N/A",
-            phone_number="N/A"
+            username=payload.employee_code,
+            email=f"{payload.employee_code}@buildtrack.com",
+            password_hash=hash_password("12345t"),
+            phone_number="N/A", # Will be updated later
+            role_id=role_id,
+            company_id=current_user.company_id if current_user else 1
         )
         db.add(user)
         db.commit()
@@ -137,6 +148,18 @@ def create_employee(
             db.commit()
             db.refresh(proj)
         proj_id = proj.project_id
+        
+    # Provide a default project if none was selected (since it's a required field in DB)
+    if not proj_id:
+        first_proj = db.query(Project).first()
+        if first_proj:
+            proj_id = first_proj.project_id
+        else:
+            proj = Project(project_name="General Assignments", status="In Progress")
+            db.add(proj)
+            db.commit()
+            db.refresh(proj)
+            proj_id = proj.project_id
 
     # Prevent duplicate employee codes
     if db.query(EmployeeProfile).filter(
@@ -209,14 +232,28 @@ def mark_attendance(
         Attendance.attendance_date == payload.attendance_date,
     ).first()
 
+    # Resolve project_id
+    proj_id = payload.project_id
+    if (not proj_id or proj_id == 1) and payload.project_name:
+        proj = db.query(Project).filter(Project.project_name == payload.project_name).first()
+        if proj:
+            proj_id = proj.project_id
+            
+    if not proj_id or proj_id == 1:
+        proj_id = emp.project_id
+
+    att_data = payload.model_dump(exclude={"project_name"})
+    att_data["project_id"] = proj_id
+
     if existing:
-        for key, value in payload.model_dump(exclude_unset=True).items():
-            setattr(existing, key, value)
+        for key, value in att_data.items():
+            if value is not None:
+                setattr(existing, key, value)
         db.commit()
         db.refresh(existing)
         return _attendance_to_response(existing)
 
-    record = Attendance(**payload.model_dump())
+    record = Attendance(**att_data)
     db.add(record)
     db.commit()
     db.refresh(record)
@@ -284,7 +321,25 @@ def create_shift(
     ).first():
         raise HTTPException(status_code=404, detail="Employee not found.")
 
-    shift = Shift(**payload.model_dump())
+    # Resolve project_id
+    proj_id = payload.project_id
+    # Force resolve by name if project_id is 1 (dummy frontend value) or None
+    if (not proj_id or proj_id == 1) and payload.project_name:
+        proj = db.query(Project).filter(Project.project_name == payload.project_name).first()
+        if not proj:
+            proj = Project(project_name=payload.project_name, status="In Progress")
+            db.add(proj)
+            db.commit()
+            db.refresh(proj)
+        proj_id = proj.project_id
+        
+    if not proj_id or proj_id == 1:
+        proj_id = db.query(Project).first().project_id
+
+    shift_data = payload.model_dump(exclude={"project_name"})
+    shift_data["project_id"] = proj_id
+
+    shift = Shift(**shift_data)
     db.add(shift)
     db.commit()
     db.refresh(shift)

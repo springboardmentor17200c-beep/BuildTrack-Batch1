@@ -1,0 +1,142 @@
+[
+  {
+    "test": "Register [Admin]",
+    "passed": true,
+    "detail": "status=201"
+  },
+  {
+    "test": "Register [Project Manager]",
+    "passed": true,
+    "detail": "status=201"
+  },
+  {
+    "test": "Register [Site Engineer]",
+    "passed": true,
+    "detail": "status=201"
+  },
+  {
+    "test": "Register [Worker]",
+    "passed": true,
+    "detail": "status=201"
+  },
+  {
+    "test": "Register [Client]",
+    "passed": true,
+    "detail": "status=201"
+  },
+  {
+    "test": "Wrong password blocked",
+    "passed": true,
+    "detail": "status=None"
+  },
+  {
+    "test": "Login [Admin]",
+    "passed": false,
+    "detail": "status=None, body=None"
+  },
+  {
+    "test": "Login [Project Manager]",
+    "passed": false,
+    "detail": "status=None, body=None"
+  },
+  {
+    "test": "Login [Site Engineer]",
+    "passed": false,
+    "detail": "status=None, body=None"
+  },
+  {
+    "test": "Login [Worker]",
+    "passed": false,
+    "detail": "status=None, body=None"
+  },
+  {
+    "test": "Login [Client]",
+    "passed": false,
+    "detail": "status=None, body=None"
+  },
+  {
+    "test": "Create project",
+    "passed": false,
+    "detail": "status=None, body=None"
+  },
+  {
+    "test": "GET /projects",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /projects/enriched",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /projects/categories",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /projects/statuses",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /workforce/employees",
+    "passed": false,
+    "detail": "status=None, count=0"
+  },
+  {
+    "test": "GET /workforce/shifts",
+    "passed": false,
+    "detail": "status=None, count=0"
+  },
+  {
+    "test": "GET /workforce/attendance",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /inventory/enriched",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /inventory/materials/enriched",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /procurement/requests",
+    "passed": true,
+    "detail": "status=200"
+  },
+  {
+    "test": "GET /notifications",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /analytics/summary (Admin)",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /analytics/progress (Admin)",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /analytics/procurement (Admin)",
+    "passed": false,
+    "detail": "status=None"
+  },
+  {
+    "test": "Analytics blocked for Worker",
+    "passed": true,
+    "detail": "status=None"
+  },
+  {
+    "test": "GET /vendors",
+    "passed": false,
+    "detail": "status=None"
+  }
+]

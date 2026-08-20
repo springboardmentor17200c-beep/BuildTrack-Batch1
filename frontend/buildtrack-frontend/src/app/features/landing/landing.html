@@ -6,14 +6,17 @@
     </div>
 
     <div class="bt-landing-nav-right">
+      
+
       <div class="bt-lang-wrap">
-        <button class="bt-landing-icon-btn" (click)="toggleLangMenu()" aria-label="Change language">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-          <span class="bt-landing-lang-code">{{ lang.current.toUpperCase() }}</span>
+        <button class="bt-lang-btn" (click)="toggleLangMenu()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span>Language</span>
+          <span class="bt-lang-current">{{ currentLangName }}</span>
         </button>
         <ul class="bt-lang-menu bt-landing-lang-menu" *ngIf="langMenuOpen">
-          <li *ngFor="let l of lang.languages">
-            <button class="bt-lang-option" [class.active]="l.code === lang.current" (click)="selectLanguage(l.code)">
+          <li *ngFor="let l of languages">
+            <button class="bt-lang-option" [class.active]="l.code === currentLangCode" (click)="selectLanguage(l)">
               {{ l.native }}
             </button>
           </li>

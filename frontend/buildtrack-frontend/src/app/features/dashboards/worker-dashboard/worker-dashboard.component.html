@@ -1,0 +1,113 @@
+<div class="bt-admin-dashboard bt-fade-in">
+      
+      <!-- Premium Hero Header -->
+      <div class="bt-hero-header">
+        <div class="bt-hero-bg"></div>
+        <div class="bt-hero-content">
+          <div class="bt-hero-text">
+            <h1 class="bt-hero-title">Welcome back, {{ currentUser?.fullName || 'Worker' }}</h1>
+            <p class="bt-hero-subtitle">Your personal dashboard.</p>
+          </div>
+          <div class="bt-hero-actions">
+            <span class="bt-hero-badge">{{ currentUser?.role }}</span>
+            <a class="bt-hero-btn" [routerLink]="['/profile']">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Profile
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat Cards Grid -->
+      <div class="bt-kpi-grid">
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap blue-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ myProfile?.payRate || 0 }} / {{ myProfile?.paymentType || 'Day' }}</span>
+            <span class="bt-kpi-label">Current Pay Rate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grids -->
+      <div class="bt-dashboard-grid-main">
+        
+        <!-- Left Column -->
+        <div class="bt-dashboard-col" style="flex: 1;">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>My Shift Schedule</h3>
+                <p>Your upcoming work shifts</p>
+              </div>
+            </div>
+            
+            <div class="bt-table-responsive" *ngIf="myShifts.length > 0">
+              <table class="bt-table-modern">
+                <thead><tr><th>Shift Type</th><th>Date</th><th>Project</th><th>Start</th><th>End</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let s of myShifts">
+                    <td class="bt-font-medium">{{ s.shiftType }}</td>
+                    <td>{{ s.shiftDate | date }}</td>
+                    <td>{{ s.project }}</td>
+                    <td>{{ s.startTime }}</td>
+                    <td>{{ s.endTime }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding: 20px; text-align: center; color: var(--bt-text-muted);" *ngIf="myShifts.length === 0">
+              No shifts assigned currently.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column (Attendance Calendar) -->
+        <div class="bt-dashboard-col" style="flex: 1;">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Attendance Calendar</h3>
+                <p>{{ currentMonthName }}</p>
+              </div>
+            </div>
+            
+            <div class="bt-calendar-grid">
+              <!-- Calendar Header -->
+              <div class="bt-calendar-header">Sun</div>
+              <div class="bt-calendar-header">Mon</div>
+              <div class="bt-calendar-header">Tue</div>
+              <div class="bt-calendar-header">Wed</div>
+              <div class="bt-calendar-header">Thu</div>
+              <div class="bt-calendar-header">Fri</div>
+              <div class="bt-calendar-header">Sat</div>
+
+              <!-- Empty days padding (optional, assuming 1st of month starts somewhere, but for simplicity we just render days 1-31) -->
+              <div *ngFor="let empty of [].constructor(calendarDays.length > 0 ? calendarDays[0].date.getDay() : 0)" class="bt-calendar-day empty"></div>
+
+              <!-- Days -->
+              <div *ngFor="let day of calendarDays" class="bt-calendar-day">
+                <div class="bt-day-number">{{ day.date | date:'d' }}</div>
+                <div *ngIf="day.record" class="bt-day-badge" [ngClass]="getAttendanceClass(day.record.status)">
+                  {{ day.record.status }}
+                </div>
+              </div>
+            </div>
+
+            <div class="bt-calendar-legend">
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-present"></span> Present</span>
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-absent"></span> Absent</span>
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-leave"></span> Leave</span>
+              <span class="bt-legend-item"><span class="bt-status-dot bt-status-half"></span> Half Day</span>
+            </div>
+          </div>
+
+        </div>
+        
+      </div>
+</div>

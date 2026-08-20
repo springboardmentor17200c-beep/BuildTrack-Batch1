@@ -57,7 +57,8 @@ class EmployeeResponse(BaseModel):
 # ── Attendance ───────────────────────────────────────
 class AttendanceCreate(BaseModel):
     employee_id: int
-    project_id: int
+    project_id: Optional[int] = None
+    project_name: Optional[str] = None
     attendance_date: date
     attendance_status: str             # Present | Absent | Half Day | On Leave
     check_in_time: Optional[datetime] = None
@@ -83,7 +84,8 @@ class AttendanceResponse(BaseModel):
 # ── Shifts ───────────────────────────────────────────
 class ShiftCreate(BaseModel):
     employee_id: int
-    project_id: int
+    project_id: Optional[int] = None
+    project_name: Optional[str] = None
     shift_type: str                    # Morning | Evening | Night
     shift_date: date
     start_time: str                    # e.g. "08:00 AM"

@@ -5,15 +5,15 @@
       <span class="bt-auth-logo-text">BuildTrack</span>
     </a>
 
-    <h1 class="bt-auth-title">{{ 'auth.createAccount' | translate }}</h1>
-    <p class="bt-auth-subtitle">{{ 'auth.registerSubtitle' | translate }}</p>
+    <h1 class="bt-auth-title">Create your account</h1>
+    <p class="bt-auth-subtitle">Set up access to manage projects, sites, and teams.</p>
 
     <div class="bt-auth-error" *ngIf="error">{{ error }}</div>
-    <div class="bt-auth-success" *ngIf="success">{{ 'auth.accountCreated' | translate }}</div>
+    <div class="bt-auth-success" *ngIf="success">Account created successfully! You can now sign in.</div>
 
     <form class="bt-auth-form" [formGroup]="form" (ngSubmit)="submit()" *ngIf="!success">
       <label class="bt-auth-field">
-        <span>{{ 'auth.username' | translate }}</span>
+        <span>Username</span>
         <input type="text" formControlName="username" placeholder="e.g. priya.menon" />
       </label>
 
@@ -23,7 +23,7 @@
       </label>
 
       <label class="bt-auth-field">
-        <span>{{ 'auth.email' | translate }}</span>
+        <span>Email</span>
         <input type="email" formControlName="email" placeholder="you@company.com" autocomplete="email" />
       </label>
 
@@ -33,26 +33,26 @@
       </label>
 
       <label class="bt-auth-field">
-        <span>{{ 'auth.role' | translate }}</span>
+        <span>Role</span>
         <select formControlName="role">
-          <option value="" disabled selected>{{ 'auth.selectRole' | translate }}</option>
+          <option value="" disabled selected>Select your role</option>
           <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
         </select>
       </label>
 
       <label class="bt-auth-field">
-        <span>{{ 'auth.password' | translate }}</span>
+        <span>Password</span>
         <input type="password" formControlName="password" placeholder="At least 6 characters" autocomplete="new-password" />
       </label>
 
       <button type="submit" class="bt-auth-submit" [disabled]="submitting">
-        {{ (submitting ? 'auth.creatingAccount' : 'auth.createAccountBtn') | translate }}
+        {{ (submitting ? 'Creating account...' : 'Create Account') }}
       </button>
     </form>
 
     <div class="bt-auth-footer">
-      {{ 'auth.alreadyHaveAccount' | translate }}
-      <a class="bt-auth-link" [routerLink]="['/login']">{{ 'auth.signInLink' | translate }}</a>
+      Already have an account?
+      <a class="bt-auth-link" [routerLink]="['/login']">Sign in</a>
     </div>
   </div>
 </div>

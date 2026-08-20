@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { } from '../../shared/sidebar/app-sidebar.component';
-
+import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface ResourceCategory {
-  name: string;
+  resource_category_id?: number;
+  category_name: string;
   description: string;
   resources: number;
   status: string;
@@ -13,48 +15,72 @@ interface ResourceCategory {
 @Component({
   selector: 'app-resource-categories',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './resource-categories.component.html',
   styleUrls: ['./resource-categories.component.css']
 })
-export class ResourceCategoriesComponent {
+export class ResourceCategoriesComponent implements OnInit {
 
   showModal = false;
+  categories: ResourceCategory[] = [];
+  searchText = '';
+  
+  // Form fields
+  newCategoryName = '';
+  newCategoryDesc = '';
+  editCategoryId: number | null = null;
 
-  categories: ResourceCategory[] = [
-    {
-      name: 'Heavy Machinery',
-      description: 'Excavators, Cranes, Bulldozers',
-      resources: 15,
-      status: 'Active'
-    },
-    {
-      name: 'Vehicles',
-      description: 'Trucks, Dumpers, Loaders',
-      resources: 9,
-      status: 'Active'
-    },
-    {
-      name: 'Power Equipment',
-      description: 'Generators and Compressors',
-      resources: 6,
-      status: 'Active'
-    },
-    {
-      name: 'Safety Equipment',
-      description: 'Helmets, Harnesses, PPE Kits',
-      resources: 25,
-      status: 'Active'
+  constructor(private location: Location, private http: HttpClient) {}
+
+  ngOnInit() {
+    this.loadCategories();
+  }
+
+  private get headers() {
+    let token = '';
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      token = localStorage.getItem('buildtrack_access_token') || '';
     }
-  ];
+    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
+  }
 
-  constructor(private location: Location) {}
+  get filteredCategories() {
+    return this.categories.filter(c => 
+      c.category_name.toLowerCase().includes(this.searchText.toLowerCase()) || 
+      c.description.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+  }
+
+  loadCategories() {
+    this.http.get<any[]>(`${environment.apiUrl}/resources/categories`, this.headers)
+      .subscribe({
+        next: (data) => {
+          this.categories = data.map(item => ({
+            resource_category_id: item.resource_category_id,
+            category_name: item.category_name,
+            description: item.description || '',
+            resources: item.resources || 0,
+            status: item.status || 'Active'
+          }));
+        },
+        error: (err) => console.error('Error loading categories', err)
+      });
+  }
 
   goBack(): void {
     this.location.back();
   }
 
-  openModal() {
+  openModal(category?: ResourceCategory) {
+    if (category) {
+      this.editCategoryId = category.resource_category_id || null;
+      this.newCategoryName = category.category_name;
+      this.newCategoryDesc = category.description;
+    } else {
+      this.editCategoryId = null;
+      this.newCategoryName = '';
+      this.newCategoryDesc = '';
+    }
     this.showModal = true;
   }
 
@@ -63,6 +89,52 @@ export class ResourceCategoriesComponent {
   }
 
   saveCategory() {
-    this.closeModal();
+    if (!this.newCategoryName.trim()) return;
+
+    const payload = {
+      category_name: this.newCategoryName,
+      description: this.newCategoryDesc
+    };
+
+    if (this.editCategoryId) {
+      this.http.put(`${environment.apiUrl}/resources/categories/${this.editCategoryId}`, payload, this.headers)
+        .subscribe({
+          next: () => {
+            this.loadCategories();
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Error updating category', err);
+            alert('Failed to update category.');
+          }
+        });
+      return;
+    }
+
+    this.http.post(`${environment.apiUrl}/resources/categories`, payload, this.headers)
+      .subscribe({
+        next: () => {
+          this.loadCategories();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error saving category', err);
+          alert('Failed to save category. It may already exist.');
+        }
+      });
+  }
+
+  deleteCategory(id?: number) {
+    if (!id) return;
+    if (!confirm('Are you sure you want to delete this category?')) return;
+
+    this.http.delete(`${environment.apiUrl}/resources/categories/${id}`, this.headers)
+      .subscribe({
+        next: () => this.loadCategories(),
+        error: (err) => {
+          console.error('Error deleting category', err);
+          alert('Cannot delete this category. It may have resources associated with it.');
+        }
+      });
   }
 }

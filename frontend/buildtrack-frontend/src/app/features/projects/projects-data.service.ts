@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { AnalyticsDataService } from '../analytics/analytics-data.service';
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, of, forkJoin } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -20,6 +22,7 @@ interface ApiProject {
   start_date: string;
   expected_end_date: string;
   actual_end_date: string | null;
+  allocated_budget: number | null;
 }
 
 /** Shape returned by GET /milestones/enriched */
@@ -32,6 +35,7 @@ interface ApiMilestone {
   due_date: string;
   completion_date: string | null;
   status: string;
+  progress_percentage: number;
 }
 
 export interface ProjectCategory { category_id: number; category_name: string; }
@@ -63,6 +67,7 @@ function mapMilestone(a: ApiMilestone): ProjectMilestone {
     dueDate: a.due_date,
     completionDate: a.completion_date,
     status: a.status as MilestoneStatus,
+    progressPercentage: a.progress_percentage || 0,
   };
 }
 
@@ -85,7 +90,7 @@ export class ProjectsDataService {
   categories$ = this.categories$$.asObservable();
   statuses$   = this.statuses$$.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private analytics: AnalyticsDataService) {}
 
   private headers(): HttpHeaders {
     const token = localStorage.getItem(TOKEN_KEY) ?? '';
@@ -100,6 +105,7 @@ export class ProjectsDataService {
   }
 
   loadAll() {
+    console.log('[ProjectsDataService] loadAll called');
     forkJoin({
       projects: this.http.get<ApiProject[]>(this.projectsUrl, { headers: this.headers() })
         .pipe(catchError(this.handleError([]))),
@@ -110,8 +116,9 @@ export class ProjectsDataService {
       statuses: this.http.get<ProjectStatusOption[]>(`${this.projectsBase}/statuses`, { headers: this.headers() })
         .pipe(catchError(this.handleError([]))),
     }).subscribe(({ projects, milestones, categories, statuses }) => {
-      this.projects$$.next(projects.map(mapProject));
+      console.log('[ProjectsDataService] loadAll results:', { categories, statuses });
       this.milestones$$.next(milestones.map(mapMilestone));
+      this.projects$$.next(projects.map(mapProject));
       this.categories$$.next(categories);
       this.statuses$$.next(statuses);
     });
@@ -128,8 +135,9 @@ export class ProjectsDataService {
   getProgress(projectId: string): number {
     const rows = this.milestones$$.value.filter(m => m.projectId === projectId);
     if (rows.length === 0) return 0;
-    const completed = rows.filter(m => m.status === 'Completed').length;
-    return Math.round((completed / rows.length) * 100);
+    const completedRows = rows.filter(m => m.status === 'Completed');
+    const totalPercentage = completedRows.reduce((sum, m) => sum + (m.progressPercentage || 0), 0);
+    return Math.min(100, totalPercentage);
   }
 
   /**
@@ -150,6 +158,7 @@ export class ProjectsDataService {
     companyId: number;
     managerId: number;
     clientId: number;
+    allocatedBudget?: number;
   }): Observable<any> {
     const category = this.categories$$.value.find(c => c.category_name === payload.categoryName);
     const statusObj = this.statuses$$.value.find(s => s.status_name === payload.statusName);
@@ -170,6 +179,7 @@ export class ProjectsDataService {
       location: payload.location,
       start_date: payload.startDate,
       expected_end_date: payload.expectedEndDate,
+      allocated_budget: payload.allocatedBudget ?? 0,
     };
 
     return this.http.post(`${this.projectsBase}`, body, { headers: this.headers() }).pipe(
@@ -201,12 +211,25 @@ export class ProjectsDataService {
         { status_id: statusObj.status_id },
         { headers: this.headers() }
       ).pipe(catchError(this.handleError(null)))
-       .subscribe(() => this.loadAll());
+       .subscribe(() => { this.loadAll(); this.analytics.loadAll(); });
     }
   }
 
   addMilestone(milestone: ProjectMilestone) {
-    this.milestones$$.next([milestone, ...this.milestones$$.value]);
+    const numericProjectId = parseInt(milestone.projectId.replace('P-', ''), 10);
+    const body = {
+      project_id: numericProjectId,
+      milestone_name: milestone.milestoneName,
+      description: milestone.description,
+      due_date: milestone.dueDate,
+      status: milestone.status,
+      progress_percentage: milestone.progressPercentage || 0
+    };
+    
+    this.http.post(this.milestonesBase, body, { headers: this.headers() }).subscribe({
+      next: () => { this.loadAll(); this.analytics.loadAll(); },
+      error: err => console.error('Failed to create milestone', err)
+    });
   }
 
   markMilestoneStatus(milestoneId: string, status: MilestoneStatus) {
@@ -226,6 +249,6 @@ export class ProjectsDataService {
       { status, completion_date: status === 'Completed' ? today : null },
       { headers: this.headers() }
     ).pipe(catchError(this.handleError(null)))
-     .subscribe(() => this.loadAll());
+     .subscribe(() => { this.loadAll(); this.analytics.loadAll(); });
   }
 }

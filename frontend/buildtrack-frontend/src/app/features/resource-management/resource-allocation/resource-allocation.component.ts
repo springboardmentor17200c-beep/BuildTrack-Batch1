@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceAllocation } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
+import { ProjectsDataService } from '../../projects/projects-data.service';
 import { } from '../../shared/sidebar/app-sidebar.component';
 
 
@@ -22,20 +23,20 @@ export class ResourceAllocationComponent implements OnInit {
   showForm = false;
   form: FormGroup;
 
-  constructor(private data: ResourceDataService, private fb: FormBuilder, private location: Location) {
+  constructor(private data: ResourceDataService, private projectsData: ProjectsDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       resourceId: ['', Validators.required],
       project: ['', Validators.required],
-      allocatedBy: ['', Validators.required],
       allocationDate: ['', Validators.required],
       expectedReturnDate: ['', Validators.required],
+      remarks: [''],
     });
   }
 
   ngOnInit(): void {
     this.data.allocations$.subscribe(a => (this.allocations = a));
-    this.data.resources$.subscribe(r => (this.availableResources = r.filter(x => x.currentStatus === 'Available')));
-    this.projectNames = this.data.projectNames;
+    this.data.resources$.subscribe(r => (this.availableResources = r));
+    this.projectsData.projects$.subscribe(p => this.projectNames = p.map(x => x.projectName));
   }
 
   toggleForm() {

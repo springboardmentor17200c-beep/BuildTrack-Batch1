@@ -26,7 +26,7 @@
         <span>Resource</span>
         <select formControlName="resourceId">
           <option value="" disabled selected>Select available resource</option>
-          <option *ngFor="let r of availableResources" [value]="r.resourceId">{{ r.resourceName }} ({{ r.category }})</option>
+          <option *ngFor="let r of availableResources" [value]="r.resourceId">{{ r.resourceName }} - {{ r.currentStatus }}</option>
         </select>
       </label>
       <label>

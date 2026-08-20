@@ -5,7 +5,8 @@
   </div>
 
   <nav class="bt-sidebar-nav">
-    <a *ngFor="let item of navItems" class="bt-sidebar-link" [class.locked]="!isAllowed(item)" [routerLink]="[item.route]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
+    <ng-container *ngFor="let item of navItems">
+    <a *ngIf="!(currentUser?.role === 'Worker' && !isAllowed(item))" class="bt-sidebar-link" [class.locked]="!isAllowed(item)" [routerLink]="[item.route]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
       <span class="bt-sidebar-icon">
         <svg *ngIf="item.icon === 'dashboard'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="8" width="3" height="10"></rect><rect x="17" y="5" width="3" height="13"></rect></svg>
         <svg *ngIf="item.icon === 'projects'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><rect x="3" y="10" width="18" height="4" rx="1"></rect><rect x="3" y="16" width="18" height="4" rx="1"></rect></svg>
@@ -17,18 +18,22 @@
         <svg *ngIf="item.icon === 'profile'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
       </span>
 
-      <span class="bt-sidebar-label">{{ item.label | translate }}</span>
+      <span class="bt-sidebar-label">{{ item.label }}</span>
 
       <svg *ngIf="!isAllowed(item)" class="bt-sidebar-lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
       </svg>
     </a>
+    </ng-container>
   </nav>
 
   <div class="bt-sidebar-footer" *ngIf="currentUser">
     <div class="bt-sidebar-user" style="display: flex; align-items: center; justify-content: space-between;">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="bt-stat-icon blue" style="width:34px;height:34px;">{{ currentUser.fullName.charAt(0) }}</div>
+        <div class="bt-stat-icon blue" style="width:34px;height:34px;overflow:hidden;padding:0;">
+          <img *ngIf="currentUser.profileImage" [src]="currentUser.profileImage" style="width:100%;height:100%;object-fit:cover;" />
+          <span *ngIf="!currentUser.profileImage">{{ currentUser.fullName.charAt(0) }}</span>
+        </div>
         <div>
           <div class="bt-sidebar-username">{{ currentUser.fullName }}</div>
           <div class="bt-sidebar-userrole">{{ currentUser.role }}</div>
@@ -37,15 +42,17 @@
       <app-notification-dropdown></app-notification-dropdown>
     </div>
 
+    
+
     <div class="bt-lang-wrap">
       <button class="bt-lang-btn" (click)="toggleLangMenu()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-        <span>{{ 'sidebar.language' | translate }}</span>
-        <span class="bt-lang-current">{{ lang.current.toUpperCase() }}</span>
+        <span>Language</span>
+        <span class="bt-lang-current">{{ currentLangName }}</span>
       </button>
       <ul class="bt-lang-menu" *ngIf="langMenuOpen">
-        <li *ngFor="let l of lang.languages">
-          <button class="bt-lang-option" [class.active]="l.code === lang.current" (click)="selectLanguage(l.code)">
+        <li *ngFor="let l of languages">
+          <button class="bt-lang-option" [class.active]="l.code === currentLangCode" (click)="selectLanguage(l)">
             {{ l.native }}
           </button>
         </li>
@@ -59,9 +66,9 @@
           <svg *ngIf="theme.isDark" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         </span>
       </span>
-      <span class="bt-theme-toggle-label">{{ (theme.isDark ? 'sidebar.darkMode' : 'sidebar.lightMode') | translate }}</span>
+      <span class="bt-theme-toggle-label">{{ (theme.isDark ? 'Dark Mode' : 'Light Mode') }}</span>
     </button>
 
-    <button class="bt-sidebar-logout" (click)="logout()">{{ 'sidebar.signOut' | translate }}</button>
+    <button class="bt-sidebar-logout" (click)="logout()">Sign Out</button>
   </div>
 </aside>

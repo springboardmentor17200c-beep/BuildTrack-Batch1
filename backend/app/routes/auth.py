@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+﻿from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -30,17 +30,21 @@ router = APIRouter(
 )
 
 def build_user_response(user: User) -> UserResponse:
-    role_name = user.role.role_name if user.role else None
+    try:
+        role_name = user.role.role_name if user.role else None
+    except Exception:
+        role_name = None
     return UserResponse(
         user_id=user.user_id,
-        full_name=user.full_name,
+        full_name=user.full_name or "",
         email=user.email,
         phone_number=user.phone_number,
         company_id=user.company_id,
         role_id=user.role_id,
         role=role_name,
-        is_active=user.is_active,
+        is_active=bool(user.is_active) if user.is_active is not None else True,
         created_at=user.created_at,
+        profile_image=user.profile_image,
     )
 
 
@@ -100,7 +104,7 @@ def register(
             db.commit()
             db.refresh(company_obj)
         company_id = company_obj.company_id
-        
+
     if not company_id:
         # Default to the primary company if none provided
         company_id = 1
@@ -234,7 +238,7 @@ def update_profile(
     db.commit()
     db.refresh(current_user)
 
-    return current_user
+    return build_user_response(current_user)
 
 
 @router.put("/change-password")
@@ -262,10 +266,18 @@ def change_password(
         "message": "Password updated successfully."
     }
 
+
 @router.get('/users', summary='List all users (admin only)')
 def list_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     users = db.query(User).all()
-    return [build_user_response(u) for u in users]
+    results = []
+    for u in users:
+        try:
+            results.append(build_user_response(u))
+        except Exception as exc:
+            import logging
+            logging.error(f"[list_users] Failed to serialize user {u.user_id}: {exc}")
+    return results

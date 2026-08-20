@@ -32,5 +32,6 @@ export interface ProjectMilestone {
   description: string;
   dueDate: string;
   completionDate: string | null;
+  progressPercentage?: number;
   status: MilestoneStatus;
 }

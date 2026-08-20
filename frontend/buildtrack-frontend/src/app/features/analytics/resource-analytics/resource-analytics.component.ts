@@ -1,16 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory } from '../../resource-management/models/resource.model';
 import { ResourceDataService } from '../../resource-management/resource-data.service';
-import { } from '../../shared/sidebar/app-sidebar.component';
-
-
-// NOTE: this page deliberately reuses ResourceDataService rather than
-// duplicating resource data — Resource Analytics is just a different lens
-// on the same `resources` / `resource_allocations` tables that the
-// Resource Management module already owns.
+import { Chart } from 'chart.js/auto';
 
 interface CategorySummary {
   category: ResourceCategory;
@@ -26,7 +20,13 @@ interface CategorySummary {
   templateUrl: './resource-analytics.component.html',
   styleUrls: ['./resource-analytics.component.css'],
 })
-export class ResourceAnalyticsComponent implements OnInit {
+export class ResourceAnalyticsComponent implements OnInit, AfterViewInit {
+  @ViewChild('statusChart') statusChartRef!: ElementRef;
+  @ViewChild('utilizationChart') utilizationChartRef!: ElementRef;
+
+  statusChart: any;
+  utilizationChart: any;
+
   resources: Resource[] = [];
   categorySummaries: CategorySummary[] = [];
 
@@ -42,8 +42,51 @@ export class ResourceAnalyticsComponent implements OnInit {
     this.resourceData.resources$.subscribe(r => {
       this.resources = r;
       this.computeStats();
+      this.updateCharts();
     });
-    this.resourceData.allocations$.subscribe(() => this.computeStats());
+    this.resourceData.allocations$.subscribe(() => {
+      this.computeStats();
+      this.updateCharts();
+    });
+  }
+
+  ngAfterViewInit() {
+    this.initCharts();
+  }
+
+  private initCharts() {
+    const ctxStatus = this.statusChartRef?.nativeElement;
+    if (ctxStatus) {
+      this.statusChart = new Chart(ctxStatus, {
+        type: 'pie',
+        data: { labels: ['Available', 'Allocated', 'Under Maintenance'], datasets: [{ data: [0,0,0], backgroundColor: ['#10b981', '#3b82f6', '#f97316'] }] },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    const ctxUtil = this.utilizationChartRef?.nativeElement;
+    if (ctxUtil) {
+      this.utilizationChart = new Chart(ctxUtil, {
+        type: 'bar',
+        data: { labels: [], datasets: [{ label: 'Avg Utilization %', data: [], backgroundColor: '#8b5cf6' }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    }
+    
+    this.updateCharts();
+  }
+
+  private updateCharts() {
+    if (this.statusChart) {
+      this.statusChart.data.datasets[0].data = [this.availableCount, this.inUseCount, this.maintenanceCount];
+      this.statusChart.update();
+    }
+
+    if (this.utilizationChart && this.categorySummaries.length > 0) {
+      this.utilizationChart.data.labels = this.categorySummaries.map(c => c.category);
+      this.utilizationChart.data.datasets[0].data = this.categorySummaries.map(c => c.avgUtilization);
+      this.utilizationChart.update();
+    }
   }
 
   private computeStats() {

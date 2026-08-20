@@ -27,6 +27,7 @@ export type RoleName =
     assignedProjects: string[];
     isActive: boolean;
     createdAt?: string;
+    profileImage?: string;
   }
 
 // POST /login expects OAuth2 form fields: username + password (not email).
@@ -75,6 +76,7 @@ export const MODULE_ACCESS: Record<string, RoleName[]> = {
   'dashboard-site-engineer': ['Site Engineer'],
   'dashboard-contractor': ['Contractor'],
   'dashboard-client': ['Client / Owner'],
+  'dashboard-worker': ['Worker'],
 };
 
 // Maps each role to its dashboard route — used right after login.
@@ -83,7 +85,7 @@ export const DASHBOARD_ROUTE_BY_ROLE: Record<RoleName, string> = {
   'Project Manager': '/dashboard/pm',
   'Site Engineer': '/dashboard/site-engineer',
   Contractor: '/dashboard/contractor',
-  Worker: '/dashboard/site-engineer',
+  Worker: '/dashboard/worker',
   'Client / Owner': '/dashboard/client',
   Vendor: '/procurement/vendor-dashboard',
 };

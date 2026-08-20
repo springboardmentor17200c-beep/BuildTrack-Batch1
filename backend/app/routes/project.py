@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
+from app.core.dependencies import get_current_user
 from app.core.permissions import require_roles
 from app.db.database import get_db
 from app.models.company import Company
@@ -25,13 +26,13 @@ ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer")
 
 
 @router.get("/categories", summary="All project categories")
-def get_categories(db: Session = Depends(get_db), current_user=Depends(require_roles(*ALL_ROLES))):
+def get_categories(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     return [{"category_id": c.category_id, "category_name": c.category_name}
             for c in db.query(ProjectCategory).all()]
 
 
 @router.get("/statuses", summary="All project statuses")
-def get_statuses(db: Session = Depends(get_db), current_user=Depends(require_roles(*ALL_ROLES))):
+def get_statuses(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     return [{"status_id": s.status_id, "status_name": s.status_name}
             for s in db.query(ProjectStatus).all()]
 
@@ -52,6 +53,7 @@ def _enrich(project: Project) -> ProjectEnrichedResponse:
         start_date=project.start_date,
         expected_end_date=project.expected_end_date,
         actual_end_date=project.actual_end_date,
+        allocated_budget=float(project.allocated_budget) if project.allocated_budget else 0,
     )
 
 
@@ -64,7 +66,12 @@ def get_projects_enriched(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles(*ALL_ROLES)),
 ):
-    projects = db.query(Project).all()
+    query = db.query(Project)
+    if current_user.role and current_user.role.role_name == "Project Manager":
+        query = query.filter(Project.manager_id == current_user.user_id)
+    elif current_user.role and current_user.role.role_name in ("Client", "Client / Owner"):
+        query = query.filter(Project.client_id == current_user.user_id)
+    projects = query.all()
     return [_enrich(p) for p in projects]
 
 
@@ -96,6 +103,12 @@ def create_project(
         require_roles(
             "Administrator",
             "Project Manager",
+            "Client",
+            "Client / Owner",
+            "Vendor",
+            "Site Engineer",
+            "Contractor",
+            "Worker",
         )
     ),
 ):
@@ -182,7 +195,10 @@ def get_projects(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles("Administrator", "Project Manager")),
 ):
-    return db.query(Project).all()
+    query = db.query(Project)
+    if current_user.role and current_user.role.role_name == "Project Manager":
+        query = query.filter(Project.manager_id == current_user.user_id)
+    return query.all()
 
 @router.get(
     "/{project_id}",

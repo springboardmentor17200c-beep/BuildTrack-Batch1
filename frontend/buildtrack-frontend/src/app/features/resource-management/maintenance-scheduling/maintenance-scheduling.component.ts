@@ -1,71 +1,74 @@
-import { Component } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { } from '../../shared/sidebar/app-sidebar.component';
-
-
-interface MaintenanceRecord {
-  resource: string;
-  type: string;
-  maintenanceDate: string;
-  nextDate: string;
-  cost: number;
-  servicedBy: string;
-  remarks: string;
-  status: string;
-}
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { MaintenanceRecord, Resource } from '../models/resource.model';
+import { ResourceDataService } from '../resource-data.service';
 
 @Component({
   selector: 'app-maintenance-scheduling',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './maintenance-scheduling.component.html',
   styleUrls: ['./maintenance-scheduling.component.css']
 })
-export class MaintenanceSchedulingComponent {
-
-  constructor(private location: Location) {}
-
+export class MaintenanceSchedulingComponent implements OnInit, OnDestroy {
+  showModal = false;
   searchText = '';
   selectedType = 'All';
 
-  showModal = false;
+  allRecords: MaintenanceRecord[] = [];
+  availableResources: Resource[] = [];
+  private sub?: Subscription;
+  maintenanceForm!: FormGroup;
 
-  records: MaintenanceRecord[] = [
-    {
-      resource: 'Excavator EX-01',
-      type: 'Preventive',
-      maintenanceDate: '2026-07-20',
-      nextDate: '2026-10-20',
-      cost: 4500,
-      servicedBy: 'John',
-      remarks: 'Oil changed',
-      status: 'Upcoming'
-    },
-    {
-      resource: 'Tower Crane TC-02',
-      type: 'Corrective',
-      maintenanceDate: '2026-07-18',
-      nextDate: '-',
-      cost: 12000,
-      servicedBy: 'Mike',
-      remarks: 'Hydraulic repair',
-      status: 'Completed'
-    }
-  ];
-
-  get filteredRecords() {
-    return this.records.filter(r =>
-      (this.selectedType === 'All' || r.type === this.selectedType) &&
-      r.resource.toLowerCase().includes(this.searchText.toLowerCase())
-    );
+  constructor(
+    private location: Location,
+    private resourceData: ResourceDataService,
+    private fb: FormBuilder
+  ) {
+    this.initForm();
   }
 
-  goBack() {
+  private initForm() {
+    this.maintenanceForm = this.fb.group({
+      resourceId: ['', Validators.required],
+      maintenanceType: ['Preventive', Validators.required],
+      maintenanceDate: ['', Validators.required],
+      nextMaintenanceDate: [''],
+      maintenanceCost: [0, Validators.min(0)],
+      servicedBy: ['', Validators.required],
+      remarks: ['']
+    });
+  }
+
+  ngOnInit() {
+    this.sub = this.resourceData.maintenance$.subscribe(records => {
+      this.allRecords = records;
+    });
+    this.resourceData.resources$.subscribe(r => this.availableResources = r);
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
+
+  get filteredRecords() {
+    return this.allRecords.filter(r => {
+      const matchSearch = !this.searchText || 
+        r.resourceId.toLowerCase().includes(this.searchText.toLowerCase()) || 
+        (r as any).resourceName?.toLowerCase().includes(this.searchText.toLowerCase());
+      const matchType = this.selectedType === 'All' || r.maintenanceType === this.selectedType;
+      return matchSearch && matchType;
+    });
+  }
+
+  goBack(): void {
     this.location.back();
   }
 
   scheduleMaintenance() {
+    this.initForm();
     this.showModal = true;
   }
 
@@ -73,4 +76,12 @@ export class MaintenanceSchedulingComponent {
     this.showModal = false;
   }
 
+  saveMaintenance() {
+    if (this.maintenanceForm.invalid) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+    this.resourceData.addMaintenance(this.maintenanceForm.value);
+    this.closeModal();
+  }
 }

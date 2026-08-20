@@ -70,9 +70,7 @@ export class InventoryDataService {
   requests$ = this.requests$$.asObservable();
   allocations$ = this.allocations$$.asObservable();
 
-  constructor(private http: HttpClient) {
-    this.loadAll();
-  }
+  constructor(private http: HttpClient) {}
 
 
   private headers(): HttpHeaders {
@@ -92,13 +90,13 @@ export class InventoryDataService {
 
   loadAll() {
     forkJoin({
-      inventory: this.http.get<ApiInventory[]>(`${this.base}/enriched`, { headers: this.headers() })
-        .pipe(catchError(this.err([]))),
-      materials: this.http.get<ApiMaterial[]>(`${this.base}/materials/enriched`, { headers: this.headers() })
-        .pipe(catchError(this.err([]))),
-    }).subscribe(({ inventory, materials }) => {
+      inventory: this.http.get<any[]>(`${this.base}/enriched`, { headers: this.headers() }).pipe(catchError(this.err([]))),
+      materials: this.http.get<any[]>(`${this.base}/materials/enriched`, { headers: this.headers() }).pipe(catchError(this.err([]))),
+      allocations: this.http.get<any[]>(`${environment.apiUrl}/material-allocations`, { headers: this.headers() }).pipe(catchError(this.err([]))),
+    }).subscribe(({ inventory, materials, allocations }) => {
       this.inventory$$.next(inventory.map(mapInventory));
       this.materials$$.next(materials.map(mapMaterial));
+      this.allocations$$.next(allocations || []);
     });
   }
 
@@ -177,8 +175,18 @@ export class InventoryDataService {
       allocatedDate: new Date().toISOString().split('T')[0],
       status: 'Reserved',
     };
+    
+    // Optimistic update
     this.allocations$$.next([newAllocation, ...this.allocations$$.value]);
     this._reduceStock(allocation.materialId, allocation.allocatedQuantity);
+
+    // Save to backend
+    this.http.post(`${environment.apiUrl}/material-allocations`, newAllocation, { headers: this.headers() })
+      .pipe(catchError(this.err(null)))
+      .subscribe(() => {
+        // Reload everything so analytics picks it up
+        this.loadAll();
+      });
   }
 
   issueAllocation(allocationId: string): void {

@@ -27,7 +27,7 @@
         <input type="text" formControlName="fullName" placeholder="e.g. Rajesh Sharma" />
       </label>
       <label>
-        <span>Employee Code</span>
+        <span>User ID</span>
         <input type="text" formControlName="employeeCode" placeholder="e.g. EMP-1042" />
       </label>
       <label>
@@ -37,13 +37,7 @@
           <option *ngFor="let c of categories.slice(1)" [value]="c">{{ c }}</option>
         </select>
       </label>
-      <label>
-        <span>Project</span>
-        <select formControlName="project">
-          <option value="" disabled selected>Select project</option>
-          <option *ngFor="let p of projectNames" [value]="p">{{ p }}</option>
-        </select>
-      </label>
+
       <label>
         <span>Contact Number</span>
         <input type="text" formControlName="contact" placeholder="e.g. +91 98765 43210" />

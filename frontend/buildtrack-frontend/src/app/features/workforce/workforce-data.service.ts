@@ -147,7 +147,10 @@ export class WorkforceDataService {
   loadShifts() {
     this.http.get<ApiShift[]>(`${this.base}/shifts`, { headers: this.headers() })
       .pipe(catchError(this.handleError([])))
-      .subscribe(data => this.shifts$$.next(data.map(mapShift)));
+      .subscribe(data => {
+        console.log("FETCHED SHIFTS FROM BACKEND: ", data);
+        this.shifts$$.next(data.map(mapShift));
+      });
   }
 
   get projectNames(): string[] {
@@ -216,10 +219,9 @@ export class WorkforceDataService {
     }
 
     // Persist to backend (upsert)
-    const projectNumericId = 1; // fallback; real implementation should resolve project_id from emp.project
     const payload = {
       employee_id: numericId,
-      project_id: projectNumericId,
+      project_name: emp.project,
       attendance_date: date,
       attendance_status: status,
       check_in_time: (status === 'Present' || status === 'Half Day')
@@ -271,7 +273,7 @@ export class WorkforceDataService {
     const numericEmpId = parseInt(shift.employeeId.replace('E-', ''), 10);
     const payload = {
       employee_id: numericEmpId,
-      project_id: 1, // fallback
+      project_name: shift.project,
       shift_type: shift.shiftType,
       shift_date: shift.shiftDate,
       start_time: shift.startTime,

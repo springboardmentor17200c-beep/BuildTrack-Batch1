@@ -1,0 +1,54 @@
+[
+  {
+    "materialId": "MAT-3",
+    "materialName": "steel",
+    "projectId": "P-17",
+    "projectName": "village",
+    "allocatedQuantity": 1700,
+    "allocatedBy": "yjh",
+    "issuedTo": "ghjk",
+    "remarks": "ghkj",
+    "allocationId": "ALL-1787132796669",
+    "allocatedDate": "2026-08-19",
+    "status": "Reserved"
+  },
+  {
+    "materialId": "MAT-2",
+    "materialName": "sand",
+    "projectId": "P-17",
+    "projectName": "village",
+    "allocatedQuantity": 500,
+    "allocatedBy": "gjk",
+    "issuedTo": "gjk",
+    "remarks": "ghk",
+    "allocationId": "ALL-1787132732204",
+    "allocatedDate": "2026-08-19",
+    "status": "Reserved"
+  },
+  {
+    "materialId": "MAT-2",
+    "materialName": "sand",
+    "projectId": "P-7",
+    "projectName": "Town hall",
+    "allocatedQuantity": 500,
+    "allocatedBy": "df",
+    "issuedTo": "df",
+    "remarks": "gh",
+    "allocationId": "ALL-1787123399907",
+    "allocatedDate": "2026-08-19",
+    "status": "Reserved"
+  },
+  {
+    "materialId": "MAT-5",
+    "materialName": "bricks",
+    "projectId": "P-16",
+    "projectName": "Aadni power",
+    "allocatedQuantity": 500,
+    "allocatedBy": "cx",
+    "issuedTo": "xc",
+    "remarks": "xc",
+    "allocationId": "ALL-1787123335027",
+    "allocatedDate": "2026-08-19",
+    "status": "Reserved"
+  }
+]

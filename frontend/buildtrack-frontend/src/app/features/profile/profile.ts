@@ -27,8 +27,11 @@ export class Profile implements OnInit {
 
   profileError = '';
   profileSuccess = false;
+  profileSubmitting = false;
+
   passwordError = '';
   passwordSuccess = false;
+  passwordSubmitting = false;
 
   activeSection: 'details' | 'security' = 'details';
 
@@ -70,12 +73,21 @@ export class Profile implements OnInit {
       return;
     }
 
-    const result = this.auth.updateProfile(this.user.userId, this.profileForm.value);
-    if (!result.success) {
-      this.profileError = result.error || 'Could not update profile.';
-      return;
-    }
-    this.profileSuccess = true;
+    this.profileSubmitting = true;
+    this.auth.updateProfile(this.user.userId, this.profileForm.value).subscribe({
+      next: result => {
+        this.profileSubmitting = false;
+        if (result.success) {
+          this.profileSuccess = true;
+        } else {
+          this.profileError = result.error || 'Could not update profile.';
+        }
+      },
+      error: () => {
+        this.profileSubmitting = false;
+        this.profileError = 'Could not update profile.';
+      }
+    });
   }
 
   changePassword() {
@@ -88,13 +100,22 @@ export class Profile implements OnInit {
     }
 
     const { currentPassword, newPassword } = this.passwordForm.value;
-    const result = this.auth.changePassword({ currentPassword, newPassword });
-    if (!result.success) {
-      this.passwordError = result.error || 'Could not change password.';
-      return;
-    }
-    this.passwordSuccess = true;
-    this.passwordForm.reset();
+    this.passwordSubmitting = true;
+    this.auth.changePassword({ currentPassword, newPassword }).subscribe({
+      next: result => {
+        this.passwordSubmitting = false;
+        if (result.success) {
+          this.passwordSuccess = true;
+          this.passwordForm.reset();
+        } else {
+          this.passwordError = result.error || 'Could not change password.';
+        }
+      },
+      error: () => {
+        this.passwordSubmitting = false;
+        this.passwordError = 'Could not change password.';
+      }
+    });
   }
 
   logout() {

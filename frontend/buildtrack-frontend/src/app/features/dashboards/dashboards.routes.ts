@@ -1,3 +1,4 @@
+import { WorkerDashboardComponent } from './worker-dashboard/worker-dashboard.component';
 import { Routes } from '@angular/router';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { PmDashboardComponent } from './pm-dashboard/pm-dashboard.component';
@@ -18,4 +19,5 @@ export const DASHBOARD_ROUTES: Routes = [
   { path: 'site-engineer', component: SiteEngineerDashboardComponent, canActivate: [roleGuard('dashboard-site-engineer')] },
   { path: 'contractor', component: ContractorDashboardComponent, canActivate: [roleGuard('dashboard-contractor')] },
   { path: 'client', component: ClientDashboardComponent, canActivate: [roleGuard('dashboard-client')] },
+  { path: 'worker', component: WorkerDashboardComponent, canActivate: [roleGuard('dashboard-worker')] },
 ];
