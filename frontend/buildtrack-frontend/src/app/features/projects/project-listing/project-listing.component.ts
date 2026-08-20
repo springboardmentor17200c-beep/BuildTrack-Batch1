@@ -30,6 +30,8 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
   // DB-backed dropdown options for the create form
   dbCategories: ApiCategory[] = [];
   dbStatuses: ProjectStatusOption[] = [];
+  availableManagers: {id: number, name: string}[] = [];
+  availableClients: {id: number, name: string}[] = [];
 
   showForm = false;
   submitting = false;
@@ -57,6 +59,14 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
+    this.subs.add(
+      this.auth.getAllUsers().subscribe(users => {
+        this.availableManagers = users.filter(u => u.role === 'Project Manager').map(u => ({ id: parseInt(u.userId), name: u.fullName || u.username }));
+        this.availableClients = users.filter(u => u.role === 'Client / Owner' || u.role === ('Client' as any)).map(u => ({ id: parseInt(u.userId), name: u.fullName || u.companyName || u.username }));
+      })
+    );
+
     this.subs.add(this.data.projects$.subscribe(p => (this.allProjects = p)));
     this.subs.add(this.data.categories$.subscribe(c => (this.dbCategories = c)));
     this.subs.add(this.data.statuses$.subscribe(s => (this.dbStatuses = s)));
@@ -109,8 +119,8 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
       startDate:       this.form.value.startDate,
       expectedEndDate: this.form.value.expectedEndDate,
       companyId,
-      managerId,
-      clientId: managerId,
+      managerId: parseInt(this.form.value.manager, 10),
+        clientId: parseInt(this.form.value.client, 10),
     }).subscribe({
       next: (result) => {
         this.submitting = false;

@@ -39,11 +39,17 @@
           </label>
           <label>
             <span>Manager</span>
-            <input type="text" formControlName="manager" placeholder="e.g. Priya Menon" />
+            <select formControlName="manager">
+            <option value="" disabled selected>Select a manager</option>
+            <option *ngFor="let m of availableManagers" [value]="m.id">{{ m.name }}</option>
+          </select>
           </label>
           <label>
             <span>Client</span>
-            <input type="text" formControlName="client" placeholder="e.g. L&T Realty" />
+            <select formControlName="client">
+            <option value="" disabled selected>Select a client</option>
+            <option *ngFor="let c of availableClients" [value]="c.id">{{ c.name }}</option>
+          </select>
           </label>
           <label>
             <span>Start Date</span>

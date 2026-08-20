@@ -20,7 +20,12 @@ def get_progress_analytics(
     current_user=Depends(require_roles(*ALL_ROLES)),
 ):
     """Project progress: completion % derived from milestones per project."""
-    projects = db.query(Project).all()
+    query = db.query(Project)
+    if current_user.role and current_user.role.role_name == "Project Manager":
+        query = query.filter(Project.manager_id == current_user.user_id)
+    elif current_user.role and current_user.role.role_name in ("Client", "Client / Owner"):
+        query = query.filter(Project.client_id == current_user.user_id)
+    projects = query.all()
     result = []
     for p in projects:
         milestones = db.query(ProjectMilestone).filter(ProjectMilestone.project_id == p.project_id).all()

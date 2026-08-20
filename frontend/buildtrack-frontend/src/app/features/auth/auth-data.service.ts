@@ -256,11 +256,11 @@ export class AuthDataService {
     );
   }
 
-  /** GET /auth/users — list all users (admin only). */
-  getAllUsers(): AppUser[] {
-    // Returns cached session user; full list is fetched via backend when needed.
-    const current = this.currentUser;
-    return current ? [current] : [];
+  /** GET /auth/users — list all users for dropdowns. */
+  getAllUsers(): Observable<AppUser[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/auth/users`, { headers: this.authHeaders() }).pipe(
+      map(users => users.map(toAppUser))
+    );
   }
 }
-
+
