@@ -118,11 +118,7 @@ export class InventoryDataService {
 
   getAvailableForAllocation(materialId: string): number {
     const record = this.inventory$$.value.find(inv => inv.materialId === materialId);
-    if (!record) return 0;
-    const reserved = this.allocations$$.value
-      .filter(a => a.materialId === materialId && a.status === 'Reserved')
-      .reduce((sum, a) => sum + a.allocatedQuantity, 0);
-    return record.availableQuantity - reserved;
+    return record ? record.availableQuantity : 0;
   }
 
   // ── Material Requests ────────────────────────────────────────────────
