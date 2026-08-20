@@ -7,12 +7,12 @@ class UserResponse(BaseModel):
     user_id: int
     full_name: str
     email: EmailStr
-    phone_number: str
+    phone_number: str | None = None
     company_id: int | None = None
     role_id: int | None = None
     role: str | None = None
-    is_active: bool
-    created_at: datetime
+    is_active: bool | None = True
+    created_at: datetime | None = None
 
     model_config = {
         "from_attributes": True
