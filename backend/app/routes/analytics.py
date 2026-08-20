@@ -10,6 +10,7 @@ from app.db.database import get_db
 from app.models.project import Project
 from app.models.project_milestone import ProjectMilestone
 from app.models.vendor import Vendor
+from app.models.inventory import Material
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
@@ -76,6 +77,14 @@ def get_budget_analytics(
     db_requests = store_data.get("requests", {})
     db_pos = store_data.get("purchase_orders", {})
 
+    # Load material allocations
+    allocations_path = os.path.join(os.path.dirname(__file__), "..", "..", "material_allocations.json")
+    try:
+        with open(allocations_path, "r", encoding="utf-8") as f:
+            allocations_data = json.load(f)
+    except Exception:
+        allocations_data = []
+
     # ── Build avg unit price per material name from all procurement POs ──
     material_unit_prices: dict = {}  # material_name -> list of unit prices
     for po in db_pos.values():
@@ -125,13 +134,28 @@ def get_budget_analytics(
                 # Daily rate
                 labour_cost += pay_rate
 
-        # ── Material cost: from procurement requests linked to this project ──
+        # ── Material cost: from procurement requests AND inventory allocations ──
         project_id_str = f"P-{pid}"
         material_cost = 0.0
+        
+        # 1. Add cost from procurement requests
         for req in db_requests.values():
             if req.get("projectId") == project_id_str:
                 mat_name = (req.get("material") or "").lower().strip()
                 qty = float(req.get("receivedQuantity") or req.get("quantity") or 0)
+                unit_price = avg_unit_price.get(mat_name, 0)
+                material_cost += qty * unit_price
+
+        # 2. Add cost from inventory allocations
+        for alloc in allocations_data:
+            if alloc.get("projectId") == project_id_str:
+                mat_id = alloc.get("materialId")
+                qty = float(alloc.get("allocatedQuantity") or 0)
+                
+                # Fetch material name from DB to match with avg unit price
+                mat = db.query(Material).filter(Material.material_id == int(mat_id.replace('MAT-',''))).first() if isinstance(mat_id, str) and mat_id.startswith('MAT-') else None
+                mat_name = mat.material_name.lower().strip() if mat else ""
+                
                 unit_price = avg_unit_price.get(mat_name, 0)
                 material_cost += qty * unit_price
 

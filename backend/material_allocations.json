@@ -1,0 +1,28 @@
+[
+  {
+    "materialId": "MAT-2",
+    "materialName": "sand",
+    "projectId": "P-7",
+    "projectName": "Town hall",
+    "allocatedQuantity": 500,
+    "allocatedBy": "df",
+    "issuedTo": "df",
+    "remarks": "gh",
+    "allocationId": "ALL-1787123399907",
+    "allocatedDate": "2026-08-19",
+    "status": "Reserved"
+  },
+  {
+    "materialId": "MAT-5",
+    "materialName": "bricks",
+    "projectId": "P-16",
+    "projectName": "Aadni power",
+    "allocatedQuantity": 500,
+    "allocatedBy": "cx",
+    "issuedTo": "xc",
+    "remarks": "xc",
+    "allocationId": "ALL-1787123335027",
+    "allocatedDate": "2026-08-19",
+    "status": "Reserved"
+  }
+]
