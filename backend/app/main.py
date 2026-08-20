@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, company, project, project_milestone, vendor, procurement, material, inventory, report
+from app.routes import auth, company, project, project_milestone, vendor, material, inventory, report
+from routes.procurement import router as procurement_router
 from app.db.init_db import init_db
 
 app = FastAPI(
@@ -34,7 +35,7 @@ app.include_router(company.router)
 app.include_router(project.router)
 app.include_router(project_milestone.router)
 app.include_router(vendor.router)
-app.include_router(procurement.router)
+app.include_router(procurement_router)
 app.include_router(material.router)
 app.include_router(inventory.router)
 app.include_router(report.router)

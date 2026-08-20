@@ -40,31 +40,31 @@ export class ProcurementDataService {
   // =========================
   getVendors(): Observable<Vendor[]> {
     return this.http
-      .get<Vendor[]>(`${this.apiUrl}/vendors`, { headers: this.authHeaders() })
+      .get<Vendor[]>(`${environment.apiUrl}/vendors`, { headers: this.authHeaders() })
       .pipe(catchError(this.handleError));
   }
 
   getVendor(id: string): Observable<Vendor> {
     return this.http
-      .get<Vendor>(`${this.apiUrl}/vendors/${id}`, { headers: this.authHeaders() })
+      .get<Vendor>(`${environment.apiUrl}/vendors/${id}`, { headers: this.authHeaders() })
       .pipe(catchError(this.handleError));
   }
 
   createVendor(payload: VendorCreatePayload): Observable<Vendor> {
     return this.http
-      .post<Vendor>(`${this.apiUrl}/vendors`, payload, { headers: this.authHeaders() })
+      .post<Vendor>(`${environment.apiUrl}/vendors`, payload, { headers: this.authHeaders() })
       .pipe(catchError(this.handleError));
   }
 
   updateVendor(id: string, payload: Partial<VendorCreatePayload>): Observable<Vendor> {
     return this.http
-      .put<Vendor>(`${this.apiUrl}/vendors/${id}`, payload, { headers: this.authHeaders() })
+      .put<Vendor>(`${environment.apiUrl}/vendors/${id}`, payload, { headers: this.authHeaders() })
       .pipe(catchError(this.handleError));
   }
 
   deleteVendor(id: string): Observable<void> {
     return this.http
-      .delete<void>(`${this.apiUrl}/vendors/${id}`, { headers: this.authHeaders() })
+      .delete<void>(`${environment.apiUrl}/vendors/${id}`, { headers: this.authHeaders() })
       .pipe(catchError(this.handleError));
   }
 

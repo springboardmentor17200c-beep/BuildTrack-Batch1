@@ -121,9 +121,3 @@ class Project(Base):
         back_populates="project",
         cascade="all, delete-orphan",
     )
-
-    inventory_items = relationship(
-        "Inventory",
-        back_populates="project",
-        cascade="all, delete-orphan",
-    )
