@@ -9,13 +9,13 @@
   text-align: center;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--bt-text-muted);
+  color: var(--bt-muted);
   padding-bottom: 8px;
 }
 
 .bt-calendar-day {
-  background: var(--bt-surface-color);
-  border: 1px solid var(--bt-border-color);
+  background: var(--bt-panel-bg);
+  border: 1px solid var(--bt-panel-border);
   border-radius: 8px;
   min-height: 80px;
   padding: 8px;
@@ -33,7 +33,7 @@
 .bt-day-number {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--bt-text-color);
+  color: var(--bt-text);
 }
 
 .bt-day-badge {
@@ -54,7 +54,7 @@
   justify-content: center;
   gap: 16px;
   padding: 16px;
-  border-top: 1px solid var(--bt-border-color);
+  border-top: 1px solid var(--bt-panel-border);
 }
 
 .bt-legend-item {
@@ -62,7 +62,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
-  color: var(--bt-text-muted);
+  color: var(--bt-muted);
 }
 
 .bt-status-dot {

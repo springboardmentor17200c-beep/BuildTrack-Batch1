@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProjectProgressSummary } from '../models/analytics.model';
 import { AnalyticsDataService } from '../analytics-data.service';
-import { } from '../../shared/sidebar/app-sidebar.component';
-
+import { Chart } from 'chart.js/auto';
 
 interface CategorySummary {
   category: string;
@@ -20,7 +19,13 @@ interface CategorySummary {
   templateUrl: './progress-analytics.component.html',
   styleUrls: ['./progress-analytics.component.css'],
 })
-export class ProgressAnalyticsComponent implements OnInit {
+export class ProgressAnalyticsComponent implements OnInit, AfterViewInit {
+  @ViewChild('statusChart') statusChartRef!: ElementRef;
+  @ViewChild('completionChart') completionChartRef!: ElementRef;
+
+  statusChart: any;
+  completionChart: any;
+
   projects: ProjectProgressSummary[] = [];
   categorySummaries: CategorySummary[] = [];
 
@@ -36,7 +41,47 @@ export class ProgressAnalyticsComponent implements OnInit {
     this.data.progress$.subscribe(rows => {
       this.projects = rows;
       this.computeStats();
+      this.updateCharts();
     });
+  }
+
+  ngAfterViewInit() {
+    this.initCharts();
+  }
+
+  private initCharts() {
+    const ctxStatus = this.statusChartRef?.nativeElement;
+    if (ctxStatus) {
+      this.statusChart = new Chart(ctxStatus, {
+        type: 'pie',
+        data: { labels: ['In Progress', 'On Hold', 'Completed'], datasets: [{ data: [0,0,0], backgroundColor: ['#3b82f6', '#f97316', '#10b981'] }] },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    const ctxComp = this.completionChartRef?.nativeElement;
+    if (ctxComp) {
+      this.completionChart = new Chart(ctxComp, {
+        type: 'bar',
+        data: { labels: [], datasets: [{ label: 'Completion %', data: [], backgroundColor: '#8b5cf6' }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    }
+    
+    this.updateCharts();
+  }
+
+  private updateCharts() {
+    if (this.statusChart) {
+      this.statusChart.data.datasets[0].data = [this.inProgressCount, this.onHoldCount, this.completedCount];
+      this.statusChart.update();
+    }
+
+    if (this.completionChart && this.projects.length > 0) {
+      this.completionChart.data.labels = this.projects.map(p => p.project);
+      this.completionChart.data.datasets[0].data = this.projects.map(p => p.completionPercentage);
+      this.completionChart.update();
+    }
   }
 
   private computeStats() {

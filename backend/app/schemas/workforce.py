@@ -57,7 +57,8 @@ class EmployeeResponse(BaseModel):
 # ── Attendance ───────────────────────────────────────
 class AttendanceCreate(BaseModel):
     employee_id: int
-    project_id: int
+    project_id: Optional[int] = None
+    project_name: Optional[str] = None
     attendance_date: date
     attendance_status: str             # Present | Absent | Half Day | On Leave
     check_in_time: Optional[datetime] = None
