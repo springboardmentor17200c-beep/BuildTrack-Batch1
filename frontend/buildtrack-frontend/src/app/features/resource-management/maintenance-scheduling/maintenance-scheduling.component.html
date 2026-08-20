@@ -82,10 +82,10 @@
       </button>
     </div>
 
-    <div class="bt-form-grid">
+    <form [formGroup]="maintenanceForm" class="bt-form-grid">
       <label >
         <span>Equipment</span>
-        <select>
+        <select formControlName="resourceId">
           <option value="" disabled selected>Select Equipment</option>
           <option *ngFor="let res of availableResources" [value]="res.resourceId">{{ res.resourceName }}</option>
         </select>
@@ -93,34 +93,34 @@
 
       <label >
         <span>Maintenance Type</span>
-        <select>
-          <option>Preventive</option>
-          <option>Corrective</option>
+        <select formControlName="maintenanceType">
+          <option value="Preventive">Preventive</option>
+          <option value="Corrective">Corrective</option>
         </select>
       </label>
 
       <div style="display: flex; gap: 16px;">
         <label style="flex: 1;">
           <span>Date</span>
-          <input type="date">
+          <input type="date" formControlName="maintenanceDate">
         </label>
         
         <label style="flex: 1;">
           <span>Next Due Date</span>
-          <input type="date">
+          <input type="date" formControlName="nextMaintenanceDate">
         </label>
       </div>
 
       <label >
-        <span>Estimated Cost (₹)</span>
-        <input type="number" placeholder="Enter cost">
+        <span>Estimated Cost (?)</span>
+        <input type="number" placeholder="Enter cost" formControlName="maintenanceCost">
       </label>
       
       <label >
         <span>Serviced By</span>
-        <input type="text" placeholder="Service provider name">
+        <input type="text" placeholder="Service provider name" formControlName="servicedBy">
       </label>
-    </div>
+    </form>
 
     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
       <button class="bt-filter-btn" (click)="closeModal()">Cancel</button>

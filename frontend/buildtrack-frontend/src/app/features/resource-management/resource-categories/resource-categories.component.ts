@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -23,10 +23,12 @@ export class ResourceCategoriesComponent implements OnInit {
 
   showModal = false;
   categories: ResourceCategory[] = [];
+  searchText = '';
   
   // Form fields
   newCategoryName = '';
   newCategoryDesc = '';
+  editCategoryId: number | null = null;
 
   constructor(private location: Location, private http: HttpClient) {}
 
@@ -35,8 +37,18 @@ export class ResourceCategoriesComponent implements OnInit {
   }
 
   private get headers() {
-    const token = localStorage.getItem('buildtrack_access_token');
+    let token = '';
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      token = localStorage.getItem('buildtrack_access_token') || '';
+    }
     return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
+  }
+
+  get filteredCategories() {
+    return this.categories.filter(c => 
+      c.category_name.toLowerCase().includes(this.searchText.toLowerCase()) || 
+      c.description.toLowerCase().includes(this.searchText.toLowerCase())
+    );
   }
 
   loadCategories() {
@@ -59,9 +71,16 @@ export class ResourceCategoriesComponent implements OnInit {
     this.location.back();
   }
 
-  openModal() {
-    this.newCategoryName = '';
-    this.newCategoryDesc = '';
+  openModal(category?: ResourceCategory) {
+    if (category) {
+      this.editCategoryId = category.resource_category_id || null;
+      this.newCategoryName = category.category_name;
+      this.newCategoryDesc = category.description;
+    } else {
+      this.editCategoryId = null;
+      this.newCategoryName = '';
+      this.newCategoryDesc = '';
+    }
     this.showModal = true;
   }
 
@@ -76,6 +95,21 @@ export class ResourceCategoriesComponent implements OnInit {
       category_name: this.newCategoryName,
       description: this.newCategoryDesc
     };
+
+    if (this.editCategoryId) {
+      this.http.put(`${environment.apiUrl}/resources/categories/${this.editCategoryId}`, payload, this.headers)
+        .subscribe({
+          next: () => {
+            this.loadCategories();
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Error updating category', err);
+            alert('Failed to update category.');
+          }
+        });
+      return;
+    }
 
     this.http.post(`${environment.apiUrl}/resources/categories`, payload, this.headers)
       .subscribe({

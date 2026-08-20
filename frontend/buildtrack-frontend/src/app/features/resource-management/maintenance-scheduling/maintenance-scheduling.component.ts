@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MaintenanceRecord, Resource } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
@@ -8,7 +8,7 @@ import { ResourceDataService } from '../resource-data.service';
 @Component({
   selector: 'app-maintenance-scheduling',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './maintenance-scheduling.component.html',
   styleUrls: ['./maintenance-scheduling.component.css']
 })
@@ -20,11 +20,27 @@ export class MaintenanceSchedulingComponent implements OnInit, OnDestroy {
   allRecords: MaintenanceRecord[] = [];
   availableResources: Resource[] = [];
   private sub?: Subscription;
+  maintenanceForm!: FormGroup;
 
   constructor(
     private location: Location,
-    private resourceData: ResourceDataService
-  ) {}
+    private resourceData: ResourceDataService,
+    private fb: FormBuilder
+  ) {
+    this.initForm();
+  }
+
+  private initForm() {
+    this.maintenanceForm = this.fb.group({
+      resourceId: ['', Validators.required],
+      maintenanceType: ['Preventive', Validators.required],
+      maintenanceDate: ['', Validators.required],
+      nextMaintenanceDate: [''],
+      maintenanceCost: [0, Validators.min(0)],
+      servicedBy: ['', Validators.required],
+      remarks: ['']
+    });
+  }
 
   ngOnInit() {
     this.sub = this.resourceData.maintenance$.subscribe(records => {
@@ -52,6 +68,7 @@ export class MaintenanceSchedulingComponent implements OnInit, OnDestroy {
   }
 
   scheduleMaintenance() {
+    this.initForm();
     this.showModal = true;
   }
 
@@ -60,6 +77,11 @@ export class MaintenanceSchedulingComponent implements OnInit, OnDestroy {
   }
 
   saveMaintenance() {
+    if (this.maintenanceForm.invalid) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+    this.resourceData.addMaintenance(this.maintenanceForm.value);
     this.closeModal();
   }
 }
