@@ -30,7 +30,10 @@
   <div class="bt-sidebar-footer" *ngIf="currentUser">
     <div class="bt-sidebar-user" style="display: flex; align-items: center; justify-content: space-between;">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="bt-stat-icon blue" style="width:34px;height:34px;">{{ currentUser.fullName.charAt(0) }}</div>
+        <div class="bt-stat-icon blue" style="width:34px;height:34px;overflow:hidden;padding:0;">
+          <img *ngIf="currentUser.profileImage" [src]="currentUser.profileImage" style="width:100%;height:100%;object-fit:cover;" />
+          <span *ngIf="!currentUser.profileImage">{{ currentUser.fullName.charAt(0) }}</span>
+        </div>
         <div>
           <div class="bt-sidebar-username">{{ currentUser.fullName }}</div>
           <div class="bt-sidebar-userrole">{{ currentUser.role }}</div>

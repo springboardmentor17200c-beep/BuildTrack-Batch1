@@ -13,6 +13,7 @@ class UserResponse(BaseModel):
     role: str | None = None
     is_active: bool | None = True
     created_at: datetime | None = None
+    profile_image: str | None = None
 
     model_config = {
         "from_attributes": True

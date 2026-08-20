@@ -27,7 +27,8 @@ interface BackendUserProfile {
   assigned_projects?: string[];
   is_active: boolean;
   created_at?: string;
-}
+    profile_image?: string;
+  }
 
 function toAppUser(u: BackendUserProfile): AppUser {
   const computedFullName = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username || u.email;
@@ -47,7 +48,8 @@ function toAppUser(u: BackendUserProfile): AppUser {
     assignedProjects: u.assigned_projects ?? [],
     isActive: u.is_active,
     createdAt: u.created_at,
-  };
+      profileImage: u.profile_image,
+    };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -214,6 +216,9 @@ export class AuthDataService {
       full_name: updates.fullName,
       phone_number: updates.phoneNumber,
     };
+    if (updates.profileImage !== undefined) {
+      body['profile_image'] = updates.profileImage;
+    }
 
     return this.http.put<BackendUserProfile>(
       `${this.apiUrl}/auth/me`,

@@ -44,6 +44,7 @@ def build_user_response(user: User) -> UserResponse:
         role=role_name,
         is_active=bool(user.is_active) if user.is_active is not None else True,
         created_at=user.created_at,
+        profile_image=user.profile_image,
     )
 
 
