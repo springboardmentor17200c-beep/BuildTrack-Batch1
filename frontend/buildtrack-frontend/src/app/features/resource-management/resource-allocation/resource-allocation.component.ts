@@ -27,15 +27,15 @@ export class ResourceAllocationComponent implements OnInit {
     this.form = this.fb.group({
       resourceId: ['', Validators.required],
       project: ['', Validators.required],
-      allocatedBy: ['', Validators.required],
       allocationDate: ['', Validators.required],
       expectedReturnDate: ['', Validators.required],
+      remarks: [''],
     });
   }
 
   ngOnInit(): void {
     this.data.allocations$.subscribe(a => (this.allocations = a));
-    this.data.resources$.subscribe(r => (this.availableResources = r.filter(x => x.currentStatus === 'Available')));
+    this.data.resources$.subscribe(r => (this.availableResources = r));
     this.projectsData.projects$.subscribe(p => this.projectNames = p.map(x => x.projectName));
   }
 

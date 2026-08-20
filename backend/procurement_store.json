@@ -1,8 +1,287 @@
 {
   "vendors": {},
-  "requests": {},
-  "purchase_orders": {},
-  "deliveries": {},
-  "inventory": {},
-  "invoices": {}
+  "requests": {
+    "c380375e-3148-4b08-9648-fb856c9bf4fe": {
+      "projectId": "P-13",
+      "material": "sand",
+      "quantity": 500,
+      "requiredDate": "2026-08-18",
+      "priority": "Medium",
+      "id": "c380375e-3148-4b08-9648-fb856c9bf4fe",
+      "status": "Material Received",
+      "timeline": [
+        {
+          "timestamp": "2026-08-18T11:23:09.038718",
+          "action": "Site Engineer created request",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:23:14.057303",
+          "action": "PM approved request",
+          "user": null,
+          "notes": "Approved by Project Manager"
+        },
+        {
+          "timestamp": "2026-08-18T11:23:19.779926",
+          "action": "Procurement selected vendor (ID: 6)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:23:25.702466",
+          "action": "Admin generated Purchase Order (PO-1000)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:23:28.246385",
+          "action": "Admin sent Purchase Order to vendor",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:24:16.932359",
+          "action": "Material fully received (500/500)",
+          "user": null,
+          "notes": null
+        }
+      ],
+      "receivedQuantity": 500,
+      "comments": "Approved by Project Manager",
+      "vendorId": "6",
+      "poId": "fde2d35e-6b51-4bc8-92f3-619a29410beb"
+    },
+    "f547ab11-011b-4570-ad87-12619e1aa51e": {
+      "projectId": "P-8",
+      "material": "sand",
+      "quantity": 1000,
+      "requiredDate": "2026-08-20",
+      "priority": "High",
+      "id": "f547ab11-011b-4570-ad87-12619e1aa51e",
+      "status": "Material Received",
+      "timeline": [
+        {
+          "timestamp": "2026-08-18T11:32:26.810477",
+          "action": "Site Engineer created request",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:32:27.966094",
+          "action": "PM approved request",
+          "user": null,
+          "notes": "Approved by Project Manager"
+        },
+        {
+          "timestamp": "2026-08-18T11:32:31.187057",
+          "action": "Procurement selected vendor (ID: 6)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:32:34.268168",
+          "action": "Admin generated Purchase Order (PO-1001)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:32:37.288060",
+          "action": "Admin sent Purchase Order to vendor",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:33:27.608876",
+          "action": "Material fully received (1000/1000)",
+          "user": null,
+          "notes": null
+        }
+      ],
+      "receivedQuantity": 1000,
+      "comments": "Approved by Project Manager",
+      "vendorId": "6",
+      "poId": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a"
+    },
+    "8c1c0fc2-2d91-4b17-be84-6bbfda9dfee6": {
+      "projectId": "P-13",
+      "material": "steel",
+      "quantity": 700,
+      "requiredDate": "2026-08-18",
+      "priority": "Medium",
+      "id": "8c1c0fc2-2d91-4b17-be84-6bbfda9dfee6",
+      "status": "Material Received",
+      "timeline": [
+        {
+          "timestamp": "2026-08-18T11:39:11.447278",
+          "action": "Site Engineer created request",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:39:12.445879",
+          "action": "PM approved request",
+          "user": null,
+          "notes": "Approved by Project Manager"
+        },
+        {
+          "timestamp": "2026-08-18T11:39:16.550177",
+          "action": "Procurement selected vendor (ID: 6)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:39:19.606809",
+          "action": "Admin generated Purchase Order (PO-1002)",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:39:22.487154",
+          "action": "Admin sent Purchase Order to vendor",
+          "user": null,
+          "notes": null
+        },
+        {
+          "timestamp": "2026-08-18T11:40:15.221658",
+          "action": "Material fully received (700/700)",
+          "user": null,
+          "notes": null
+        }
+      ],
+      "receivedQuantity": 700,
+      "comments": "Approved by Project Manager",
+      "vendorId": "6",
+      "poId": "40fcb36e-2a17-4a52-acc2-dae6bcd4c65c"
+    }
+  },
+  "purchase_orders": {
+    "fde2d35e-6b51-4bc8-92f3-619a29410beb": {
+      "vendorId": "6",
+      "requestId": "c380375e-3148-4b08-9648-fb856c9bf4fe",
+      "materials": [
+        "sand"
+      ],
+      "quantity": 500,
+      "unitPrice": 250.0,
+      "totalAmount": 127500.0,
+      "expectedDeliveryDate": "2026-08-19",
+      "id": "fde2d35e-6b51-4bc8-92f3-619a29410beb",
+      "poNumber": "PO-1000",
+      "status": "Delivered"
+    },
+    "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a": {
+      "vendorId": "6",
+      "requestId": "f547ab11-011b-4570-ad87-12619e1aa51e",
+      "materials": [
+        "sand"
+      ],
+      "quantity": 1000,
+      "unitPrice": 250.0,
+      "totalAmount": 255000.0,
+      "expectedDeliveryDate": "2026-08-18",
+      "id": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a",
+      "poNumber": "PO-1001",
+      "status": "Delivered"
+    },
+    "40fcb36e-2a17-4a52-acc2-dae6bcd4c65c": {
+      "vendorId": "6",
+      "requestId": "8c1c0fc2-2d91-4b17-be84-6bbfda9dfee6",
+      "materials": [
+        "steel"
+      ],
+      "quantity": 700,
+      "unitPrice": 200.0,
+      "totalAmount": 147000.0,
+      "expectedDeliveryDate": "2026-08-18",
+      "id": "40fcb36e-2a17-4a52-acc2-dae6bcd4c65c",
+      "poNumber": "PO-1002",
+      "status": "Delivered"
+    }
+  },
+  "deliveries": {
+    "85c9e519-a3c3-4dff-be54-3dad8f4cdd2e": {
+      "poId": "fde2d35e-6b51-4bc8-92f3-619a29410beb",
+      "material": "sand",
+      "quantity": 500,
+      "acceptedQuantity": 500,
+      "rejectedQuantity": 0,
+      "deliveryDate": "2026-08-18",
+      "status": "Received",
+      "id": "85c9e519-a3c3-4dff-be54-3dad8f4cdd2e"
+    },
+    "577337bf-edd9-42fb-a4e8-0d5c39e69ca3": {
+      "poId": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a",
+      "material": "sand",
+      "quantity": 1000,
+      "acceptedQuantity": 1000,
+      "rejectedQuantity": 0,
+      "deliveryDate": "2026-08-18",
+      "status": "Received",
+      "id": "577337bf-edd9-42fb-a4e8-0d5c39e69ca3"
+    },
+    "919db9af-f6e4-486a-9e4d-d0068f7f2054": {
+      "poId": "40fcb36e-2a17-4a52-acc2-dae6bcd4c65c",
+      "material": "steel",
+      "quantity": 700,
+      "acceptedQuantity": 700,
+      "rejectedQuantity": 0,
+      "deliveryDate": "2026-08-18",
+      "status": "Received",
+      "id": "919db9af-f6e4-486a-9e4d-d0068f7f2054"
+    }
+  },
+  "inventory": {
+    "sand": {
+      "id": "3b1e824f-77f0-4693-b9a1-eea8314b5489",
+      "material": "sand",
+      "stock": 1500
+    },
+    "steel": {
+      "id": "57b1827d-2434-446f-b6d3-f98d2faffdea",
+      "material": "steel",
+      "stock": 700
+    }
+  },
+  "invoices": {
+    "56336a65-de85-485d-8dd7-095ddd2b7952": {
+      "vendorId": "6",
+      "purchaseOrderId": "fde2d35e-6b51-4bc8-92f3-619a29410beb",
+      "unitPrice": 250.0,
+      "amount": 127500.0,
+      "gst": 2.0,
+      "date": "2026-08-18",
+      "paymentDate": "2026-08-18T11:24:20.976807",
+      "paymentRef": "TRX-CDEC13A7",
+      "id": "56336a65-de85-485d-8dd7-095ddd2b7952",
+      "invoiceNo": "INV-1000",
+      "paymentStatus": "Paid"
+    },
+    "d997f872-1e2f-4b5e-827b-6350a06f6e1f": {
+      "vendorId": "6",
+      "purchaseOrderId": "e5b90563-41fb-4dd3-ae1a-6d9420e06a4a",
+      "unitPrice": 250.0,
+      "amount": 255000.0,
+      "gst": 2.0,
+      "date": "2026-08-18",
+      "paymentDate": "2026-08-18T11:33:30.040745",
+      "paymentRef": "TRX-3832541A",
+      "id": "d997f872-1e2f-4b5e-827b-6350a06f6e1f",
+      "invoiceNo": "INV-1001",
+      "paymentStatus": "Paid"
+    },
+    "1bb76163-62c0-4355-9107-cce88ce7d997": {
+      "vendorId": "6",
+      "purchaseOrderId": "40fcb36e-2a17-4a52-acc2-dae6bcd4c65c",
+      "unitPrice": 200.0,
+      "amount": 147000.0,
+      "gst": 5.0,
+      "date": "2026-08-18",
+      "paymentDate": "2026-08-18T11:40:17.046117",
+      "paymentRef": "TRX-FCDC7778",
+      "id": "1bb76163-62c0-4355-9107-cce88ce7d997",
+      "invoiceNo": "INV-1002",
+      "paymentStatus": "Paid"
+    }
+  }
 }

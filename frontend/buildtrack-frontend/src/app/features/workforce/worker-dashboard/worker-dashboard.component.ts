@@ -47,7 +47,6 @@ export class WorkerDashboardComponent implements OnInit {
       fullName: ['', Validators.required],
       employeeCode: ['', Validators.required],
       workforceCategory: ['', Validators.required],
-      project: ['', Validators.required],
       contact: ['', Validators.required],
       experienceYears: ['', [Validators.required, Validators.min(0)]],
       payRate: ['', [Validators.required, Validators.min(0)]],

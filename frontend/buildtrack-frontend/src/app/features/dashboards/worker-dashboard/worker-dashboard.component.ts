@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser } from '../../auth/models/auth.model';
-import { Project } from '../../projects/models/projects.model';
+import { WorkforceDataService } from '../../workforce/workforce-data.service';
+import { Employee, Shift } from '../../workforce/models/workforce.model';
 
 @Component({
   selector: 'app-worker-dashboard',
@@ -14,20 +15,28 @@ import { Project } from '../../projects/models/projects.model';
 })
 export class WorkerDashboardComponent implements OnInit {
   currentUser: AppUser | null = null;
-  assignedProjects: Project[] = [];
-  todayTasks = 5;
-  completedTasks = 2;
-  attendancePercent = 95;
+  myProfile: Employee | null = null;
+  myShifts: Shift[] = [];
 
-  constructor(private auth: AuthDataService) {}
+  constructor(private auth: AuthDataService, private workforce: WorkforceDataService) {}
 
   ngOnInit() {
     this.auth.currentUser$.subscribe(u => {
       this.currentUser = u;
+      
+      if (u) {
+        // Find employee profile by username matching employeeCode
+        this.workforce.employees$.subscribe(emps => {
+          this.myProfile = emps.find(e => e.employeeCode === u.username) || null;
+          
+          if (this.myProfile) {
+            // Find shifts where the worker is assigned
+            this.workforce.shifts$.subscribe(shifts => {
+              this.myShifts = shifts.filter(s => s.employeeId === this.myProfile!.employeeId);
+            });
+          }
+        });
+      }
     });
-  }
-
-  statusClass(status: string) {
-    return { Planning: 'gray', 'In Progress': 'blue', 'On Hold': 'orange', Completed: 'green' }[status] || 'gray';
   }
 }
