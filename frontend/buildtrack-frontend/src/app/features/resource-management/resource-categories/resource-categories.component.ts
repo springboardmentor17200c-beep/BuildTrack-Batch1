@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -45,7 +45,7 @@ export class ResourceCategoriesComponent implements OnInit {
         next: (data) => {
           this.categories = data.map(item => ({
             resource_category_id: item.resource_category_id,
-            name: item.category_name,
+            category_name: item.category_name,
             description: item.description || '',
             resources: item.resources || 0,
             status: item.status || 'Active'
@@ -99,7 +99,7 @@ export class ResourceCategoriesComponent implements OnInit {
         next: () => this.loadCategories(),
         error: (err) => {
           console.error('Error deleting category', err);
-          alert('Cannot delete category because it has associated resources.');
+          alert('Cannot delete this category. It may have resources associated with it.');
         }
       });
   }

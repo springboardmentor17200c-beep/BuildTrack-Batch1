@@ -1,9 +1,9 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, of, forkJoin } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { MaintenanceRecord, Resource, ResourceAllocation } from './models/resource.model';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ResourceDataService {
@@ -22,48 +22,49 @@ export class ResourceDataService {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       token = localStorage.getItem('buildtrack_access_token') || '';
     }
-    return { headers: new HttpHeaders({ 'Authorization': \Bearer \\ }) };
+    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
   }
 
   loadAll() {
     forkJoin({
-      resources: this.http.get<any[]>(\\/resources\, this.headers).pipe(catchError(() => of([]))),
-      allocations: this.http.get<any[]>(\\/resources/allocations\, this.headers).pipe(catchError(() => of([]))),
-      maintenance: this.http.get<any[]>(\\/resources/maintenance\, this.headers).pipe(catchError(() => of([])))
+      resources: this.http.get<any[]>(`${environment.apiUrl}/resources`, this.headers).pipe(catchError(() => of([]))),
+      allocations: this.http.get<any[]>(`${environment.apiUrl}/resources/allocations`, this.headers).pipe(catchError(() => of([]))),
+      maintenance: this.http.get<any[]>(`${environment.apiUrl}/resources/maintenance`, this.headers).pipe(catchError(() => of([])))
     }).subscribe(({ resources, allocations, maintenance }) => {
       this.resources.next(resources.map(r => ({
-        resourceId: \R-\\,
+        resourceId: String(r.resource_id),
         resourceName: r.resource_name,
         category: r.category_name,
         manufacturer: r.manufacturer || '',
         modelNumber: r.model_number || '',
         serialNumber: r.serial_number || '',
         purchaseDate: r.purchase_date || '',
-        currentStatus: r.current_status
+        currentStatus: r.current_status as any
       })));
 
       this.allocations.next(allocations.map(a => ({
-        allocationId: \A-\\,
-        resourceId: \R-\\,
-        resourceName: a.resource_name,
-        category: a.category_name,
-        project: a.project_name,
-        allocatedBy: a.allocated_by_name,
-        allocationDate: a.allocation_date,
-        expectedReturnDate: a.expected_return_date,
-        actualReturnDate: a.actual_return_date,
-        allocationStatus: a.allocation_status,
+        allocationId: String(a.allocation_id),
+        resourceId: String(a.resource_id),
+        resourceName: a.resource_name || '',
+        category: a.category_name || '',
+        project: a.project_name || '',
+        allocatedBy: a.allocated_by_name || '',
+        allocationDate: a.allocation_date || '',
+        expectedReturnDate: a.expected_return_date || '',
+        actualReturnDate: a.actual_return_date || null,
+        allocationStatus: a.allocation_status as any || 'Allocated',
         remarks: a.remarks
       })));
 
       this.maintenance.next(maintenance.map(m => ({
-        maintenanceId: \M-\\,
-        resourceId: \R-\\,
+        maintenanceId: String(m.maintenance_id),
+        resourceId: String(m.resource_id),
+        resourceName: m.resource_name || '',
         maintenanceType: m.maintenance_type,
-        maintenanceDate: m.maintenance_date,
-        nextMaintenanceDate: m.next_maintenance_date,
-        maintenanceCost: m.maintenance_cost,
-        servicedBy: m.serviced_by,
+        maintenanceDate: m.maintenance_date || '',
+        nextMaintenanceDate: m.next_maintenance_date || null,
+        maintenanceCost: m.maintenance_cost || 0,
+        servicedBy: m.serviced_by || '',
         remarks: m.remarks
       })));
     });
@@ -74,26 +75,26 @@ export class ResourceDataService {
   }
 
   getAssignedProject(resourceId: string): string | null {
-    const open = this.allocations.value.find(a => a.resourceId === resourceId && !a.actualReturnDate);
+    const open = this.allocations.value.find(a => String(a.resourceId) === String(resourceId) && !a.actualReturnDate);
     return open ? open.project : null;
   }
 
   getLastMaintenanceDate(resourceId: string): string | null {
     const records = this.maintenance.value
-      .filter(m => m.resourceId === resourceId)
+      .filter(m => String(m.resourceId) === String(resourceId))
       .sort((a, b) => b.maintenanceDate.localeCompare(a.maintenanceDate));
     return records.length ? records[0].maintenanceDate : null;
   }
 
   getNextMaintenanceDate(resourceId: string): string | null {
     const records = this.maintenance.value
-      .filter(m => m.resourceId === resourceId && m.nextMaintenanceDate)
+      .filter(m => String(m.resourceId) === String(resourceId) && m.nextMaintenanceDate)
       .sort((a, b) => (a.nextMaintenanceDate as string).localeCompare(b.nextMaintenanceDate as string));
-    return records.length ? records[0].nextMaintenanceDate as string : null;
+    return records.length ? (records[0].nextMaintenanceDate as string) : null;
   }
 
   getUtilization(resourceId: string): number {
-    const resource = this.resources.value.find(r => r.resourceId === resourceId);
+    const resource = this.resources.value.find(r => String(r.resourceId) === String(resourceId));
     if (!resource || !resource.purchaseDate) return 0;
 
     const purchase = new Date(resource.purchaseDate).getTime();
@@ -101,7 +102,7 @@ export class ResourceDataService {
     const totalDays = Math.max(1, (now - purchase) / 86400000);
 
     const allocatedDays = this.allocations.value
-      .filter(a => a.resourceId === resourceId)
+      .filter(a => String(a.resourceId) === String(resourceId))
       .reduce((sum, a) => {
         const start = new Date(a.allocationDate).getTime();
         const end = a.actualReturnDate ? new Date(a.actualReturnDate).getTime() : now;
@@ -109,5 +110,19 @@ export class ResourceDataService {
       }, 0);
 
     return Math.min(100, Math.round((allocatedDays / totalDays) * 100));
+  }
+
+  addAllocation(alloc: ResourceAllocation) {
+    this.allocations.next([alloc, ...this.allocations.value]);
+  }
+
+  returnAllocation(allocId: string) {
+    const update = this.allocations.value.map(a => {
+      if(a.allocationId === allocId) {
+         return { ...a, actualReturnDate: new Date().toISOString().split('T')[0], allocationStatus: 'Returned' as any };
+      }
+      return a;
+    });
+    this.allocations.next(update);
   }
 }

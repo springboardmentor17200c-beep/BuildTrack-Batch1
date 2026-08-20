@@ -100,6 +100,7 @@ export class ProjectsDataService {
   }
 
   loadAll() {
+    console.log('[ProjectsDataService] loadAll called');
     forkJoin({
       projects: this.http.get<ApiProject[]>(this.projectsUrl, { headers: this.headers() })
         .pipe(catchError(this.handleError([]))),
@@ -110,6 +111,7 @@ export class ProjectsDataService {
       statuses: this.http.get<ProjectStatusOption[]>(`${this.projectsBase}/statuses`, { headers: this.headers() })
         .pipe(catchError(this.handleError([]))),
     }).subscribe(({ projects, milestones, categories, statuses }) => {
+      console.log('[ProjectsDataService] loadAll results:', { categories, statuses });
       this.projects$$.next(projects.map(mapProject));
       this.milestones$$.next(milestones.map(mapMilestone));
       this.categories$$.next(categories);
