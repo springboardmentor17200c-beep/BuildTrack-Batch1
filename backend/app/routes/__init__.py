@@ -9,3 +9,4 @@ from . import material
 from . import inventory
 from . import report
 from . import analytics
+from . import resource

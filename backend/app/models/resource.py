@@ -26,3 +26,34 @@ class Resource(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     category = relationship("ResourceCategory")
+
+class ResourceAllocation(Base):
+    __tablename__ = "resource_allocations"
+
+    allocation_id = Column(Integer, primary_key=True, index=True)
+    resource_id = Column(Integer, ForeignKey("resources.resource_id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
+    allocated_by_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    allocation_date = Column(Date, nullable=False)
+    expected_return_date = Column(Date, nullable=False)
+    actual_return_date = Column(Date, nullable=True)
+    allocation_status = Column(String(30), default="Allocated", nullable=False)
+    remarks = Column(String)
+    
+    resource = relationship("Resource")
+    project = relationship("Project")
+    allocated_by = relationship("User")
+
+class MaintenanceRecord(Base):
+    __tablename__ = "maintenance_records"
+
+    maintenance_id = Column(Integer, primary_key=True, index=True)
+    resource_id = Column(Integer, ForeignKey("resources.resource_id"), nullable=False)
+    maintenance_type = Column(String(50), nullable=False)
+    maintenance_date = Column(Date, nullable=False)
+    next_maintenance_date = Column(Date, nullable=True)
+    maintenance_cost = Column(Numeric(10, 2), nullable=False)
+    serviced_by = Column(String(100), nullable=False)
+    remarks = Column(String)
+
+    resource = relationship("Resource")

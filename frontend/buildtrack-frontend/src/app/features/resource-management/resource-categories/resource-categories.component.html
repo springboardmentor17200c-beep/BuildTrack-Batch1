@@ -45,7 +45,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
       </div>
       <div class="bt-stat-text">
-        <span class="bt-stat-value">4</span>
+        <span class="bt-stat-value">{{ categories.length }}</span>
         <span class="bt-stat-label">Active Categories</span>
       </div>
     </div>
@@ -82,7 +82,7 @@
       <div class="bt-actions" style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--bt-border);">
         <button class="bt-filter-btn" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">View</button>
         <button class="bt-filter-btn" style="flex: 1; justify-content: center; box-shadow: none; border-color: transparent;">Edit</button>
-        <button class="bt-filter-btn" style="flex: 1; justify-content: center; color: var(--bt-red); box-shadow: none; border-color: transparent;">Delete</button>
+        <button class="bt-filter-btn" (click)="deleteCategory(category.resource_category_id)" style="flex: 1; justify-content: center; color: var(--bt-red); box-shadow: none; border-color: transparent;">Delete</button>
       </div>
 
     </div>
@@ -104,12 +104,12 @@
     <div class="bt-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
       <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
         <span>Category Name</span>
-        <input type="text" placeholder="Enter category name" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%;">
+        <input type="text" [(ngModel)]="newCategoryName" placeholder="Enter category name" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%;">
       </label>
 
       <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
         <span>Description</span>
-        <textarea rows="3" placeholder="Enter description" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%; resize: vertical;"></textarea>
+        <textarea rows="3" [(ngModel)]="newCategoryDesc" placeholder="Enter description" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; font-family: inherit; width: 100%; resize: vertical;"></textarea>
       </label>
 
       <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">

@@ -1,7 +1,8 @@
-<div class="bt-page">
+﻿<div class="bt-page">
 
   <button class="bt-back-btn" (click)="goBack()">
-    ← Back
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+    Back
   </button>
 
   <div class="bt-topbar">
@@ -11,157 +12,121 @@
         Schedule and monitor preventive and corrective maintenance.
       </p>
     </div>
+    
+    <div class="bt-actions">
+      <div class="bt-search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search equipment..." [(ngModel)]="searchText">
+      </div>
+
+      <select [(ngModel)]="selectedType" class="bt-filter-select">
+        <option>All</option>
+        <option>Preventive</option>
+        <option>Corrective</option>
+      </select>
+
+      <button class="bt-add-btn" (click)="scheduleMaintenance()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Schedule Maintenance
+      </button>
+    </div>
   </div>
 
-  <div class="toolbar">
-
-    <input
-      type="text"
-      placeholder="Search equipment..."
-      [(ngModel)]="searchText">
-
-    <select [(ngModel)]="selectedType">
-      <option>All</option>
-      <option>Preventive</option>
-      <option>Corrective</option>
-    </select>
-
-    <button
-      class="add-btn"
-      (click)="scheduleMaintenance()">
-      + Schedule Maintenance
-    </button>
-
+  <div class="bt-panel" style="overflow-x: auto;">
+    <table class="bt-table">
+      <thead>
+        <tr>
+          <th>Equipment</th>
+          <th>Type</th>
+          <th>Maintenance Date</th>
+          <th>Next Due</th>
+          <th>Cost</th>
+          <th>Serviced By</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of filteredRecords">
+          <td style="font-weight: 600;">{{ r.resourceName || r.resource }}</td>
+          <td>{{ r.type || r.maintenanceType }}</td>
+          <td>{{ r.maintenanceDate }}</td>
+          <td>{{ r.nextDate || r.nextMaintenanceDate || '-' }}</td>
+          <td>₹{{ r.cost || r.maintenanceCost }}</td>
+          <td>{{ r.servicedBy }}</td>
+          <td>
+            <span class="bt-badge" 
+                  [ngClass]="(r.status || 'Completed') === 'Completed' ? 'bt-badge-green' : 'bt-badge-orange'">
+              {{ r.status || 'Completed' }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="filteredRecords.length === 0">
+          <td colspan="7" style="text-align: center; color: var(--bt-muted); padding: 32px;">
+            No maintenance records found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-
-  <table>
-
-    <thead>
-      <tr>
-        <th>Equipment</th>
-        <th>Type</th>
-        <th>Maintenance Date</th>
-        <th>Next Due</th>
-        <th>Cost</th>
-        <th>Serviced By</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody>
-
-      <tr *ngFor="let r of filteredRecords">
-
-        <td>{{ r.resource }}</td>
-        <td>{{ r.type }}</td>
-        <td>{{ r.maintenanceDate }}</td>
-        <td>{{ r.nextDate }}</td>
-        <td>₹ {{ r.cost }}</td>
-        <td>{{ r.servicedBy }}</td>
-
-        <td>
-          <span
-            class="status"
-            [class.upcoming]="r.status === 'Upcoming'"
-            [class.completed]="r.status === 'Completed'">
-            {{ r.status }}
-          </span>
-        </td>
-
-      </tr>
-
-    </tbody>
-
-  </table>
 
 </div>
 
 <!-- Schedule Maintenance Modal -->
+<div class="modal-overlay" *ngIf="showModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);">
+  <div class="bt-form-card" style="width: 100%; max-width: 500px; padding: 32px; max-height: 90vh; overflow-y: auto;">
 
-<div
-  class="modal-overlay"
-  *ngIf="showModal">
-
-  <div class="modal">
-
-    <div class="modal-header">
-
-      <h2>Schedule Maintenance</h2>
-
-      <button
-        class="close-btn"
-        (click)="closeModal()">
-        ✕
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h3 style="margin: 0; font-size: 20px; font-weight: 700;">Schedule Maintenance</h3>
+      <button class="bt-filter-btn" (click)="closeModal()" style="border: none; background: transparent; padding: 4px; box-shadow: none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
-
     </div>
 
-    <div class="modal-body">
-
-      <div class="form-group">
-        <label>Equipment</label>
-
-        <select>
-          <option>Excavator EX-01</option>
+    <div class="bt-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Equipment</span>
+        <select style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; background: white;">
+          <option>Select Equipment</option>
+          <option>CAT 320 Excavator</option>
           <option>Tower Crane TC-02</option>
-          <option>Concrete Mixer CM-01</option>
         </select>
-      </div>
+      </label>
 
-      <div class="form-group">
-        <label>Maintenance Type</label>
-
-        <select>
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Maintenance Type</span>
+        <select style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; background: white;">
           <option>Preventive</option>
           <option>Corrective</option>
         </select>
+      </label>
+
+      <div style="display: flex; gap: 16px;">
+        <label style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+          <span>Date</span>
+          <input type="date" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+        </label>
+        
+        <label style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+          <span>Next Due Date</span>
+          <input type="date" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+        </label>
       </div>
 
-      <div class="form-group">
-        <label>Maintenance Date</label>
-        <input type="date">
-      </div>
-
-      <div class="form-group">
-        <label>Next Maintenance Date</label>
-        <input type="date">
-      </div>
-
-      <div class="form-group">
-        <label>Cost</label>
-        <input
-          type="number"
-          placeholder="Enter maintenance cost">
-      </div>
-
-      <div class="form-group">
-        <label>Serviced By</label>
-        <input
-          type="text"
-          placeholder="Technician / Company">
-      </div>
-
-      <div class="form-group">
-        <label>Remarks</label>
-        <textarea rows="3"></textarea>
-      </div>
-
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Estimated Cost (₹)</span>
+        <input type="number" placeholder="Enter cost" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+      </label>
+      
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--bt-muted);">
+        <span>Serviced By</span>
+        <input type="text" placeholder="Service provider name" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bt-border); font-size: 14px; width: 100%;">
+      </label>
     </div>
 
-    <div class="modal-footer">
-
-      <button
-        class="cancel-btn"
-        (click)="closeModal()">
-        Cancel
-      </button>
-
-      <button class="save-btn">
-        Save
-      </button>
-
+    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
+      <button class="bt-filter-btn" (click)="closeModal()">Cancel</button>
+      <button class="bt-add-btn" (click)="saveMaintenance()">Save Record</button>
     </div>
 
   </div>
-
 </div>
