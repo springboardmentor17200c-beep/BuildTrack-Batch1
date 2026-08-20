@@ -70,9 +70,7 @@ export class InventoryDataService {
   requests$ = this.requests$$.asObservable();
   allocations$ = this.allocations$$.asObservable();
 
-  constructor(private http: HttpClient) {
-    this.loadAll();
-  }
+  constructor(private http: HttpClient) {}
 
 
   private headers(): HttpHeaders {

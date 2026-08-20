@@ -1,133 +1,156 @@
-<div class="bt-page">
-  <div class="bt-topbar">
-    <div>
-      <h1 class="bt-title">Welcome back, {{ currentUser?.fullName || 'Project Manager' }}</h1>
-      <p class="bt-subtitle">Your projects, budgets, workforce, and resources at a glance.</p>
-    </div>
-    <div class="bt-actions">
-      <span class="bt-badge blue">{{ currentUser?.role }}</span>
-      <a class="bt-filter-btn" [routerLink]="['/profile']">Profile</a>
-    </div>
-  </div>
-
-  <div class="bt-stats-row">
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon blue">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ activeProjects }}</span>
-        <span class="bt-stat-label">Active Projects</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon purple">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ avgProgress }}%</span>
-        <span class="bt-stat-label">Avg. Progress</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon orange">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ budgetUsedPercent }}%</span>
-        <span class="bt-stat-label">Budget Used</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon red">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ pendingOrders }}</span>
-        <span class="bt-stat-label">Pending Orders</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="bt-panel" style="margin-bottom:20px;">
-    <div class="bt-panel-header">
-      <div>
-        <h3 class="bt-panel-title">Project Progress</h3>
-        <span class="bt-panel-sub">All projects you're managing</span>
-      </div>
-      <a class="bt-filter-btn" [routerLink]="['/analytics/progress']">Full Analytics</a>
-    </div>
-    <div class="bt-table-wrap">
-      <table class="bt-table">
-        <thead><tr><th>Project</th><th>Category</th><th>Status</th><th>Progress</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let p of projects">
-            <td class="bt-strong">{{ p.project }}</td>
-            <td>{{ p.category }}</td>
-            <td><span class="bt-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span></td>
-            <td>
-              <div class="bt-progress">
-                <div class="bt-progress-bar"><div class="bt-progress-fill blue" [style.width.%]="p.completionPercentage"></div></div>
-                <span class="bt-progress-value">{{ p.completionPercentage }}%</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;align-items:start;">
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">Workforce Status</h3>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Total Workers</span><span class="bt-strong">{{ totalWorkers }}</span></div>
-        <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Present Today</span><span class="bt-strong">{{ presentToday }}</span></div>
-        <div style="display:flex;justify-content:space-between;"><span class="bt-muted">On Leave</span><span class="bt-strong">{{ onLeave }}</span></div>
-      </div>
-      <div class="bt-form-actions" style="margin-top:14px;">
-        <a class="bt-filter-btn" [routerLink]="['/workforce']">View Workforce</a>
-      </div>
-    </div>
-
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">Resource Utilization</h3>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;"><span class="bt-muted">In Use</span><span class="bt-strong">{{ inUseCount }}</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="bt-muted">Avg. Utilization</span>
-          <div class="bt-progress">
-            <div class="bt-progress-bar" style="width:70px;"><div class="bt-progress-fill purple" [style.width.%]="resourceUtilization"></div></div>
-            <span class="bt-progress-value">{{ resourceUtilization }}%</span>
+<div class="bt-admin-dashboard bt-fade-in">
+      
+      <!-- Premium Hero Header -->
+      <div class="bt-hero-header">
+        <div class="bt-hero-bg"></div>
+        <div class="bt-hero-content">
+          <div class="bt-hero-text">
+            <h1 class="bt-hero-title">Welcome back, {{ currentUser?.fullName || 'Project Manager' }}</h1>
+            <p class="bt-hero-subtitle">Your projects, budgets, workforce, and resources at a glance.</p>
+          </div>
+          <div class="bt-hero-actions">
+            <span class="bt-hero-badge">{{ currentUser?.role }}</span>
+            <a class="bt-hero-btn" [routerLink]="['/profile']">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Profile
+            </a>
           </div>
         </div>
       </div>
-      <div class="bt-form-actions" style="margin-top:14px;">
-        <a class="bt-filter-btn" [routerLink]="['/resources']">View Resources</a>
-      </div>
-    </div>
 
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">Procurement Overview</h3>
+      <!-- Stat Cards Grid -->
+      <div class="bt-kpi-grid">
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap blue-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ activeProjects }}</span>
+            <span class="bt-kpi-label">Active Projects</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap purple-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ avgProgress }}%</span>
+            <span class="bt-kpi-label">Avg. Progress</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap orange-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ budgetUsedPercent }}%</span>
+            <span class="bt-kpi-label">Budget Used</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap red-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ pendingOrders }}</span>
+            <span class="bt-kpi-label">Pending Orders</span>
+          </div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Pending Orders</span><span class="bt-strong">{{ pendingOrders }}</span></div>
-        <div style="display:flex;justify-content:space-between;"><span class="bt-muted">Budget Used</span><span class="bt-strong">{{ budgetUsedPercent }}%</span></div>
+
+      <!-- Main Content Grids -->
+      <div class="bt-dashboard-grid-main">
+        
+        <!-- Left Column -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Project Progress</h3>
+                <p>Live Status</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/analytics/progress']">
+                View All
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+              </a>
+            </div>
+            
+            <div class="bt-table-responsive">
+              <table class="bt-table-modern">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of projects">
+                    <td class="bt-font-medium">{{ p.project }}</td>
+                    <td>
+                      <span class="bt-status-pill" [ngClass]="statusClass(p.status)">
+                        <span class="bt-status-dot"></span>
+                        {{ p.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="bt-progress-wrapper">
+                        <div class="bt-progress-track">
+                          <div class="bt-progress-fill" [ngClass]="statusClass(p.status)" [style.width.%]="p.completionPercentage || 0"></div>
+                        </div>
+                        <span class="bt-progress-text">{{ p.completionPercentage || 0 }}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Workforce Status</h3>
+                <p>{{ totalWorkers }} Total Workers</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/workforce']">Manage</a>
+            </div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--bt-border);padding-bottom:8px;">
+                <span class="bt-text-secondary">Present Today</span><span class="bt-font-medium">{{ presentToday }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span class="bt-text-secondary">On Leave</span><span class="bt-font-medium">{{ onLeave }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Resource Utilization</h3>
+                <p>{{ inUseCount }} In Use</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/resources']">View</a>
+            </div>
+            <div style="padding:16px;">
+              <div class="bt-progress-wrapper" style="margin-top:8px;">
+                <span class="bt-text-secondary" style="width:100px;">Avg. Utilization</span>
+                <div class="bt-progress-track" style="flex:1;">
+                  <div class="bt-progress-fill purple" [style.width.%]="resourceUtilization"></div>
+                </div>
+                <span class="bt-progress-text">{{ resourceUtilization }}%</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
       </div>
-      <div class="bt-form-actions" style="margin-top:14px;">
-        <a class="bt-filter-btn" [routerLink]="['/analytics/procurement']">View Procurement</a>
-      </div>
-    </div>
-  </div>
 </div>

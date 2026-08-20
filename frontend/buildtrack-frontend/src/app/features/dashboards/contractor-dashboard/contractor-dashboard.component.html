@@ -1,117 +1,156 @@
-<div class="bt-page">
-  <div class="bt-topbar">
-    <div>
-      <h1 class="bt-title">Welcome back, {{ currentUser?.fullName || 'Contractor' }}</h1>
-      <p class="bt-subtitle">Your crew, shift schedule, allocated equipment, and material requests.</p>
-    </div>
-    <div class="bt-actions">
-      <span class="bt-badge green">{{ currentUser?.role }}</span>
-      <a class="bt-filter-btn" [routerLink]="['/profile']">Profile</a>
-    </div>
-  </div>
-
-  <div class="bt-stats-row">
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon green">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ crewSize }}</span>
-        <span class="bt-stat-label">Crew Size</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon purple">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l4 2"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ shiftsThisWeek }}</span>
-        <span class="bt-stat-label">Shifts Scheduled</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon blue">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ equipmentAllocated }}</span>
-        <span class="bt-stat-label">Equipment Allocated</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon orange">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ pendingRequests }}</span>
-        <span class="bt-stat-label">Pending Requests</span>
-      </div>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-bottom:20px;">
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">Shift Schedule</h3>
+<div class="bt-admin-dashboard bt-fade-in">
+      
+      <!-- Premium Hero Header -->
+      <div class="bt-hero-header">
+        <div class="bt-hero-bg"></div>
+        <div class="bt-hero-content">
+          <div class="bt-hero-text">
+            <h1 class="bt-hero-title">Welcome back, {{ currentUser?.fullName || 'Contractor' }}</h1>
+            <p class="bt-hero-subtitle">Your crew, shift schedule, allocated equipment, and material requests.</p>
+          </div>
+          <div class="bt-hero-actions">
+            <span class="bt-hero-badge">{{ currentUser?.role }}</span>
+            <a class="bt-hero-btn" [routerLink]="['/profile']">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Profile
+            </a>
+          </div>
         </div>
-        <a class="bt-filter-btn" [routerLink]="['/workforce/shifts']">View All</a>
       </div>
-      <div class="bt-table-wrap">
-        <table class="bt-table">
-          <thead><tr><th>Worker</th><th>Shift</th><th>Date</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let s of shifts">
-              <td class="bt-strong">{{ s.employeeName }}</td>
-              <td><span class="bt-badge" [ngClass]="shiftClass(s.shiftType)">{{ s.shiftType }}</span></td>
-              <td class="bt-muted">{{ s.shiftDate }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">Equipment Allocated</h3>
+      <!-- Stat Cards Grid -->
+      <div class="bt-kpi-grid">
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap green-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ crewSize }}</span>
+            <span class="bt-kpi-label">Crew Size</span>
+          </div>
         </div>
-        <a class="bt-filter-btn" [routerLink]="['/resources/allocation']">View All</a>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap purple-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ shiftsThisWeek }}</span>
+            <span class="bt-kpi-label">Shifts Scheduled</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap blue-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ equipmentAllocated }}</span>
+            <span class="bt-kpi-label">Equipment Allocated</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap orange-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ pendingRequests }}</span>
+            <span class="bt-kpi-label">Pending Requests</span>
+          </div>
+        </div>
       </div>
-      <div class="bt-table-wrap">
-        <table class="bt-table">
-          <thead><tr><th>Resource</th><th>Project</th><th>Return By</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let a of allocations">
-              <td class="bt-strong">{{ a.resourceName }}</td>
-              <td>{{ a.project }}</td>
-              <td class="bt-muted">{{ a.expectedReturnDate }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 
-  <div class="bt-panel">
-    <div class="bt-panel-header">
-      <div>
-        <h3 class="bt-panel-title">My Material Requests</h3>
+      <!-- Main Content Grids -->
+      <div class="bt-dashboard-grid-main">
+        
+        <!-- Left Column -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>My Material Requests</h3>
+                <p>Track request statuses</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/inventory/requests']">
+                New Request
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+              </a>
+            </div>
+            
+            <div class="bt-table-responsive">
+              <table class="bt-table-modern">
+                <thead><tr><th>Material</th><th>Quantity</th><th>Project</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let r of requests">
+                    <td class="bt-font-medium">{{ r.materialName }}</td>
+                    <td>{{ r.requestedQuantity }} {{ r.unitOfMeasure }}</td>
+                    <td>{{ r.project }}</td>
+                    <td>
+                      <span class="bt-status-pill" [ngClass]="requestStatusClass(r.requestStatus)">
+                        <span class="bt-status-dot"></span>
+                        {{ r.requestStatus }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Equipment Allocated</h3>
+                <p>Tools and machinery currently assigned to you</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/resources/allocation']">View All</a>
+            </div>
+            <div class="bt-table-responsive">
+              <table class="bt-table-modern">
+                <thead><tr><th>Resource</th><th>Project</th><th>Return By</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let a of allocations">
+                    <td class="bt-font-medium">{{ a.resourceName }}</td>
+                    <td>{{ a.project }}</td>
+                    <td class="bt-text-secondary">{{ a.expectedReturnDate }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Shift Schedule</h3>
+                <p>Your team's shifts</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/workforce/shifts']">View All</a>
+            </div>
+            <div class="bt-table-responsive">
+              <table class="bt-table-modern">
+                <thead><tr><th>Worker</th><th>Shift</th><th>Date</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let s of shifts">
+                    <td class="bt-font-medium">{{ s.employeeName }}</td>
+                    <td>
+                      <span class="bt-status-pill" [ngClass]="shiftClass(s.shiftType)">
+                        <span class="bt-status-dot"></span>
+                        {{ s.shiftType }}
+                      </span>
+                    </td>
+                    <td class="bt-text-secondary">{{ s.shiftDate }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+        
       </div>
-      <a class="bt-filter-btn" [routerLink]="['/inventory/requests']">New Request</a>
-    </div>
-    <div class="bt-table-wrap">
-      <table class="bt-table">
-        <thead><tr><th>Material</th><th>Quantity</th><th>Project</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let r of requests">
-            <td class="bt-strong">{{ r.materialName }}</td>
-            <td>{{ r.requestedQuantity }} {{ r.unitOfMeasure }}</td>
-            <td>{{ r.project }}</td>
-            <td><span class="bt-badge" [ngClass]="requestStatusClass(r.requestStatus)">{{ r.requestStatus }}</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 </div>

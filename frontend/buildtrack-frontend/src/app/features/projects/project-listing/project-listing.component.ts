@@ -51,6 +51,8 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
       category:        ['', Validators.required],
       startDate:       ['', Validators.required],
       expectedEndDate: ['', Validators.required],
+      manager:         ['', Validators.required],
+      client:          ['', Validators.required],
     });
   }
 
@@ -102,8 +104,8 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
       location:        this.form.value.location,
       categoryName:    this.form.value.category,
       statusName:      'Planning',
-      managerName:     user.fullName,
-      clientName:      user.fullName,
+      managerName:     this.form.value.manager,
+      clientName:      this.form.value.client,
       startDate:       this.form.value.startDate,
       expectedEndDate: this.form.value.expectedEndDate,
       companyId,

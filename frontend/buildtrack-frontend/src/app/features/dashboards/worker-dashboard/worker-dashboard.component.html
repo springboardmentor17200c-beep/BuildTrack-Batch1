@@ -1,0 +1,132 @@
+<div class="bt-admin-dashboard bt-fade-in">
+      
+      <!-- Premium Hero Header -->
+      <div class="bt-hero-header">
+        <div class="bt-hero-bg"></div>
+        <div class="bt-hero-content">
+          <div class="bt-hero-text">
+            <h1 class="bt-hero-title">Welcome back, {{ currentUser?.fullName || 'Worker' }}</h1>
+            <p class="bt-hero-subtitle">Your daily tasks and site assignments.</p>
+          </div>
+          <div class="bt-hero-actions">
+            <span class="bt-hero-badge">{{ currentUser?.role }}</span>
+            <a class="bt-hero-btn" [routerLink]="['/profile']">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Profile
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat Cards Grid -->
+      <div class="bt-kpi-grid">
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap blue-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ assignedProjects.length || 0 }}</span>
+            <span class="bt-kpi-label">Assigned Sites</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap green-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ completedTasks }}</span>
+            <span class="bt-kpi-label">Completed Tasks</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap orange-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ todayTasks }}</span>
+            <span class="bt-kpi-label">Tasks Today</span>
+          </div>
+        </div>
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap purple-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ attendancePercent }}%</span>
+            <span class="bt-kpi-label">Attendance</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grids -->
+      <div class="bt-dashboard-grid-main">
+        
+        <!-- Left Column -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>My Sites</h3>
+                <p>Where you are assigned</p>
+              </div>
+            </div>
+            
+            <div class="bt-table-responsive" *ngIf="assignedProjects.length > 0">
+              <table class="bt-table-modern">
+                <thead><tr><th>Site</th><th>Location</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let p of assignedProjects">
+                    <td class="bt-font-medium">{{ p.projectName }}</td>
+                    <td>{{ p.location }}</td>
+                    <td>
+                      <span class="bt-status-pill" [ngClass]="statusClass(p.status)">
+                        <span class="bt-status-dot"></span>
+                        {{ p.status }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding: 20px; text-align: center; color: var(--bt-text-muted);" *ngIf="assignedProjects.length === 0">
+              No sites assigned currently.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Daily Tasks</h3>
+                <p>To-Do List</p>
+              </div>
+            </div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="checkbox" checked disabled>
+                <span style="text-decoration:line-through;color:var(--bt-text-muted)">Check in at Site A</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="checkbox" checked disabled>
+                <span style="text-decoration:line-through;color:var(--bt-text-muted)">Morning Briefing</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="checkbox">
+                <span>Material Unloading</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="checkbox">
+                <span>Site Cleanup</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+      </div>
+</div>
