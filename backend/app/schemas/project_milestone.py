@@ -32,6 +32,7 @@ class ProjectMilestoneResponse(BaseModel):
     due_date: date
     completion_date: Optional[date]
     status: str
+    progress_percentage: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -46,3 +47,4 @@ class ProjectMilestoneEnrichedResponse(BaseModel):
     due_date: date
     completion_date: Optional[date]
     status: str
+    progress_percentage: int = 0
