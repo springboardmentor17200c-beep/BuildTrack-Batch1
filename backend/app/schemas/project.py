@@ -15,6 +15,7 @@ class ProjectCreate(BaseModel):
     location: str
     start_date: date
     expected_end_date: date
+    allocated_budget: Optional[float] = 0
 
 
 class ProjectUpdate(BaseModel):
@@ -28,6 +29,7 @@ class ProjectUpdate(BaseModel):
     start_date: Optional[date] = None
     expected_end_date: Optional[date] = None
     actual_end_date: Optional[date] = None
+    allocated_budget: Optional[float] = None
 
 
 class ProjectResponse(BaseModel):
@@ -45,6 +47,7 @@ class ProjectResponse(BaseModel):
     start_date: date
     expected_end_date: date
     actual_end_date: Optional[date]
+    allocated_budget: Optional[float] = 0
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -62,3 +65,4 @@ class ProjectEnrichedResponse(BaseModel):
     start_date: date
     expected_end_date: date
     actual_end_date: Optional[date]
+    allocated_budget: Optional[float] = 0

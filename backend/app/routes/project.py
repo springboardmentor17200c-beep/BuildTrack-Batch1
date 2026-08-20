@@ -53,6 +53,7 @@ def _enrich(project: Project) -> ProjectEnrichedResponse:
         start_date=project.start_date,
         expected_end_date=project.expected_end_date,
         actual_end_date=project.actual_end_date,
+        allocated_budget=float(project.allocated_budget) if project.allocated_budget else 0,
     )
 
 

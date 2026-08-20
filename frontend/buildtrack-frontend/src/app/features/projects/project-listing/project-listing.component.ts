@@ -56,6 +56,7 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
       expectedEndDate: ['', Validators.required],
       manager:         ['', Validators.required],
       client:          ['', Validators.required],
+      allocatedBudget: [0],
     });
   }
 
@@ -122,8 +123,9 @@ export class ProjectListingComponent implements OnInit, OnDestroy {
       startDate:       this.form.value.startDate,
       expectedEndDate: this.form.value.expectedEndDate,
       companyId,
-      managerId: parseInt(this.form.value.manager, 10),
-        clientId: parseInt(this.form.value.client, 10),
+      managerId:       parseInt(this.form.value.manager, 10),
+      clientId:        parseInt(this.form.value.client, 10),
+      allocatedBudget: parseFloat(this.form.value.allocatedBudget) || 0,
     }).subscribe({
       next: (result) => {
         this.submitting = false;

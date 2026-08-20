@@ -3,6 +3,7 @@ from sqlalchemy import (
     Date,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
     TIMESTAMP,
@@ -71,6 +72,8 @@ class Project(Base):
     )
 
     actual_end_date = Column(Date)
+
+    allocated_budget = Column(Numeric(15, 2), default=0, server_default='0')
 
     created_at = Column(
         TIMESTAMP,
