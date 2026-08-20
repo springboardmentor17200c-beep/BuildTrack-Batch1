@@ -26,12 +26,15 @@
   </nav>
 
   <div class="bt-sidebar-footer" *ngIf="currentUser">
-    <div class="bt-sidebar-user">
-      <div class="bt-stat-icon blue" style="width:34px;height:34px;">{{ currentUser.fullName.charAt(0) }}</div>
-      <div>
-        <div class="bt-sidebar-username">{{ currentUser.fullName }}</div>
-        <div class="bt-sidebar-userrole">{{ currentUser.role }}</div>
+    <div class="bt-sidebar-user" style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="bt-stat-icon blue" style="width:34px;height:34px;">{{ currentUser.fullName.charAt(0) }}</div>
+        <div>
+          <div class="bt-sidebar-username">{{ currentUser.fullName }}</div>
+          <div class="bt-sidebar-userrole">{{ currentUser.role }}</div>
+        </div>
       </div>
+      <app-notification-dropdown></app-notification-dropdown>
     </div>
 
     <div class="bt-lang-wrap">

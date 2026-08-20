@@ -26,6 +26,7 @@ export class ProcurementRequestsComponent implements OnInit {
   formError = '';
   form: FormGroup;
   selectedRequestId: string | null = null;
+  deletingId: string | null = null;
 
   get selectedRequest(): MaterialRequest | undefined {
     return this.requests.find(r => r.id === this.selectedRequestId);
@@ -39,6 +40,16 @@ export class ProcurementRequestsComponent implements OnInit {
   get canCreateRequest(): boolean {
     const role = this.auth.currentUser?.role;
     return role === 'Administrator' || role === 'Site Engineer';
+  }
+
+  get isSEorAdmin(): boolean {
+    const role = this.auth.currentUser?.role;
+    return role === 'Site Engineer' || role === 'Administrator';
+  }
+
+  isDeletable(req: MaterialRequest): boolean {
+    const deletable = ['Pending PM Approval', 'Revision Required', 'Rejected by PM'];
+    return this.isSEorAdmin && deletable.includes(req.status);
   }
 
   constructor(
@@ -131,6 +142,34 @@ export class ProcurementRequestsComponent implements OnInit {
     } else {
       this.router.navigate(['/procurement/requests', id]);
     }
+  }
+
+  deleteRequest(req: MaterialRequest, event: Event) {
+    event.stopPropagation(); // don't open the detail panel
+    if (!confirm('Delete this procurement request? This cannot be undone.')) return;
+
+    this.deletingId = req.id; // triggers CSS exit animation
+    this.cdr.detectChanges();
+
+    // Wait for animation to finish (400ms) then call API + remove from list
+    setTimeout(() => {
+      this.data.deleteRequest(req.id).subscribe({
+        next: () => {
+          this.requests = this.requests.filter(r => r.id !== req.id);
+          if (this.selectedRequestId === req.id) {
+            this.selectedRequestId = null;
+            this.router.navigate(['/procurement/requests']);
+          }
+          this.deletingId = null;
+          this.cdr.detectChanges();
+        },
+        error: err => {
+          this.deletingId = null;
+          this.loadError = err.message || 'Could not delete request.';
+          this.cdr.detectChanges();
+        }
+      });
+    }, 380);
   }
 
   submit() {

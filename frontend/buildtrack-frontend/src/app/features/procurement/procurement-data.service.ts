@@ -101,6 +101,12 @@ export class ProcurementDataService {
       .pipe(catchError(this.handleError));
   }
 
+  deleteRequest(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiUrl}/requests/${id}`, { headers: this.authHeaders() })
+      .pipe(catchError(this.handleError));
+  }
+
   selectVendorForRequest(id: string, vendorId: string): Observable<MaterialRequest> {
     return this.http
       .put<MaterialRequest>(`${this.apiUrl}/requests/${id}/select-vendor`, null, {
