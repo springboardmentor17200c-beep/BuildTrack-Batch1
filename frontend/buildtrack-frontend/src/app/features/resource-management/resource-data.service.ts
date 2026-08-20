@@ -9,10 +9,12 @@ import { environment } from '../../../environments/environment';
 export class ResourceDataService {
   private resources = new BehaviorSubject<Resource[]>([]);
   private allocations = new BehaviorSubject<ResourceAllocation[]>([]);
+  private projects = new BehaviorSubject<any[]>([]);
   private maintenance = new BehaviorSubject<MaintenanceRecord[]>([]);
 
   resources$ = this.resources.asObservable();
   allocations$ = this.allocations.asObservable();
+  projects$ = this.projects.asObservable();
   maintenance$ = this.maintenance.asObservable();
 
   constructor(private http: HttpClient) {}
@@ -29,8 +31,10 @@ export class ResourceDataService {
     forkJoin({
       resources: this.http.get<any[]>(`${environment.apiUrl}/resources`, this.headers).pipe(catchError(() => of([]))),
       allocations: this.http.get<any[]>(`${environment.apiUrl}/resources/allocations`, this.headers).pipe(catchError(() => of([]))),
-      maintenance: this.http.get<any[]>(`${environment.apiUrl}/resources/maintenance`, this.headers).pipe(catchError(() => of([])))
-    }).subscribe(({ resources, allocations, maintenance }) => {
+      maintenance: this.http.get<any[]>(`${environment.apiUrl}/resources/maintenance`, this.headers).pipe(catchError(() => of([]))),
+      projects: this.http.get<any[]>(`${environment.apiUrl}/projects/enriched`, this.headers).pipe(catchError(() => of([])))
+    }).subscribe(({ resources, allocations, maintenance, projects }) => {
+      this.projects.next(projects);
       this.resources.next(resources.map(r => ({
         resourceId: String(r.resource_id),
         resourceName: r.resource_name,
@@ -71,7 +75,7 @@ export class ResourceDataService {
   }
 
   get projectNames(): string[] {
-    return ['Skyline Residency Tower', 'Riverside Business Park'];
+    return this.projects.value.map(p => p.project_name);
   }
 
   getAssignedProject(resourceId: string): string | null {
@@ -113,16 +117,45 @@ export class ResourceDataService {
   }
 
   addAllocation(alloc: ResourceAllocation) {
-    this.allocations.next([alloc, ...this.allocations.value]);
+    const proj = this.projects.value.find(p => p.project_name === alloc.project);
+    const projId = proj ? proj.project_id : 1; // Fallback to 1 if not found
+    const numResourceId = parseInt(alloc.resourceId.replace('R-', ''), 10) || parseInt(alloc.resourceId, 10);
+    
+    const body = {
+      resource_id: numResourceId,
+      project_id: projId,
+      allocated_by_id: 1, // Will be overridden by backend using current_user
+      allocation_date: alloc.allocationDate,
+      expected_return_date: alloc.expectedReturnDate,
+      allocation_status: 'Allocated',
+      remarks: alloc.remarks || ''
+    };
+    
+    this.http.post(`${environment.apiUrl}/resources/allocations`, body, this.headers).subscribe({
+      next: () => this.loadAll(),
+      error: err => console.error('Failed to add allocation', err)
+    });
   }
 
   returnAllocation(allocId: string) {
+    const today = new Date().toISOString().split('T')[0];
+    const numericId = parseInt(allocId.replace('A-', ''), 10) || parseInt(allocId, 10);
+    
+    // Optimistic UI update
     const update = this.allocations.value.map(a => {
       if(a.allocationId === allocId) {
-         return { ...a, actualReturnDate: new Date().toISOString().split('T')[0], allocationStatus: 'Returned' as any };
+         return { ...a, actualReturnDate: today, allocationStatus: 'Returned' as any };
       }
       return a;
     });
     this.allocations.next(update);
+
+    this.http.put(`${environment.apiUrl}/resources/allocations/${numericId}`, {
+      actual_return_date: today,
+      allocation_status: 'Returned'
+    }, this.headers).subscribe({
+      next: () => this.loadAll(),
+      error: err => console.error('Failed to return allocation', err)
+    });
   }
 }
