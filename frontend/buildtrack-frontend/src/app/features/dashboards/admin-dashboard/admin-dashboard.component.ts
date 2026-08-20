@@ -106,6 +106,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       this.analytics.progress$.subscribe(rows => {
         if (rows.length === 0) return;
         this.projects = rows.map(r => ({
+          project: r.project,
           projectName: r.project,
           status: r.status,
           completionPercentage: r.completionPercentage,
