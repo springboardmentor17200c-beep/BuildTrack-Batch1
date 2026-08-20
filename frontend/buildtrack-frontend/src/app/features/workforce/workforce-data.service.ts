@@ -271,7 +271,7 @@ export class WorkforceDataService {
     const numericEmpId = parseInt(shift.employeeId.replace('E-', ''), 10);
     const payload = {
       employee_id: numericEmpId,
-      project_id: 1, // fallback
+      project_name: shift.project,
       shift_type: shift.shiftType,
       shift_date: shift.shiftDate,
       start_time: shift.startTime,
