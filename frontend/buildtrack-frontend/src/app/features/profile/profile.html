@@ -1,164 +1,152 @@
-<div class="bt-page bt-settings-page">
-  <button class="bt-back-btn" (click)="goBack()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
-    </svg>
-    Back
-  </button>
-
-  <!-- Cover + overlapping avatar -->
-  <div class="bt-settings-cover" *ngIf="user">
-    <div class="bt-settings-cover-bg">
-      <div class="bt-settings-cover-orb bt-orb-1"></div>
-      <div class="bt-settings-cover-orb bt-orb-2"></div>
-    </div>
-    <div class="bt-settings-cover-content">
-      <div class="bt-settings-avatar-wrap">
-        <div class="bt-settings-avatar">{{ user.fullName.charAt(0) }}</div>
-      </div>
-      <div class="bt-settings-identity">
-        <h1 class="bt-settings-name">{{ user.fullName }}</h1>
-        <div class="bt-settings-email">{{ user.email }}</div>
-        <div class="bt-settings-pills">
-          <span class="bt-pill bt-pill-blue">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6-6.3 4.6 2.3-7.4-6-4.6h7.6z"></path></svg>
-            {{ user.role }}
-          </span>
-          <span class="bt-pill bt-pill-green">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"></circle></svg>
-            Active
-          </span>
-        </div>
-      </div>
-      <button class="bt-settings-signout" (click)="logout()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
-        Sign Out
-      </button>
-    </div>
-  </div>
-
-  <!-- Settings body: section nav + content -->
-  <div class="bt-settings-body">
-    <nav class="bt-settings-nav">
-      <span class="bt-settings-nav-label">Settings</span>
-      <button
-        class="bt-settings-nav-item"
-        [class.active]="activeSection === 'details'"
-        (click)="activeSection = 'details'">
-        <span class="bt-settings-nav-icon bt-icon-blue">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
-        </span>
-        Account Details
-      </button>
-      <button
-        class="bt-settings-nav-item"
-        [class.active]="activeSection === 'security'"
-        (click)="activeSection = 'security'">
-        <span class="bt-settings-nav-icon bt-icon-purple">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        </span>
-        Security
-      </button>
-    </nav>
-
-    <div class="bt-settings-content">
-      <!-- Account Details section -->
-      <section *ngIf="activeSection === 'details' && user" class="bt-settings-section">
-        <div class="bt-settings-section-header">
-          <div class="bt-settings-section-icon bt-icon-blue">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
-          </div>
-          <div>
-            <h2>Account Details</h2>
-            <p>Update your name and contact information.</p>
-          </div>
-        </div>
-
-        <div class="bt-auth-error" *ngIf="profileError">{{ profileError }}</div>
-        <div class="bt-auth-success" *ngIf="profileSuccess">Profile updated successfully.</div>
-
-        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-          <div class="bt-settings-field-row">
-            <label>
-              <span>Full Name</span>
-              <div class="bt-input-icon-wrap">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
-                <input type="text" formControlName="fullName" />
-              </div>
-            </label>
-            <label>
-              <span>Phone Number</span>
-              <div class="bt-input-icon-wrap">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                <input type="text" formControlName="phoneNumber" />
-              </div>
-            </label>
-          </div>
-          <label class="bt-settings-field-full">
-            <span>Profile Image URL</span>
-            <div class="bt-input-icon-wrap">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
-              <input type="text" formControlName="profileImage" placeholder="https://..." />
+<div class="bt-profile-container">
+      <!-- Premium Cover Header -->
+      <div class="bt-profile-cover">
+        <div class="bt-profile-cover-bg"></div>
+        
+        <div class="bt-profile-cover-bottom">
+          <div class="bt-profile-avatar-wrap">
+            <img *ngIf="profileForm.value.profileImage" [src]="profileForm.value.profileImage" class="bt-profile-avatar" alt="Avatar" />
+            <div *ngIf="!profileForm.value.profileImage" class="bt-profile-avatar-placeholder">
+              {{ (user?.fullName || user?.username || '?').charAt(0).toUpperCase() }}
             </div>
-          </label>
-
-          <div class="bt-settings-actions">
-            <button type="submit" class="bt-settings-submit">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
-              Save Changes
+            <div class="bt-profile-status-indicator"></div>
+          </div>
+          
+          <div class="bt-profile-info">
+            <h1 class="bt-profile-name">{{ user?.fullName || user?.username }}</h1>
+            <p class="bt-profile-email">{{ user?.email }}</p>
+            <div class="bt-profile-tags">
+              <span class="bt-badge purple">{{ user?.role }}</span>
+              <span class="bt-badge green" *ngIf="user?.companyId">Company ID: {{ user?.companyId }}</span>
+            </div>
+          </div>
+          
+          <div class="bt-profile-actions">
+            <button class="bt-btn-outline-red" (click)="logout()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
+              Sign Out
             </button>
           </div>
-        </form>
-      </section>
-
-      <!-- Security section -->
-      <section *ngIf="activeSection === 'security'" class="bt-settings-section">
-        <div class="bt-settings-section-header">
-          <div class="bt-settings-section-icon bt-icon-purple">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          </div>
-          <div>
-            <h2>Change Password</h2>
-            <p>Choose a strong password to keep your account secure.</p>
-          </div>
         </div>
+      </div>
 
-        <div class="bt-auth-error" *ngIf="passwordError">{{ passwordError }}</div>
-        <div class="bt-auth-success" *ngIf="passwordSuccess">Password changed successfully.</div>
-
-        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-          <label class="bt-settings-field-full">
-            <span>Current Password</span>
-            <div class="bt-input-icon-wrap">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <input type="password" formControlName="currentPassword" />
+      <!-- Settings Layout -->
+      <div class="bt-settings-layout">
+        <!-- Sidebar Nav -->
+        <nav class="bt-settings-nav">
+          <span class="bt-settings-nav-label">Settings Menu</span>
+          <button
+            class="bt-settings-nav-item"
+            [class.active]="activeSection === 'details'"
+            (click)="activeSection = 'details'">
+            <div class="bt-settings-nav-icon bt-icon-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
             </div>
-          </label>
-          <div class="bt-settings-field-row">
-            <label>
-              <span>New Password</span>
-              <div class="bt-input-icon-wrap">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                <input type="password" formControlName="newPassword" />
-              </div>
-            </label>
-            <label>
-              <span>Confirm New Password</span>
-              <div class="bt-input-icon-wrap">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                <input type="password" formControlName="confirmPassword" />
-              </div>
-            </label>
-          </div>
+            <span>Account Details</span>
+          </button>
+          <button
+            class="bt-settings-nav-item"
+            [class.active]="activeSection === 'security'"
+            (click)="activeSection = 'security'">
+            <div class="bt-settings-nav-icon bt-icon-purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <span>Security</span>
+          </button>
+        </nav>
 
-          <div class="bt-settings-actions">
-            <button type="submit" class="bt-settings-submit">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              Change Password
-            </button>
-          </div>
-        </form>
-      </section>
+        <!-- Content Area -->
+        <div class="bt-settings-content">
+          
+          <!-- Account Details Section -->
+          <section *ngIf="activeSection === 'details' && user" class="bt-section-fade-in">
+            <div class="bt-settings-header">
+              <h2>Account Details</h2>
+              <p>Update your personal information and contact details.</p>
+            </div>
+
+            <div class="bt-alert error" *ngIf="profileError">{{ profileError }}</div>
+            <div class="bt-alert success" *ngIf="profileSuccess">Profile updated successfully!</div>
+
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="bt-form">
+              <div class="bt-form-row">
+                <div class="bt-form-group">
+                  <label>Full Name</label>
+                  <div class="bt-input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
+                    <input type="text" formControlName="fullName" placeholder="Enter your full name" />
+                  </div>
+                </div>
+                <div class="bt-form-group">
+                  <label>Phone Number</label>
+                  <div class="bt-input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <input type="text" formControlName="phoneNumber" placeholder="Enter your phone number" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="bt-form-group">
+                <label>Profile Image URL</label>
+                <div class="bt-input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+                  <input type="text" formControlName="profileImage" placeholder="https://example.com/avatar.jpg" />
+                </div>
+              </div>
+
+              <div class="bt-form-actions">
+                <button type="submit" class="bt-btn-primary" [disabled]="profileForm.invalid || !profileForm.dirty">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Security Section -->
+          <section *ngIf="activeSection === 'security'" class="bt-section-fade-in">
+            <div class="bt-settings-header">
+              <h2>Security Settings</h2>
+              <p>Update your password to keep your account secure.</p>
+            </div>
+
+            <div class="bt-alert error" *ngIf="passwordError">{{ passwordError }}</div>
+            <div class="bt-alert success" *ngIf="passwordSuccess">Password changed successfully!</div>
+
+            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="bt-form">
+              <div class="bt-form-group">
+                <label>Current Password</label>
+                <div class="bt-input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  <input type="password" formControlName="currentPassword" placeholder="Enter current password" />
+                </div>
+              </div>
+
+              <div class="bt-form-row">
+                <div class="bt-form-group">
+                  <label>New Password</label>
+                  <div class="bt-input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <input type="password" formControlName="newPassword" placeholder="Enter new password" />
+                  </div>
+                </div>
+                <div class="bt-form-group">
+                  <label>Confirm New Password</label>
+                  <div class="bt-input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <input type="password" formControlName="confirmPassword" placeholder="Confirm new password" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="bt-form-actions">
+                <button type="submit" class="bt-btn-primary" [disabled]="passwordForm.invalid">
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </section>
+
+        </div>
+      </div>
+
     </div>
-  </div>
-</div>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../../auth/auth-data.service';
 import { AppUser } from '../../auth/models/auth.model';
 import { AnalyticsDataService } from '../../analytics/analytics-data.service';
@@ -12,7 +12,7 @@ import { ResourceDataService } from '../../resource-management/resource-data.ser
 @Component({
   selector: 'app-pm-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './pm-dashboard.component.html',
   styleUrls: ['./pm-dashboard.component.css'],
 })

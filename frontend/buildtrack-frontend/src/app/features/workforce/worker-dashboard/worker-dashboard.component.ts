@@ -6,6 +6,9 @@ import { RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
 import { Employee, WorkforceCategory } from '../models/workforce.model';
 import { WorkforceDataService } from '../workforce-data.service';
+import { ProjectsDataService } from '../../projects/projects-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface CategorySummary {
   category: WorkforceCategory;
@@ -39,7 +42,7 @@ export class WorkerDashboardComponent implements OnInit {
   form: FormGroup;
   projectNames: string[] = [];
 
-  constructor(private data: WorkforceDataService, private fb: FormBuilder, private location: Location) {
+  constructor(private data: WorkforceDataService, private projectsData: ProjectsDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       fullName: ['', Validators.required],
       employeeCode: ['', Validators.required],
@@ -57,7 +60,9 @@ export class WorkerDashboardComponent implements OnInit {
       this.employees = e;
       this.computeStats();
     });
-    this.projectNames = this.data.projectNames;
+    this.projectsData.projects$.subscribe(projs => {
+      this.projectNames = projs.map(p => p.projectName);
+    });
   }
 
   private computeStats() {

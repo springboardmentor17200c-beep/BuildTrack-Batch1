@@ -21,13 +21,13 @@ export type MaterialCategory =
 // same way the backend would (there's no status column on `inventory`).
 export type StockStatus = 'In Stock' | 'Low Stock' | 'Out of Stock';
 
-// Maps to the `materials` table (the catalog: what a material IS).
 export interface Material {
   materialId: string;
   materialName: string;
   category: MaterialCategory;
   unitOfMeasure: string;
   description?: string;
+  isActive?: boolean;
 }
 
 // Maps to the `inventory` table (how much is currently in stock).

@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { ProcurementDataService } from '../procurement-data.service';
 import { MaterialRequest, MaterialRequestStatus } from '../models/procurement.model';
 import { AuthDataService } from '../../auth/auth-data.service';
@@ -11,7 +11,7 @@ import { ProjectsDataService } from '../../projects/projects-data.service';
 @Component({
   selector: 'app-procurement-requests',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './procurement-requests.component.html',
   styleUrls: ['./procurement-requests.component.css'],
 })

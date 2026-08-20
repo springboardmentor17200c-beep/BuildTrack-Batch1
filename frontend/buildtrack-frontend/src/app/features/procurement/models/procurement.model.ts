@@ -123,6 +123,7 @@ export interface Invoice {
   invoiceNo: string;
   vendorId: string;
   purchaseOrderId: string;
+  unitPrice: number;
   amount: number;
   gst: number;
   date: string;
@@ -134,6 +135,7 @@ export interface Invoice {
 export interface InvoiceCreatePayload {
   vendorId: string;
   purchaseOrderId: string;
+  unitPrice: number;
   amount: number;
   gst: number;
   date: string;

@@ -25,6 +25,8 @@ import { ANALYTICS_ROUTES } from './features/analytics/analytics.routes';
 import { PROCUREMENT_ROUTES } from './features/procurement/procurement.routes';
 import { DASHBOARD_ROUTES } from './features/dashboards/dashboards.routes';
 
+import { AppLayoutComponent } from './features/shared/layout/app-layout.component';
+
 export const routes: Routes = [
   { path: '', component: Landing },
 
@@ -34,20 +36,28 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPassword },
   { path: 'unauthorized', component: Unauthorized },
 
-  // Logged-in only — no role restriction
-  { path: 'projects', children: PROJECTS_ROUTES, canActivate: [roleGuard('projects')] },
-  { path: 'profile', component: Profile, canActivate: [authGuard] },
+  // App Shell Layout (Protected Routes)
+  {
+    path: '',
+    component: AppLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      // Logged-in only — no role restriction
+      { path: 'projects', children: PROJECTS_ROUTES, canActivate: [roleGuard('projects')] },
+      { path: 'profile', component: Profile },
+      
+      // Dashboard
+      { path: 'dashboard', pathMatch: 'full', canActivate: [dashboardRedirectGuard], children: [] },
+      { path: 'dashboard', children: DASHBOARD_ROUTES },
 
-  // Dashboard
-  { path: 'dashboard', pathMatch: 'full', canActivate: [dashboardRedirectGuard], children: [] },
-  { path: 'dashboard', children: DASHBOARD_ROUTES },
+      // Logged-in AND role-restricted
+      { path: 'resources', children: RESOURCE_MANAGEMENT_ROUTES },
+      { path: 'inventory', children: INVENTORY_ROUTES, canActivate: [roleGuard('inventory')] },
+      { path: 'workforce', children: WORKFORCE_ROUTES, canActivate: [roleGuard('workforce')] },
+      { path: 'analytics', children: ANALYTICS_ROUTES, canActivate: [roleGuard('analytics')] },
+      { path: 'procurement', children: PROCUREMENT_ROUTES, canActivate: [roleGuard('procurement')] },
+    ]
+  },
 
-  // Logged-in AND role-restricted
-  { path: 'resources', children: RESOURCE_MANAGEMENT_ROUTES },
-  { path: 'inventory', children: INVENTORY_ROUTES, canActivate: [roleGuard('inventory')] },
-  { path: 'workforce', children: WORKFORCE_ROUTES, canActivate: [roleGuard('workforce')] },
-  { path: 'analytics', children: ANALYTICS_ROUTES, canActivate: [roleGuard('analytics')] },
-  { path: 'procurement', children: PROCUREMENT_ROUTES, canActivate: [roleGuard('procurement')] },
-
-  { path: '**', redirectTo: 'landing' },
+  { path: '**', redirectTo: '' },
 ];

@@ -41,7 +41,7 @@
         <span>Project</span>
         <select formControlName="projectId">
           <option value="" disabled selected>Select project</option>
-          <option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</option>
+          <option *ngFor="let p of projects" [value]="p.projectId">{{ p.projectName }}</option>
         </select>
       </label>
       <label>

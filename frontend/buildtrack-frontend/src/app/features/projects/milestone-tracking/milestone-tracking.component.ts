@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { MilestoneStatus, Project, ProjectMilestone } from '../models/projects.model';
 import { ProjectsDataService } from '../projects-data.service';
 
 @Component({
   selector: 'app-milestone-tracking',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './milestone-tracking.component.html',
   styleUrls: ['./milestone-tracking.component.css'],
 })

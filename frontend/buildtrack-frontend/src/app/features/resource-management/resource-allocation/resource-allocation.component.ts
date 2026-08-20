@@ -5,6 +5,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceAllocation } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-resource-allocation',

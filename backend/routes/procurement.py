@@ -1,7 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
 from typing import List, Dict
 import uuid
 from datetime import datetime
+
+from app.db.database import get_db
+from app.core.dependencies import get_current_user
+from app.core.notification_helper import create_notification_for_role, create_notification
+from app.models.user import User
 
 from models_procurement import (
     Vendor, VendorCreate,
@@ -69,7 +75,11 @@ def delete_vendor(vendor_id: str):
 
 # --- Material Requests ---
 @router.post("/requests", response_model=MaterialRequest)
-def create_request(req: MaterialRequestCreate):
+def create_request(
+    req: MaterialRequestCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     r_id = generate_id()
     new_req = req.model_dump()
     new_req["id"] = r_id
@@ -78,20 +88,71 @@ def create_request(req: MaterialRequestCreate):
     new_req["receivedQuantity"] = 0
     add_timeline_event(new_req, "Site Engineer created request")
     db_requests[r_id] = new_req
+    
+    create_notification_for_role(
+        db, current_user.company_id, "Project Manager", 
+        "New PR Pending", f"New procurement request created for {req.material}."
+    )
     return new_req
 
 @router.get("/requests", response_model=List[MaterialRequest])
 def get_requests():
     return list(db_requests.values())
 
+@router.delete("/requests/{request_id}", status_code=204)
+def delete_request(
+    request_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Delete a procurement request.
+    Only allowed when status is still Pending PM Approval (not yet acted on).
+    SE can delete their own requests; Admin can delete any pending request.
+    """
+    if request_id not in db_requests:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    req = db_requests[request_id]
+    role = current_user.role.role_name if current_user.role else ""
+
+    # Only allow deletion of requests that haven't been approved/in-progress yet
+    deletable_statuses = [
+        MaterialRequestStatus.Pending_PM_Approval.value,
+        MaterialRequestStatus.Revision_Required.value,
+        MaterialRequestStatus.Rejected_by_PM.value,
+    ]
+    if req["status"] not in deletable_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete a request that is already approved or in progress."
+        )
+
+    # Permission check: SE or Admin only
+    if role not in ("Site Engineer", "Administrator"):
+        raise HTTPException(status_code=403, detail="You do not have permission to delete requests.")
+
+    del db_requests[request_id]
+    return
+
 @router.put("/requests/{request_id}/approve", response_model=MaterialRequest)
-def approve_request(request_id: str, comments: str = None):
+def approve_request(
+    request_id: str, 
+    comments: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     if request_id not in db_requests:
         raise HTTPException(status_code=404, detail="Request not found")
     db_requests[request_id]["status"] = MaterialRequestStatus.PM_Approved
     if comments:
         db_requests[request_id]["comments"] = comments
     add_timeline_event(db_requests[request_id], "PM approved request", comments)
+    
+    create_notification_for_role(
+        db, current_user.company_id, "Administrator",
+        "PR Approved", f"PR {request_id[:8]} approved. Vendor assignment required."
+    )
     return db_requests[request_id]
 
 @router.put("/requests/{request_id}/reject", response_model=MaterialRequest)
@@ -138,7 +199,12 @@ def get_purchase_orders():
     return list(db_purchase_orders.values())
 
 @router.put("/purchase-orders/{po_id}", response_model=PurchaseOrder)
-def update_purchase_order(po_id: str, po_update: dict):
+def update_purchase_order(
+    po_id: str, 
+    po_update: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     if po_id not in db_purchase_orders:
         raise HTTPException(status_code=404, detail="Purchase Order not found")
     po = db_purchase_orders[po_id]
@@ -150,11 +216,20 @@ def update_purchase_order(po_id: str, po_update: dict):
             req["status"] = MaterialRequestStatus.PO_Sent
             add_timeline_event(req, f"Admin sent Purchase Order to vendor")
             
+        create_notification_for_role(
+            db, current_user.company_id, "Vendor",
+            "New Purchase Order", f"Purchase Order {po.get('poNumber')} received for approval."
+        )
+            
     return po
 
 # --- Material Deliveries & Inventory ---
 @router.post("/deliveries", response_model=MaterialDelivery)
-def create_delivery(delivery: MaterialDeliveryCreate):
+def create_delivery(
+    delivery: MaterialDeliveryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     d_id = generate_id()
     new_del = delivery.model_dump()
     new_del["id"] = d_id
@@ -184,6 +259,10 @@ def create_delivery(delivery: MaterialDeliveryCreate):
                 req["status"] = MaterialRequestStatus.Partially_Received
                 add_timeline_event(req, f"Material partially received ({req['receivedQuantity']}/{req['quantity']})")
                 
+    create_notification_for_role(db, current_user.company_id, "Site Engineer", "Material Delivered", f"Materials delivered for PO.")
+    create_notification_for_role(db, current_user.company_id, "Project Manager", "Material Delivered", f"Materials delivered for PO.")
+    create_notification_for_role(db, current_user.company_id, "Administrator", "Material Delivered", f"Materials delivered for PO.")
+                
     return new_del
 
 @router.get("/deliveries", response_model=List[MaterialDelivery])
@@ -196,24 +275,49 @@ def get_inventory():
 
 # --- Invoices ---
 @router.post("/invoices", response_model=Invoice)
-def create_invoice(invoice: InvoiceCreate):
+def create_invoice(
+    invoice: InvoiceCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     i_id = generate_id()
     new_inv = invoice.model_dump()
     new_inv["id"] = i_id
     new_inv["invoiceNo"] = f"INV-{len(db_invoices) + 1000}"
     new_inv["paymentStatus"] = InvoiceStatus.Pending
     db_invoices[i_id] = new_inv
+
+    # Back-fill the PO with the vendor's unit price and computed total
+    po = db_purchase_orders.get(invoice.purchaseOrderId)
+    if po:
+        po["unitPrice"] = invoice.unitPrice
+        po["totalAmount"] = invoice.amount  # amount already includes unitPrice × qty
+    
+    create_notification_for_role(
+        db, current_user.company_id, "Administrator",
+        "Invoice Received", f"Invoice {new_inv['invoiceNo']} received, pending payment."
+    )
     return new_inv
+
 
 @router.get("/invoices", response_model=List[Invoice])
 def get_invoices():
     return list(db_invoices.values())
 
 @router.put("/invoices/{invoice_id}/payment", response_model=Invoice)
-def pay_invoice(invoice_id: str):
+def pay_invoice(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     if invoice_id not in db_invoices:
         raise HTTPException(status_code=404, detail="Invoice not found")
     db_invoices[invoice_id]["paymentStatus"] = InvoiceStatus.Paid
     db_invoices[invoice_id]["paymentDate"] = datetime.utcnow().isoformat()
     db_invoices[invoice_id]["paymentRef"] = f"TRX-{str(uuid.uuid4())[:8].upper()}"
+    
+    create_notification_for_role(
+        db, current_user.company_id, "Vendor",
+        "Payment Processed", f"Payment completed for invoice {db_invoices[invoice_id]['invoiceNo']}."
+    )
     return db_invoices[invoice_id]

@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, MaterialCategory, StockStatus } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-stock-monitoring',

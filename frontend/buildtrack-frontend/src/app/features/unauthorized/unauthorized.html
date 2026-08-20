@@ -1,20 +1,49 @@
-<div class="bt-auth-page">
-  <div class="bt-auth-card" style="text-align:center;">
-    <div class="bt-auth-logo" style="justify-content:center;">
-      <div class="bt-auth-logo-badge">BT</div>
-      <span class="bt-auth-logo-text">BuildTrack</span>
+<div class="bt-unauthorized-wrapper">
+  
+  <!-- This entire layer (sidebar + main content) is blurred -->
+  <div class="bt-blurred-background">
+    <div class="bt-shell">
+      <app-sidebar></app-sidebar>
+      
+      <div class="bt-main" style="padding: 24px;">
+        <div class="bt-page-header">
+          <div>
+            <h1 class="bt-title">Secure Module</h1>
+            <p class="bt-subtitle">Loading secure data...</p>
+          </div>
+        </div>
+        
+        <!-- Mock Realistic Content -->
+        <div style="display:flex; gap: 20px; margin-bottom: 24px;">
+          <div class="bt-stat-card" style="flex:1; height: 120px;"></div>
+          <div class="bt-stat-card" style="flex:1; height: 120px;"></div>
+          <div class="bt-stat-card" style="flex:1; height: 120px;"></div>
+          <div class="bt-stat-card" style="flex:1; height: 120px;"></div>
+        </div>
+        <div class="bt-panel" style="height: 400px;"></div>
+      </div>
     </div>
+  </div>
 
-    <h1 class="bt-auth-title">Access restricted</h1>
-    <p class="bt-auth-subtitle" *ngIf="auth.currentUser">
-      Your role (<strong>{{ auth.currentUser.role }}</strong>) doesn't have permission to view this page.
-    </p>
-    <p class="bt-auth-subtitle" *ngIf="!auth.currentUser">
-      You need to sign in to view this page.
-    </p>
+  <!-- The Modal floats on top of the full-page blur -->
+  <div class="bt-unauthorized-overlay">
+    <div class="bt-auth-card" style="text-align:center;">
+      <div class="bt-auth-logo" style="justify-content:center;">
+        <div class="bt-auth-logo-badge">BT</div>
+        <span class="bt-auth-logo-text">BuildTrack</span>
+      </div>
 
-    <a class="bt-auth-submit" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;" [routerLink]="['/dashboard']">
-      Back to Dashboard
-    </a>
+      <h1 class="bt-auth-title">Access restricted</h1>
+      <p class="bt-auth-subtitle" *ngIf="auth.currentUser">
+        Your role (<strong>{{ auth.currentUser.role }}</strong>) doesn't have permission to view this page.
+      </p>
+      <p class="bt-auth-subtitle" *ngIf="!auth.currentUser">
+        You need to sign in to view this page.
+      </p>
+
+      <a class="bt-auth-submit" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:24px;" [routerLink]="['/dashboard']">
+        Back to Dashboard
+      </a>
+    </div>
   </div>
 </div>

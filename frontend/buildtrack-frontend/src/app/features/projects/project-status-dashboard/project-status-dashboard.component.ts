@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { Project, ProjectCategory, ProjectStatus } from '../models/projects.model';
 import { ProjectsDataService } from '../projects-data.service';
 
@@ -14,7 +14,7 @@ interface CategorySummary {
 @Component({
   selector: 'app-project-status-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './project-status-dashboard.component.html',
   styleUrls: ['./project-status-dashboard.component.css'],
 })

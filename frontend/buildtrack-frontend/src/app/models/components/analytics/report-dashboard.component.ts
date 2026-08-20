@@ -11,32 +11,30 @@ import { Report } from '../../../models/report.model';
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="bt-page">
-      <button class="bt-back-btn" (click)="goBack()">
+      <button class="bt-back-btn" routerLink="/analytics">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
         </svg>
         Back to Analytics
       </button>
 
-      <div class="dashboard-header">
-        <div class="header-left">
-          <h1>Reports & Documentation</h1>
-          <p class="subtitle">Generate, manage, and export project reports in PDF or Excel/CSV format</p>
+      <div class="bt-topbar" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <h1 class="bt-title">Reports & Documentation</h1>
+          <p class="bt-subtitle">Generate, manage, and export project reports in PDF or Excel/CSV format</p>
         </div>
-        <div class="header-actions">
-          <button class="btn btn-primary" (click)="generateNewReport()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Generate New Report
-          </button>
-        </div>
+        <button class="bt-add-btn" routerLink="/analytics/reports/generate">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Generate New Report</span>
+        </button>
       </div>
 
       <!-- Report Filters -->
-      <div class="filter-section">
-        <div class="filter-row">
-          <div class="filter-item">
-            <label>Report Type</label>
-            <select [(ngModel)]="selectedReportType" (change)="applyFilters()" class="form-control">
+      <div class="bt-panel" style="margin-bottom: 24px;">
+        <div class="bt-form-grid" style="align-items: flex-end;">
+          <label>
+            <span>Report Type</span>
+            <select [(ngModel)]="selectedReportType" (change)="applyFilters()">
               <option value="all">All Reports</option>
               <option value="progress">Progress Reports</option>
               <option value="resource">Resource Reports</option>
@@ -44,26 +42,28 @@ import { Report } from '../../../models/report.model';
               <option value="workforce">Workforce Reports</option>
               <option value="procurement">Procurement Reports</option>
             </select>
-          </div>
-          <div class="filter-item">
-            <label>Status</label>
-            <select [(ngModel)]="selectedStatus" (change)="applyFilters()" class="form-control">
+          </label>
+          <label>
+            <span>Status</span>
+            <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
               <option value="all">All Status</option>
               <option value="generated">Generated</option>
               <option value="draft">Draft</option>
               <option value="scheduled">Scheduled</option>
             </select>
-          </div>
-          <div class="filter-item">
-            <label>Date Range</label>
-            <div class="date-range">
-              <input type="date" [(ngModel)]="startDate" (change)="applyFilters()" class="form-control">
-              <span>to</span>
-              <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" class="form-control">
+          </label>
+          <div style="grid-column: span 2;">
+            <label style="display: block; margin-bottom: 6px;">
+              <span>Date Range</span>
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="date" [(ngModel)]="startDate" (change)="applyFilters()" style="flex: 1;">
+              <span style="color: var(--text-secondary); font-size: 13px; font-weight: 600;">to</span>
+              <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" style="flex: 1;">
             </div>
           </div>
-          <div class="filter-item filter-actions-item">
-            <button class="btn btn-outline" (click)="clearFilters()">
+          <div>
+            <button class="bt-filter-btn" (click)="clearFilters()" style="width: 100%; justify-content: center; margin-top: 24px;">
               Clear Filters
             </button>
           </div>
@@ -71,277 +71,75 @@ import { Report } from '../../../models/report.model';
       </div>
 
       <!-- Reports Grid -->
-      <div class="reports-grid" *ngIf="!isLoading && filteredReports.length > 0">
-        <div class="report-card" *ngFor="let report of filteredReports">
-          <div class="report-header">
-            <span class="type-badge" [ngClass]="report.type">{{ report.type | uppercase }}</span>
-            <span class="status-badge" [ngClass]="report.status">{{ report.status }}</span>
+      <div class="bt-panel" *ngIf="!isLoading && filteredReports.length > 0">
+        <div class="bt-panel-header">
+          <div>
+            <h3 class="bt-panel-title">Available Reports</h3>
+            <span class="bt-panel-sub">Showing {{ filteredReports.length }} report(s)</span>
           </div>
-          <div class="report-body">
-            <h3>{{ report.title }}</h3>
-            <p class="report-description">{{ report.description }}</p>
-            <div class="report-meta">
-              <span class="meta-item">
-                📅 {{ report.generatedDate | date:'mediumDate' }}
-              </span>
-              <span class="meta-item">
-                📄 {{ report.format | uppercase }}
-              </span>
-            </div>
-          </div>
-          <div class="report-actions">
-            <button class="btn btn-sm btn-outline" (click)="exportPDF(report)" title="Export HTML/PDF">
-              📥 Export PDF
-            </button>
-            <button class="btn btn-sm btn-outline" (click)="exportExcel(report)" title="Export CSV/Excel">
-              📊 Export CSV
-            </button>
-            <button class="btn btn-sm btn-danger" (click)="deleteReport(report.id)">
-              🗑️ Delete
-            </button>
-          </div>
+        </div>
+        <div class="bt-table-wrap">
+          <table class="bt-table">
+            <thead>
+              <tr>
+                <th>Report Title</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Date Generated</th>
+                <th>Format</th>
+                <th style="text-align: right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let report of filteredReports">
+                <td>
+                  <div class="bt-strong">{{ report.title }}</div>
+                  <div class="bt-muted" style="font-size: 12px; margin-top: 4px;">{{ report.description }}</div>
+                </td>
+                <td>
+                  <span class="bt-badge" [ngClass]="report.type === 'progress' ? 'blue' : report.type === 'budget' ? 'green' : report.type === 'resource' ? 'purple' : report.type === 'workforce' ? 'orange' : 'gray'">
+                    {{ report.type | uppercase }}
+                  </span>
+                </td>
+                <td>
+                  <span class="bt-badge gray">{{ report.status }}</span>
+                </td>
+                <td>{{ report.generatedDate | date:'mediumDate' }}</td>
+                <td><span class="bt-badge gray">{{ report.format | uppercase }}</span></td>
+                <td style="text-align: right">
+                  <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <button class="bt-filter-btn" (click)="exportPDF(report)" title="Export HTML/PDF">
+                      PDF
+                    </button>
+                    <button class="bt-filter-btn" (click)="exportExcel(report)" title="Export CSV/Excel">
+                      CSV
+                    </button>
+                    <button class="bt-filter-btn" (click)="deleteReport(report.id)" style="color: var(--bt-red);">
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div *ngIf="isLoading" class="loading-state">
-        <div class="spinner"></div>
+      <div *ngIf="isLoading" class="bt-panel" style="padding: 48px; text-align: center; color: var(--text-secondary);">
         <p>Loading reports...</p>
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="!isLoading && filteredReports.length === 0" class="empty-state">
-        <h3>No Reports Found</h3>
-        <p>Generate a new report to get started</p>
-        <button class="btn btn-primary" (click)="generateNewReport()">
-          Generate Report
+      <div *ngIf="!isLoading && filteredReports.length === 0" class="bt-panel" style="padding: 48px; text-align: center;">
+        <h3 class="bt-strong" style="margin-bottom: 8px; font-size: 18px;">No Reports Found</h3>
+        <p class="bt-muted" style="margin-bottom: 24px;">Adjust your filters or generate a new report to get started.</p>
+        <button class="bt-add-btn" routerLink="/analytics/reports/generate" style="margin: 0 auto;">
+          <span>Generate Report</span>
         </button>
       </div>
     </div>
-  `,
-  styles: [`
-    .bt-page {
-      padding: 24px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .bt-back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: none;
-      border: none;
-      color: #64748b;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      margin-bottom: 16px;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
-    .bt-back-btn:hover {
-      color: #1e293b;
-      background: #f1f5f9;
-    }
-    .dashboard-header {
-      background: white;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e2e8f0;
-    }
-    .header-left h1 {
-      margin: 0 0 4px 0;
-      font-size: 24px;
-      font-weight: 700;
-      color: #0f172a;
-    }
-    .subtitle {
-      margin: 0;
-      color: #64748b;
-      font-size: 14px;
-    }
-    .header-actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-    .btn-primary {
-      background: #2563eb;
-      color: white;
-    }
-    .btn-primary:hover {
-      background: #1d4ed8;
-    }
-    .btn-outline {
-      background: white;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-    }
-    .btn-outline:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-    }
-    .btn-danger {
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fecaca;
-    }
-    .btn-danger:hover {
-      background: #fee2e2;
-    }
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 13px;
-    }
-    .filter-section {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e2e8f0;
-    }
-    .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: flex-end;
-    }
-    .filter-item {
-      flex: 1;
-      min-width: 160px;
-    }
-    .filter-actions-item {
-      flex: 0 0 auto;
-    }
-    .filter-item label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 6px;
-    }
-    .form-control {
-      width: 100%;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      font-size: 14px;
-      color: #1e293b;
-      background-color: white;
-      box-sizing: border-box;
-    }
-    .date-range {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .reports-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 20px;
-    }
-    .report-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .report-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .type-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      text-transform: uppercase;
-
-      &.progress { background: #dbeafe; color: #1e40af; }
-      &.budget { background: #dcfce7; color: #166534; }
-      &.resource { background: #f3e8ff; color: #6b21a8; }
-      &.workforce { background: #ffedd5; color: #9a3412; }
-      &.procurement { background: #e0e7ff; color: #3730a3; }
-    }
-    .status-badge {
-      font-size: 12px;
-      font-weight: 500;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: #f1f5f9;
-      color: #475569;
-    }
-    .report-body h3 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #0f172a;
-    }
-    .report-description {
-      margin: 0 0 16px 0;
-      font-size: 13px;
-      color: #64748b;
-      line-height: 1.4;
-    }
-    .report-meta {
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-      color: #64748b;
-      margin-bottom: 16px;
-    }
-    .report-actions {
-      display: flex;
-      gap: 8px;
-      border-top: 1px solid #f1f5f9;
-      padding-top: 16px;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 48px;
-      background: white;
-      border-radius: 12px;
-      border: 1px dashed #cbd5e1;
-    }
-    .loading-state {
-      text-align: center;
-      padding: 48px;
-    }
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 12px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `]
+  `
 })
 export class ReportsDashboardComponent implements OnInit {
   reports: Report[] = [];
@@ -468,6 +266,6 @@ export class ReportsDashboardComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/analytics']);
+    this.location.back();
   }
 }

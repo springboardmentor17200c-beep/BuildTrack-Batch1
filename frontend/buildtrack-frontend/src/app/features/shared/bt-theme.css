@@ -34,23 +34,12 @@
   --bt-border: #f1f5f9;
   --bt-font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 
-  /* Liquid glass material — identical recipe to the Project Management page */
-  --bt-glass-fill: rgba(255, 255, 255, 0.14);
-  --bt-glass-fill-strong: rgba(255, 255, 255, 0.22);
-  --bt-glass-fill-soft: rgba(255, 255, 255, 0.09);
-  --bt-glass-border: rgba(255, 255, 255, 0.32);
-  --bt-glass-border-soft: rgba(255, 255, 255, 0.18);
-  --bt-glass-blur: blur(30px) saturate(190%);
-
-  --bt-glass-shadow:
-    0 8px 32px rgba(15, 30, 60, 0.16),
-    0 1.5px 1px rgba(255,255,255,0.5) inset,
-    0 -1px 1px rgba(15,30,60,0.06) inset;
-
-  --bt-glass-shadow-hover:
-    0 22px 48px rgba(15, 30, 60, 0.24),
-    0 0 0 1px rgba(255,255,255,0.4) inset,
-    0 1.5px 1px rgba(255,255,255,0.6) inset;
+  /* Premium Solid Material */
+  --bt-panel-bg: #ffffff;
+  --bt-panel-border: #e2e8f0;
+  --bt-panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --bt-panel-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --bt-input-bg: #f8fafc;
 
   --bt-glow-blue: 0 0 24px rgba(59, 130, 246, 0.45);
   --bt-glow-green: 0 0 24px rgba(16, 185, 129, 0.45);
@@ -71,57 +60,32 @@
 }
 
 /* ---------------------------------------------------------
-   GLASS PRIMITIVE — every card/panel below applies this
+   PREMIUM SOLID PRIMITIVE — every card/panel below applies this
 --------------------------------------------------------- */
 .bt-stat-card,
 .bt-panel,
 .bt-form-card,
-.bt-option-card,
+.bt-option-card {
+  background: var(--bt-panel-bg);
+  border: 1px solid var(--bt-panel-border);
+  box-shadow: var(--bt-panel-shadow);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
 .bt-search,
 .bt-filter-select,
 .bt-filter-btn {
-  position: relative;
-  background: var(--bt-glass-fill);
-  -webkit-backdrop-filter: var(--bt-glass-blur);
-  backdrop-filter: var(--bt-glass-blur);
-  border: 1px solid var(--bt-glass-border);
-  box-shadow: var(--bt-glass-shadow);
-  isolation: isolate;
+  background: var(--bt-panel-bg);
+  border: 1px solid var(--bt-panel-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
-.bt-stat-card::before,
-.bt-panel::before,
-.bt-form-card::before,
-.bt-option-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 26%, transparent 60%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.bt-stat-card::after,
-.bt-panel::after,
-.bt-form-card::after,
-.bt-option-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(120% 90% at 8% 0%, rgba(255,255,255,0.30), transparent 55%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bt-stat-card > *, .bt-panel > *, .bt-form-card > *, .bt-option-card > * {
-  position: relative;
-  z-index: 2;
+.bt-stat-card:hover,
+.bt-panel:hover,
+.bt-option-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--bt-panel-shadow-hover);
 }
 
 /* Back button */
@@ -363,26 +327,31 @@
 
 /* Table */
 .bt-table-wrap { overflow-x: auto; }
-.bt-table { width: 100%; border-collapse: collapse; }
+.bt-table { 
+  width: 100%; 
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
 .bt-table th {
   text-align: left;
-  font-size: 11.5px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--bt-muted);
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--bt-glass-border-soft);
+  padding: 0 14px 8px;
+  border-bottom: 1px solid var(--bt-panel-border);
   white-space: nowrap;
 }
 .bt-table td {
   padding: 14px;
   font-size: 14px;
-  border-bottom: 1px solid var(--bt-glass-border-soft);
+  background: var(--bt-input-bg);
   vertical-align: middle;
 }
-.bt-table tr:last-child td { border-bottom: none; }
-.bt-table tbody tr { transition: background .25s var(--bt-ease); }
-.bt-table tbody tr:hover td { background: rgba(255,255,255,0.22); }
+.bt-table tbody tr td:first-child { border-radius: 10px 0 0 10px; }
+.bt-table tbody tr td:last-child { border-radius: 0 10px 10px 0; }
+.bt-table tbody tr { transition: transform .2s ease; }
+.bt-table tbody tr:hover { transform: translateY(-1px); }
 .bt-strong { font-weight: 700; }
 .bt-muted { color: var(--bt-muted); font-size: 13px; }
 
@@ -536,13 +505,13 @@
   }
   
   .bt-auth-card {
-    background: #fff;
-    border: 1px solid var(--bt-border);
+    background: var(--bt-panel-bg);
+    border: 1px solid var(--bt-panel-border);
     border-radius: 22px;
     padding: 40px;
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 12px 32px rgba(30, 40, 80, 0.08);
+    box-shadow: var(--bt-panel-shadow);
   }
   
   .bt-auth-logo {
@@ -706,11 +675,17 @@
     min-width: 0;
   }
   
+  .bt-main > :not(router-outlet) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  
   .bt-sidebar {
     width: 240px;
     flex-shrink: 0;
-    background: #fff;
-    border-right: 1px solid var(--bt-border);
+    background: var(--bt-panel-bg);
+    border-right: 1px solid var(--bt-panel-border);
     min-height: 100vh;
     position: sticky;
     top: 0;
@@ -885,6 +860,11 @@ body.bt-dark {
   --bt-text: #e5e7eb;
   --bt-muted: #9aa1b1;
   --bt-border: #2a2f3d;
+  --bt-panel-bg: #1b1e29;
+  --bt-panel-border: #2a2f3d;
+  --bt-panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  --bt-panel-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.3);
+  --bt-input-bg: #12141c;
   --bt-blue-soft: rgba(59, 130, 246, 0.16);
   --bt-green-soft: rgba(16, 185, 129, 0.14);
   --bt-red-soft: rgba(239, 68, 68, 0.14);
@@ -897,26 +877,6 @@ body.bt-dark .bt-settings-page,
 body.bt-dark .bt-shell,
 body.bt-dark .bt-auth-page {
   background: linear-gradient(180deg, #14161f 0%, #0e1017 100%);
-}
-
-/* Glass panels / cards */
-body.bt-dark .bt-panel,
-body.bt-dark .bt-stat-card,
-body.bt-dark .bt-form-card,
-body.bt-dark .bt-option-card,
-body.bt-dark .bt-settings-cover-content,
-body.bt-dark .bt-settings-nav,
-body.bt-dark .bt-settings-content,
-body.bt-dark .bt-auth-card,
-body.bt-dark .bt-sidebar {
-  background: #1b1e29;
-  border-color: #2a2f3d;
-}
-
-body.bt-dark .bt-panel::after,
-body.bt-dark .bt-stat-card::after,
-body.bt-dark .bt-option-card::after {
-  background: radial-gradient(120% 90% at 8% 0%, rgba(255,255,255,0.04), transparent 55%);
 }
 
 /* Sidebar */
@@ -940,8 +900,8 @@ body.bt-dark .bt-form-grid input,
 body.bt-dark .bt-form-grid select,
 body.bt-dark .bt-auth-field input,
 body.bt-dark .bt-auth-field select {
-  background: #12141c;
-  border-color: #2a2f3d;
+  background: var(--bt-input-bg);
+  border-color: var(--bt-panel-border);
   color: var(--bt-text);
 }
 body.bt-dark .bt-input-icon-wrap input:focus,
@@ -1713,3 +1673,4 @@ a.bt-icon-btn,
 a.bt-sidebar-logout {
   text-decoration: none;
 }
+

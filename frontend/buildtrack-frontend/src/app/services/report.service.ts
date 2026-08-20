@@ -74,7 +74,10 @@ export class ReportService {
 
   getReports(): Observable<Report[]> {
     return this.http.get<Report[]>(this.apiUrl).pipe(
-      catchError(() => of([...this.reports]).pipe(delay(300)))
+      catchError((err) => {
+        console.error('Failed to load real reports from backend', err);
+        return of([]);
+      })
     );
   }
 

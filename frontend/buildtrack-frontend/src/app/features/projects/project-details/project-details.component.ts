@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { Project, ProjectMilestone, ProjectStatus } from '../models/projects.model';
 import { ProjectsDataService } from '../projects-data.service';
 
 @Component({
   selector: 'app-project-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './project-details.component.html',
   styleUrls: ['./project-details.component.css'],
 })

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from app.core.permissions import require_roles
 from app.db.database import get_db
@@ -12,12 +13,76 @@ from app.schemas.project import (
     ProjectCreate,
     ProjectResponse,
     ProjectUpdate,
+    ProjectEnrichedResponse,
 )
 
 router = APIRouter(
     prefix="/projects",
     tags=["Projects"],
 )
+
+ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer")
+
+
+@router.get("/categories", summary="All project categories")
+def get_categories(db: Session = Depends(get_db), current_user=Depends(require_roles(*ALL_ROLES))):
+    return [{"category_id": c.category_id, "category_name": c.category_name}
+            for c in db.query(ProjectCategory).all()]
+
+
+@router.get("/statuses", summary="All project statuses")
+def get_statuses(db: Session = Depends(get_db), current_user=Depends(require_roles(*ALL_ROLES))):
+    return [{"status_id": s.status_id, "status_name": s.status_name}
+            for s in db.query(ProjectStatus).all()]
+
+
+
+
+def _enrich(project: Project) -> ProjectEnrichedResponse:
+    """Convert ORM project row (with joined relationships) to enriched response."""
+    return ProjectEnrichedResponse(
+        project_id=project.project_id,
+        project_name=project.project_name,
+        description=project.description,
+        location=project.location,
+        category=project.category.category_name if project.category else "",
+        status=project.status.status_name if project.status else "",
+        manager=project.manager.full_name if project.manager else "",
+        client=project.client.full_name if project.client else "",
+        start_date=project.start_date,
+        expected_end_date=project.expected_end_date,
+        actual_end_date=project.actual_end_date,
+    )
+
+
+@router.get(
+    "/enriched",
+    response_model=List[ProjectEnrichedResponse],
+    summary="All projects with denormalized names (for frontend)",
+)
+def get_projects_enriched(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(*ALL_ROLES)),
+):
+    projects = db.query(Project).all()
+    return [_enrich(p) for p in projects]
+
+
+@router.get(
+    "/enriched/{project_id}",
+    response_model=ProjectEnrichedResponse,
+    summary="Single project with denormalized names",
+)
+def get_project_enriched(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(*ALL_ROLES)),
+):
+    project = db.query(Project).filter(Project.project_id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    return _enrich(project)
+
 
 @router.post(
     "",

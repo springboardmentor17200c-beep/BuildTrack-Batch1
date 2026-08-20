@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory, ResourceStatus } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-equipment-tracking',

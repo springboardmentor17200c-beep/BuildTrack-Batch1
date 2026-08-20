@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AppSidebarComponent } from '../../shared/sidebar/app-sidebar.component';
+import { } from '../../shared/sidebar/app-sidebar.component';
 import { ProcurementDataService } from '../procurement-data.service';
 import { Vendor } from '../models/procurement.model';
 import { AuthDataService } from '../../auth/auth-data.service';
@@ -10,7 +10,7 @@ import { AuthDataService } from '../../auth/auth-data.service';
 @Component({
   selector: 'app-vendor-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppSidebarComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './vendor-management.component.html',
   styleUrls: ['./vendor-management.component.css'],
 })

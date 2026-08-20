@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface ResourceCategory {
   name: string;

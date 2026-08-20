@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from app.core.permissions import require_roles
 from app.db.database import get_db
@@ -11,6 +12,7 @@ from app.schemas.project_milestone import (
     ProjectMilestoneCreate,
     ProjectMilestoneUpdate,
     ProjectMilestoneResponse,
+    ProjectMilestoneEnrichedResponse,
 )
 
 router = APIRouter(
@@ -23,6 +25,35 @@ VALID_STATUSES = {
     "In Progress",
     "Completed",
 }
+
+ALL_ROLES = ("Administrator", "Project Manager", "Site Engineer")
+
+
+def _enrich(m: ProjectMilestone) -> ProjectMilestoneEnrichedResponse:
+    return ProjectMilestoneEnrichedResponse(
+        milestone_id=m.milestone_id,
+        project_id=m.project_id,
+        project_name=m.project.project_name if m.project else "",
+        milestone_name=m.milestone_name,
+        description=m.description,
+        due_date=m.due_date,
+        completion_date=m.completion_date,
+        status=m.status,
+    )
+
+
+@router.get(
+    "/enriched",
+    response_model=List[ProjectMilestoneEnrichedResponse],
+    summary="All milestones with project_name (for frontend)",
+)
+def get_milestones_enriched(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(*ALL_ROLES)),
+):
+    milestones = db.query(ProjectMilestone).all()
+    return [_enrich(m) for m in milestones]
+
 
 @router.post(
     "",

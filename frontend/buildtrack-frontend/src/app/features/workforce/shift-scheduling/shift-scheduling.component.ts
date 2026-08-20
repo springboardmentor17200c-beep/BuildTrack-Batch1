@@ -6,6 +6,9 @@ import { RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
 import { Employee, Shift, ShiftType } from '../models/workforce.model';
 import { WorkforceDataService } from '../workforce-data.service';
+import { ProjectsDataService } from '../../projects/projects-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 const SHIFT_TIMES: Record<ShiftType, { start: string; end: string }> = {
   Morning: { start: '08:00 AM', end: '04:00 PM' },
@@ -31,7 +34,7 @@ export class ShiftSchedulingComponent implements OnInit {
   projectFilter = 'All';
   shiftTypeFilter: ShiftType | 'All' = 'All';
 
-  constructor(private data: WorkforceDataService, private fb: FormBuilder, private location: Location) {
+  constructor(private data: WorkforceDataService, private projectsData: ProjectsDataService, private fb: FormBuilder, private location: Location) {
     this.form = this.fb.group({
       employeeId: ['', Validators.required],
       project: ['', Validators.required],
@@ -43,7 +46,9 @@ export class ShiftSchedulingComponent implements OnInit {
   ngOnInit(): void {
     this.data.shifts$.subscribe(s => (this.allShifts = s));
     this.data.employees$.subscribe(e => (this.employees = e.filter(x => x.employmentStatus === 'Active')));
-    this.projectNames = this.data.projectNames;
+    this.projectsData.projects$.subscribe(projs => {
+      this.projectNames = projs.map(p => p.projectName);
+    });
   }
 
   get filtered(): Shift[] {

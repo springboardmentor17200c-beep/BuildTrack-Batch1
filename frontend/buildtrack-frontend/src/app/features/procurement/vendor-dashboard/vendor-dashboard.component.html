@@ -1,7 +1,4 @@
-<div class="bt-shell">
-  <app-sidebar></app-sidebar>
-  <div class="bt-main">
-    <div class="bt-page">
+<div class="bt-page">
       <button class="bt-back-btn" [routerLink]="isVendorRole ? ['/'] : ['/procurement/vendors']">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
         Back
@@ -77,19 +74,65 @@
 
         <div class="bt-panel" *ngIf="selectedPoForInvoice" style="margin-bottom: 24px;">
           <div class="bt-panel-header">
-            <h3 class="bt-panel-title">Submit Invoice</h3>
+            <h3 class="bt-panel-title">Create Invoice</h3>
             <button class="bt-filter-btn" (click)="selectedPoForInvoice = null">Cancel</button>
           </div>
-          <form [formGroup]="invoiceForm" (ngSubmit)="submitInvoice()" style="padding: 16px;">
-            <div class="bt-form-grid">
-              <label><span>Invoice Amount (₹)</span><input type="number" min="0.01" step="0.01" formControlName="amount" /></label>
-              <label><span>GST %</span><input type="number" min="0" step="0.1" formControlName="gst" /></label>
-              <label><span>Invoice Date</span><input type="date" formControlName="date" /></label>
-            </div>
-            <div class="bt-form-actions" style="margin-top: 16px;">
-              <button type="submit" class="bt-add-btn">Submit Invoice</button>
-            </div>
-          </form>
+          <div style="padding: 16px;">
+
+            <!-- Order Summary Banner -->
+            <ng-container *ngIf="getPoForInvoice() as po">
+              <div class="vd-order-summary">
+                <div class="vd-order-row">
+                  <span class="vd-order-label">Material</span>
+                  <span class="vd-order-val">{{ po.materials.join(', ') }}</span>
+                </div>
+                <div class="vd-order-row">
+                  <span class="vd-order-label">Units Ordered</span>
+                  <span class="vd-order-val vd-qty">{{ po.quantity }}</span>
+                </div>
+                <div class="vd-order-row">
+                  <span class="vd-order-label">PO Number</span>
+                  <span class="vd-order-val">{{ po.poNumber }}</span>
+                </div>
+              </div>
+
+              <form [formGroup]="invoiceForm" (ngSubmit)="submitInvoice()">
+                <div class="bt-form-grid" style="margin-top: 16px;">
+                  <label>
+                    <span>Unit Price (₹) <em class="bt-muted" style="font-weight:400;">(per 1 unit)</em></span>
+                    <input type="number" min="0.01" step="0.01" formControlName="unitPrice"
+                           placeholder="e.g. 850.00" (input)="onPriceChange()" />
+                  </label>
+                  <label>
+                    <span>GST %</span>
+                    <input type="number" min="0" max="100" step="0.1" formControlName="gst"
+                           (input)="onPriceChange()" />
+                  </label>
+                  <label><span>Invoice Date</span><input type="date" formControlName="date" /></label>
+                </div>
+
+                <!-- Live Calculation Breakdown -->
+                <div class="vd-calc" *ngIf="invoicePreview">
+                  <div class="vd-calc-row">
+                    <span>{{ po.quantity }} units × ₹{{ invoicePreview.unitPrice | number:'1.2-2' }}</span>
+                    <span>₹{{ invoicePreview.subtotal | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="vd-calc-row">
+                    <span>GST ({{ invoicePreview.gst }}%)</span>
+                    <span>₹{{ invoicePreview.gstAmount | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="vd-calc-row vd-calc-total">
+                    <span>Total Invoice Amount</span>
+                    <span>₹{{ invoicePreview.total | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+
+                <div class="bt-form-actions" style="margin-top: 16px;">
+                  <button type="submit" class="bt-add-btn">Generate &amp; Submit Invoice</button>
+                </div>
+              </form>
+            </ng-container>
+          </div>
         </div>
 
         <div class="bt-panel">
@@ -100,16 +143,17 @@
           </div>
           <div class="bt-table-wrap">
             <table class="bt-table">
-              <thead><tr><th>Invoice No</th><th>Date</th><th>Amount (incl. GST)</th><th>Payment Status</th></tr></thead>
+              <thead><tr><th>Invoice No</th><th>Unit Price</th><th>Date</th><th>Total Amount (incl. GST)</th><th>Payment Status</th></tr></thead>
               <tbody>
                 <tr *ngFor="let inv of invoices">
                   <td class="bt-strong">{{ inv.invoiceNo }}</td>
+                  <td>₹{{ inv.unitPrice | number:'1.2-2' }}</td>
                   <td class="bt-muted">{{ inv.date | date:'mediumDate' }}</td>
-                  <td>₹{{ inv.amount | number }}</td>
+                  <td>₹{{ inv.amount | number:'1.2-2' }}</td>
                   <td><span class="bt-badge" [ngClass]="inv.paymentStatus === 'Paid' ? 'green' : 'orange'">{{ inv.paymentStatus }}</span></td>
                 </tr>
                 <tr *ngIf="invoices.length === 0">
-                  <td colspan="4" class="bt-empty">No invoices submitted yet.</td>
+                  <td colspan="5" class="bt-empty">No invoices submitted yet.</td>
                 </tr>
               </tbody>
             </table>
@@ -119,5 +163,3 @@
 
       <div class="bt-empty" *ngIf="loading">Loading dashboard...</div>
     </div>
-  </div>
-</div>

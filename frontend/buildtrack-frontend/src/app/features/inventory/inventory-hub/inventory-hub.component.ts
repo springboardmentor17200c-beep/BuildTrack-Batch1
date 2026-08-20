@@ -4,6 +4,8 @@ import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { InventoryDataService } from '../inventory-data.service';
 import { Subscription } from 'rxjs';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface InventoryOption {
   title: string;

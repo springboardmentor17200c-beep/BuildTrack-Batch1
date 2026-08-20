@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AnalyticsDataService } from '../analytics-data.service';
+import { ResourceDataService } from '../../resource-management/resource-data.service';
+import { ReportService } from '../../../services/report.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface AnalyticsOption {
   title: string;
@@ -34,7 +38,7 @@ export class AnalyticsHubComponent implements OnInit {
       icon: 'budget',
       route: 'budget',
       accent: 'blue',
-      stat: '2',
+      stat: '0',
       statLabel: 'Active budgets',
     },
     {
@@ -43,7 +47,7 @@ export class AnalyticsHubComponent implements OnInit {
       icon: 'progress',
       route: 'progress',
       accent: 'green',
-      stat: '4',
+      stat: '0',
       statLabel: 'Projects tracked',
     },
     {
@@ -52,7 +56,7 @@ export class AnalyticsHubComponent implements OnInit {
       icon: 'resource',
       route: 'resources',
       accent: 'purple',
-      stat: '12',
+      stat: '0',
       statLabel: 'Tracked assets',
     },
     {
@@ -61,7 +65,7 @@ export class AnalyticsHubComponent implements OnInit {
       icon: 'procurement',
       route: 'procurement',
       accent: 'orange',
-      stat: '4',
+      stat: '0',
       statLabel: 'Active vendors',
     },
     {
@@ -70,23 +74,46 @@ export class AnalyticsHubComponent implements OnInit {
       icon: 'report',
       route: 'reports',
       accent: 'blue',
-      stat: '5',
+      stat: '0',
       statLabel: 'Reports available',
     },
   ];
 
-  constructor(private router: Router, private data: AnalyticsDataService, private location: Location) {}
+  constructor(
+    private router: Router, 
+    private data: AnalyticsDataService, 
+    private resourceData: ResourceDataService,
+    private reportService: ReportService,
+    private location: Location
+  ) {}
 
   ngOnInit(): void {
     const approved = this.data.totalApprovedBudget();
     const spent = this.data.totalSpent();
     this.budgetUsedPercent = approved ? Math.round((spent / approved) * 100) : 0;
 
+    this.data.budgets$.subscribe(b => {
+      this.options[0].stat = b.length.toString();
+    });
+
     this.data.progress$.subscribe(rows => {
       this.activeProjects = rows.filter(r => r.status === 'In Progress').length;
       this.avgProgress = rows.length
         ? Math.round(rows.reduce((s, r) => s + r.completionPercentage, 0) / rows.length)
         : 0;
+      this.options[1].stat = rows.length.toString();
+    });
+
+    this.resourceData.resources$.subscribe(r => {
+      this.options[2].stat = r.length.toString();
+    });
+
+    this.data.vendors$.subscribe(v => {
+      this.options[3].stat = v.length.toString();
+    });
+
+    this.reportService.getReports().subscribe(reports => {
+      this.options[4].stat = reports.length.toString();
     });
 
     this.procurementValue = this.data.totalProcurementValue();

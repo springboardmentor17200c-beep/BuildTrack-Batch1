@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { } from '../shared/sidebar/app-sidebar.component';
 import { AuthDataService } from '../auth/auth-data.service';
 import { AppUser } from '../auth/models/auth.model';
 

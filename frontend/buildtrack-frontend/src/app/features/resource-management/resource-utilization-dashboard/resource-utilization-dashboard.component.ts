@@ -3,6 +3,8 @@ import { CommonModule, Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory, ResourceAllocation } from '../models/resource.model';
 import { ResourceDataService } from '../resource-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 interface CategorySummary {
   category: ResourceCategory;

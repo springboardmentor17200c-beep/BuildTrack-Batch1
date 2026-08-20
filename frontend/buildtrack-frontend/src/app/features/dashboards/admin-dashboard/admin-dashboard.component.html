@@ -1,141 +1,197 @@
-Here's the complete updated file — same PowerShell here-string method to save it cleanly:
-
-powershell
-@'
-<div class="bt-shell">
-  <app-sidebar></app-sidebar>
-  <div class="bt-main">
-<div class="bt-page">
-  <div class="bt-topbar">
-    <div>
-      <h1 class="bt-title">{{ 'dashboard.welcomeBack' | translate }} {{ currentUser?.fullName || 'Administrator' }}</h1>
-      <p class="bt-subtitle">{{ 'dashboard.adminSubtitle' | translate }}</p>
-    </div>
-    <div class="bt-actions">
-      <span class="bt-badge purple">{{ currentUser?.role }}</span>
-      <a class="bt-filter-btn" [routerLink]="['/profile']">{{ 'nav.profile' | translate }}</a>
-    </div>
-  </div>
-
-  <div class="bt-stats-row">
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon purple">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ totalUsers }}</span>
-        <span class="bt-stat-label">{{ 'dashboard.totalUsers' | translate }}</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon blue">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ activeProjects }}</span>
-        <span class="bt-stat-label">{{ 'dashboard.activeProjects' | translate }}</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon orange">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10"></path></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ budgetUsedPercent }}%</span>
-        <span class="bt-stat-label">{{ 'dashboard.budgetUsed' | translate }}</span>
-      </div>
-    </div>
-    <div class="bt-stat-card">
-      <div class="bt-stat-icon green">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
-      </div>
-      <div class="bt-stat-text">
-        <span class="bt-stat-value">{{ avgUtilization }}%</span>
-        <span class="bt-stat-label">{{ 'dashboard.avgUtilization' | translate }}</span>
-      </div>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;margin-bottom:20px;">
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">{{ 'dashboard.projectMonitoring' | translate }}</h3>
-          <span class="bt-panel-sub">{{ 'dashboard.liveStatus' | translate }}</span>
+<div class="bt-admin-dashboard bt-fade-in">
+      
+      <!-- Premium Hero Header -->
+      <div class="bt-hero-header">
+        <div class="bt-hero-bg"></div>
+        <div class="bt-hero-content">
+          <div class="bt-hero-text">
+            <h1 class="bt-hero-title">Welcome back, {{ currentUser?.fullName || 'Administrator' }}</h1>
+            <p class="bt-hero-subtitle">{{ 'Here\'s what\'s happening across all your projects today.' }}</p>
+          </div>
+          <div class="bt-hero-actions">
+            <span class="bt-hero-badge">{{ currentUser?.role }}</span>
+            <a class="bt-hero-btn" [routerLink]="['/profile']">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Profile
+            </a>
+          </div>
         </div>
-        <a class="bt-filter-btn" [routerLink]="['/analytics/progress']">{{ 'dashboard.viewAll' | translate }}</a>
       </div>
-      <div class="bt-table-wrap">
-        <table class="bt-table">
-          <thead><tr><th>Project</th><th>Status</th><th>Progress</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let p of projects">
-              <td class="bt-strong">{{ p.project }}</td>
-              <td><span class="bt-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span></td>
-              <td>
-                <div class="bt-progress">
-                  <div class="bt-progress-bar" style="width:120px;"><div class="bt-progress-fill blue" [style.width.%]="p.completionPercentage"></div></div>
-                  <span class="bt-progress-value">{{ p.completionPercentage }}%</span>
+
+      <!-- Stat Cards Grid -->
+      <div class="bt-kpi-grid">
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap purple-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ totalUsers }}</span>
+            <span class="bt-kpi-label">Total Users</span>
+          </div>
+        </div>
+
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap blue-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l3-4 3 3 5-7"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ activeProjects }}</span>
+            <span class="bt-kpi-label">Active Projects</span>
+          </div>
+        </div>
+
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap orange-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10"></path></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ budgetUsedPercent }}%</span>
+            <span class="bt-kpi-label">Budget Used</span>
+          </div>
+        </div>
+
+        <div class="bt-kpi-card">
+          <div class="bt-kpi-icon-wrap green-glow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+          </div>
+          <div class="bt-kpi-details">
+            <span class="bt-kpi-value">{{ completedProjects }}</span>
+            <span class="bt-kpi-label">Completed Projects</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grids -->
+      <div class="bt-dashboard-grid-main">
+        
+        <!-- Left Column: Projects & Reports -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Project Monitoring</h3>
+                <p>Live Status</p>
+              </div>
+              <a class="bt-btn-ghost" [routerLink]="['/analytics/progress']">
+                View All
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+              </a>
+            </div>
+            
+            <div class="bt-table-responsive">
+              <table class="bt-table-modern">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of projects">
+                    <td class="bt-font-medium">{{ p.project || p.projectName }}</td>
+                    <td>
+                      <span class="bt-status-pill" [ngClass]="statusClass(p.status)">
+                        <span class="bt-status-dot"></span>
+                        {{ p.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="bt-progress-wrapper">
+                        <div class="bt-progress-track">
+                          <div class="bt-progress-fill" [ngClass]="statusClass(p.status)" [style.width.%]="p.completionPercentage"></div>
+                        </div>
+                        <span class="bt-progress-text">{{ p.completionPercentage || 0 }}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Reports</h3>
+                <p>Jump to Analytics</p>
+              </div>
+            </div>
+            <div class="bt-reports-grid">
+              <a class="bt-report-card blue-hover" [routerLink]="['/analytics/budget']">
+                <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+                <span>Budget Analytics</span>
+              </a>
+              <a class="bt-report-card purple-hover" [routerLink]="['/analytics/progress']">
+                <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+                <span>Project Progress</span>
+              </a>
+              <a class="bt-report-card green-hover" [routerLink]="['/analytics/resources']">
+                <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
+                <span>Resource Analytics</span>
+              </a>
+              <a class="bt-report-card orange-hover" [routerLink]="['/analytics/procurement']">
+                <div class="bt-report-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
+                <span>Procurement Analytics</span>
+              </a>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Right Column: Users & Activity -->
+        <div class="bt-dashboard-col">
+          
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>User Management</h3>
+                <p>{{ totalUsers }} accounts</p>
+              </div>
+            </div>
+            <div class="bt-roles-list">
+              <div class="bt-role-item" *ngFor="let r of roleCounts">
+                <div class="bt-role-left">
+                  <span class="bt-role-dot" [ngClass]="roleClass(r.role)"></span>
+                  <span class="bt-role-name">{{ r.role }}</span>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">{{ 'dashboard.userManagement' | translate }}</h3>
-          <span class="bt-panel-sub">{{ totalUsers }} {{ 'dashboard.accounts' | translate }}</span>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div *ngFor="let r of roleCounts" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bt-border);">
-          <span class="bt-badge" [ngClass]="roleClass(r.role)">{{ r.role }}</span>
-          <span class="bt-strong">{{ r.count }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start;">
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">{{ 'dashboard.reports' | translate }}</h3>
-          <span class="bt-panel-sub">{{ 'dashboard.jumpToAnalytics' | translate }}</span>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/budget']">{{ 'dashboard.budgetAnalytics' | translate }}</a>
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/progress']">{{ 'dashboard.projectProgress' | translate }}</a>
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/resources']">{{ 'dashboard.resourceAnalytics' | translate }}</a>
-        <a class="bt-filter-btn" style="justify-content:flex-start;" [routerLink]="['/analytics/procurement']">{{ 'dashboard.procurementAnalytics' | translate }}</a>
-      </div>
-    </div>
-
-    <div class="bt-panel">
-      <div class="bt-panel-header">
-        <div>
-          <h3 class="bt-panel-title">{{ 'dashboard.activityMonitoring' | translate }}</h3>
-          <span class="bt-panel-sub">{{ 'dashboard.recentActivity' | translate }}</span>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div *ngFor="let a of activity" style="display:flex;gap:12px;align-items:flex-start;">
-          <div class="bt-stat-icon" [ngClass]="a.icon === 'project' ? 'blue' : a.icon === 'budget' ? 'orange' : a.icon === 'user' ? 'purple' : 'green'" style="width:34px;height:34px;flex-shrink:0;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>
+                <span class="bt-role-count">{{ r.count }}</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <div class="bt-strong" style="font-size:13.5px;">{{ a.text }}</div>
-            <div class="bt-muted">{{ a.time }}</div>
+
+          <div class="bt-premium-panel">
+            <div class="bt-panel-header">
+              <div class="bt-panel-header-text">
+                <h3>Activity Monitoring</h3>
+                <p>Recent Activity</p>
+              </div>
+            </div>
+            
+            <div class="bt-activity-feed">
+              <div class="bt-activity-item" *ngFor="let a of activity; let last = last">
+                <div class="bt-activity-timeline">
+                  <div class="bt-activity-icon" [ngClass]="a.icon === 'project' ? 'blue' : a.icon === 'budget' ? 'orange' : a.icon === 'user' ? 'purple' : 'green'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>
+                  </div>
+                  <div class="bt-activity-line" *ngIf="!last"></div>
+                </div>
+                <div class="bt-activity-content">
+                  <p class="bt-activity-text">{{ a.text }}</p>
+                  <span class="bt-activity-time">{{ a.time }}</span>
+                </div>
+              </div>
+              
+              <!-- Empty state if no activity -->
+              <div *ngIf="activity.length === 0" class="bt-empty-state">
+                <p>No recent activity.</p>
+              </div>
+            </div>
           </div>
+
         </div>
+
       </div>
+
     </div>
-  </div>
-</div>
-  </div>
-</div>

@@ -5,59 +5,59 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RouterModule } from '@angular/router';
 import { InventoryRecord, Material, MaterialRequest } from '../models/inventory.model';
 import { InventoryDataService } from '../inventory-data.service';
+import { ProjectsDataService } from '../../projects/projects-data.service';
+import { Project } from '../../projects/models/projects.model';
 import { Subscription } from 'rxjs';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 @Component({
   selector: 'app-material-requests',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './material-requests.component.html',  // ← Must match file name
-  styleUrls: ['./material-requests.component.css'],  // ← Must match file name
+  templateUrl: './material-requests.component.html',
+  styleUrls: ['./material-requests.component.css'],
 })
 export class MaterialRequestsComponent implements OnInit, OnDestroy {
   requests: MaterialRequest[] = [];
   materials: Material[] = [];
   inventoryRecords: InventoryRecord[] = [];
-  projectNames: string[] = [];
+  projects: Project[] = [];
   showForm = false;
   form: FormGroup;
   private subscriptions = new Subscription();
 
-  constructor(private data: InventoryDataService, private fb: FormBuilder, private location: Location) {
+  constructor(
+    private data: InventoryDataService,
+    private projectsData: ProjectsDataService,
+    private fb: FormBuilder,
+    private location: Location
+  ) {
     this.form = this.fb.group({
-      materialId: ['', Validators.required],
-      quantity: ['', [Validators.required, Validators.min(1)]],
-      project: ['', Validators.required],
+      materialId:  ['', Validators.required],
+      quantity:    ['', [Validators.required, Validators.min(1)]],
+      project:     ['', Validators.required],
       requestedBy: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
-    this.subscriptions.add(
-      this.data.requests$.subscribe(r => (this.requests = r))
-    );
-    this.subscriptions.add(
-      this.data.materials$.subscribe(m => (this.materials = m))
-    );
-    this.subscriptions.add(
-      this.data.inventory$.subscribe(inv => (this.inventoryRecords = inv))
-    );
-    this.projectNames = this.data.projectNames;
+    this.subscriptions.add(this.data.requests$.subscribe(r => (this.requests = r)));
+    this.subscriptions.add(this.data.materials$.subscribe(m => (this.materials = m)));
+    this.subscriptions.add(this.data.inventory$.subscribe(inv => (this.inventoryRecords = inv)));
+    this.subscriptions.add(this.projectsData.projects$.subscribe(p => (this.projects = p)));
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+  ngOnDestroy(): void { this.subscriptions.unsubscribe(); }
+
+  get projectNames(): string[] {
+    return this.projects.map(p => p.projectName);
   }
 
-  toggleForm() {
-    this.showForm = !this.showForm;
-  }
+  toggleForm() { this.showForm = !this.showForm; }
 
   submit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
     const { materialId, quantity, project, requestedBy } = this.form.value;
     const material = this.materials.find(m => m.materialId === materialId);
@@ -85,19 +85,12 @@ export class MaterialRequestsComponent implements OnInit, OnDestroy {
     return this.data.hasSufficientStock(request.materialId, request.requestedQuantity);
   }
 
-  approve(request: MaterialRequest) {
-    this.data.approveRequest(request.requestId);
-  }
-
-  reject(request: MaterialRequest) {
-    this.data.rejectRequest(request.requestId);
-  }
+  approve(request: MaterialRequest) { this.data.approveRequest(request.requestId); }
+  reject(request: MaterialRequest)  { this.data.rejectRequest(request.requestId); }
 
   statusClass(status: MaterialRequest['requestStatus']) {
-    return { Pending: 'orange', Approved: 'green', Rejected: 'red' }[status];
+    return ({ Pending: 'orange', Approved: 'green', Rejected: 'red' } as any)[status];
   }
 
-  goBack(): void {
-    this.location.back();
-  }
+  goBack(): void { this.location.back(); }
 }

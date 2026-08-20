@@ -4,6 +4,8 @@ import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Resource, ResourceCategory } from '../../resource-management/models/resource.model';
 import { ResourceDataService } from '../../resource-management/resource-data.service';
+import { } from '../../shared/sidebar/app-sidebar.component';
+
 
 // NOTE: this page deliberately reuses ResourceDataService rather than
 // duplicating resource data — Resource Analytics is just a different lens
