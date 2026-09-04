@@ -28,6 +28,13 @@
             ],
             "styles": [
               "src/styles.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "html2canvas",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "stackblur-canvas"
             ]
           },
           "configurations": {
