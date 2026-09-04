@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+
 import { BehaviorSubject } from 'rxjs';
+
 import { TranslateService } from '@ngx-translate/core';
 
 export type LangCode = 'en' | 'hi' | 'ta' | 'te' | 'bn';
@@ -16,13 +18,17 @@ const LANG_KEY = 'buildtrack_lang';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
+
   languages = LANGUAGES;
 
   private lang$$ = new BehaviorSubject<LangCode>('en');
   lang$ = this.lang$$.asObservable();
 
-  constructor(private translateService: TranslateService) {
+  private translateService = inject(TranslateService);
+
+  constructor() {
     const pref = this.loadPreference();
+
     this.lang$$.next(pref);
     this.translateService.use(pref);
   }
@@ -34,6 +40,7 @@ export class LanguageService {
   setLanguage(code: LangCode): void {
     this.lang$$.next(code);
     this.translateService.use(code);
+
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       try {
         localStorage.setItem(LANG_KEY, code);
@@ -45,9 +52,13 @@ export class LanguageService {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       try {
         const stored = localStorage.getItem(LANG_KEY) as LangCode | null;
-        if (stored && LANGUAGES.find(l => l.code === stored)) return stored;
+
+        if (stored && LANGUAGES.find(l => l.code === stored)) {
+          return stored;
+        }
       } catch {}
     }
+
     return 'en';
   }
 }
